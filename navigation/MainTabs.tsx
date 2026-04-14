@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { User } from '@supabase/supabase-js';
 import TodayScreen from '../screens/TodayScreen';
+import AllTasksScreen from '../screens/AllTasksScreen';
 import PlaceholderScreen from '../screens/PlaceholderScreen';
 
 const Tab = createBottomTabNavigator();
@@ -38,7 +39,7 @@ export default function MainTabs({ user, onSignOut }: Props) {
         name="Tasks"
         options={{ tabBarIcon: ({ color, size }) => <Ionicons name="checkmark-circle-outline" size={size} color={color} /> }}
       >
-        {() => <PlaceholderScreen title="All Tasks" icon="✓" />}
+        {() => <AllTasksScreen user={user} />}
       </Tab.Screen>
 
       <Tab.Screen
