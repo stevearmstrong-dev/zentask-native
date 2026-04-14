@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { User } from '@supabase/supabase-js';
 import TodayScreen from '../screens/TodayScreen';
 import AllTasksScreen from '../screens/AllTasksScreen';
+import PomodoroScreen from '../screens/PomodoroScreen';
 import PlaceholderScreen from '../screens/PlaceholderScreen';
 
 const Tab = createBottomTabNavigator();
@@ -46,7 +47,7 @@ export default function MainTabs({ user, onSignOut }: Props) {
         name="Pomodoro"
         options={{ tabBarIcon: ({ color, size }) => <Ionicons name="timer-outline" size={size} color={color} /> }}
       >
-        {() => <PlaceholderScreen title="Pomodoro" icon="🍅" />}
+        {() => <PomodoroScreen />}
       </Tab.Screen>
 
       <Tab.Screen

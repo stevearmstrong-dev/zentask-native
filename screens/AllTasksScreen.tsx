@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { User } from '@supabase/supabase-js';
@@ -35,6 +36,7 @@ export default function AllTasksScreen({ user }: Props) {
   const [showAddModal, setShowAddModal] = useState(false);
 
   const userEmail = user?.email || '';
+  const isGuest = !userEmail;
 
   const loadTasks = useCallback(async () => {
     try {
@@ -80,7 +82,14 @@ export default function AllTasksScreen({ user }: Props) {
   };
 
   const handleAdd = async (newTask: { text: string; priority: any; dueDate: string; dueTime: string; category: string }) => {
-    if (!userEmail) return;
+    if (!userEmail) {
+      Alert.alert(
+        'Sign In Required',
+        'Tasks can\'t be saved in guest mode. Sign in to create and sync tasks across your devices.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
     try {
       const task: Task = {
         id: Date.now(),
@@ -111,10 +120,17 @@ export default function AllTasksScreen({ user }: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Guest banner */}
+      {isGuest && (
+        <View style={styles.guestBanner}>
+          <Text style={styles.guestBannerText}>👤 Guest mode — sign in to save tasks</Text>
+        </View>
+      )}
+
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>All Tasks</Text>
-        <TouchableOpacity style={styles.addBtn} onPress={() => setShowAddModal(true)}>
+        <TouchableOpacity style={[styles.addBtn, isGuest && styles.addBtnDisabled]} onPress={() => setShowAddModal(true)}>
           <Text style={styles.addBtnText}>+ New</Text>
         </TouchableOpacity>
       </View>
@@ -196,6 +212,15 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   addBtnText: { color: '#fff', fontWeight: '600', fontSize: 15 },
+  addBtnDisabled: { backgroundColor: '#48484A' },
+  guestBanner: {
+    backgroundColor: 'rgba(255,159,10,0.15)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,159,10,0.3)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  guestBannerText: { color: '#FF9F0A', fontSize: 14, fontWeight: '500' },
   filterRow: {
     flexDirection: 'row',
     paddingHorizontal: 20,
