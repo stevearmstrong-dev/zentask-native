@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,13 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '@supabase/supabase-js';
 import { Task } from '../types';
 import supabaseService from '../services/supabase';
+
+const GUEST_TASKS_KEY = 'zentask:guest_tasks';
 
 interface Props {
   user: User | null;
@@ -42,19 +46,25 @@ export default function TodayScreen({ user }: Props) {
   const userEmail = user?.email || '';
   const userName = user?.user_metadata?.name || (userEmail ? userEmail.split('@')[0] : 'Guest');
 
-  const loadTasks = async () => {
+  const loadTasks = useCallback(async () => {
     try {
-      const dbTasks = await supabaseService.fetchTasks(userEmail);
-      setTasks(dbTasks.map(t => supabaseService.convertToAppFormat(t)));
+      if (!userEmail) {
+        const raw = await AsyncStorage.getItem(GUEST_TASKS_KEY);
+        setTasks(raw ? JSON.parse(raw) : []);
+      } else {
+        const dbTasks = await supabaseService.fetchTasks(userEmail);
+        setTasks(dbTasks.map(t => supabaseService.convertToAppFormat(t)));
+      }
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [userEmail]);
 
-  useEffect(() => { loadTasks(); }, []);
+  // Reload every time this tab comes into focus
+  useFocusEffect(useCallback(() => { loadTasks(); }, [loadTasks]));
 
   const todayStr = new Date().toISOString().split('T')[0];
   const todayTasks = tasks.filter(t => !t.completed && t.dueDate === todayStr);
@@ -67,11 +77,12 @@ export default function TodayScreen({ user }: Props) {
   const completionRate = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
 
   const toggleTask = async (task: Task) => {
-    try {
-      await supabaseService.updateTask(task.id as number, { completed: !task.completed }, userEmail);
-      setTasks(prev => prev.map(t => t.id === task.id ? { ...t, completed: !t.completed } : t));
-    } catch (e) {
-      console.error(e);
+    const updated = tasks.map(t => t.id === task.id ? { ...t, completed: !t.completed } : t);
+    setTasks(updated);
+    if (!userEmail) {
+      await AsyncStorage.setItem(GUEST_TASKS_KEY, JSON.stringify(updated));
+    } else {
+      supabaseService.updateTask(task.id as number, { completed: !task.completed }, userEmail).catch(console.error);
     }
   };
 

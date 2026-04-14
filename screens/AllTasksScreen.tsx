@@ -7,9 +7,9 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '@supabase/supabase-js';
 import { Task } from '../types';
 import supabaseService from '../services/supabase';
@@ -28,6 +28,8 @@ const FILTERS: { label: string; value: Filter }[] = [
   { label: 'Completed', value: 'completed' },
 ];
 
+const GUEST_TASKS_KEY = 'zentask:guest_tasks';
+
 export default function AllTasksScreen({ user }: Props) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,76 +40,104 @@ export default function AllTasksScreen({ user }: Props) {
   const userEmail = user?.email || '';
   const isGuest = !userEmail;
 
+  // --- Guest local storage helpers ---
+  const loadGuestTasks = async (): Promise<Task[]> => {
+    try {
+      const raw = await AsyncStorage.getItem(GUEST_TASKS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  };
+
+  const saveGuestTasks = async (updated: Task[]) => {
+    try {
+      await AsyncStorage.setItem(GUEST_TASKS_KEY, JSON.stringify(updated));
+    } catch (e) { console.error(e); }
+  };
+
+  // --- Load ---
   const loadTasks = useCallback(async () => {
     try {
-      const dbTasks = await supabaseService.fetchTasks(userEmail);
-      setTasks(dbTasks.map(t => supabaseService.convertToAppFormat(t)));
+      if (isGuest) {
+        setTasks(await loadGuestTasks());
+      } else {
+        const dbTasks = await supabaseService.fetchTasks(userEmail);
+        setTasks(dbTasks.map(t => supabaseService.convertToAppFormat(t)));
+      }
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [userEmail]);
+  }, [userEmail, isGuest]);
 
   useEffect(() => { loadTasks(); }, [loadTasks]);
 
+  // --- Filtered view ---
   const filteredTasks = tasks.filter(t => {
     if (filter === 'active') return !t.completed;
     if (filter === 'completed') return t.completed;
     return true;
   });
 
+  // --- Actions ---
   const handleToggle = async (id: number) => {
-    const task = tasks.find(t => t.id === id);
-    if (!task) return;
-    try {
-      await supabaseService.updateTask(id, { completed: !task.completed }, userEmail);
-      setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
-    } catch (e) { console.error(e); }
+    const updated = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+    setTasks(updated);
+    if (isGuest) {
+      await saveGuestTasks(updated);
+    } else {
+      const task = tasks.find(t => t.id === id);
+      if (task) await supabaseService.updateTask(id, { completed: !task.completed }, userEmail).catch(console.error);
+    }
   };
 
   const handleDelete = async (id: number) => {
-    try {
-      await supabaseService.deleteTask(id, userEmail);
-      setTasks(prev => prev.filter(t => t.id !== id));
-    } catch (e) { console.error(e); }
+    const updated = tasks.filter(t => t.id !== id);
+    setTasks(updated);
+    if (isGuest) {
+      await saveGuestTasks(updated);
+    } else {
+      await supabaseService.deleteTask(id, userEmail).catch(console.error);
+    }
   };
 
   const handleEdit = async (id: number, updates: Partial<Task>) => {
-    try {
-      await supabaseService.updateTask(id, updates, userEmail);
-      setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
-    } catch (e) { console.error(e); }
+    const updated = tasks.map(t => t.id === id ? { ...t, ...updates } : t);
+    setTasks(updated);
+    if (isGuest) {
+      await saveGuestTasks(updated);
+    } else {
+      await supabaseService.updateTask(id, updates, userEmail).catch(console.error);
+    }
   };
 
   const handleAdd = async (newTask: { text: string; priority: any; dueDate: string; dueTime: string; category: string }) => {
-    if (!userEmail) {
-      Alert.alert(
-        'Sign In Required',
-        'Tasks can\'t be saved in guest mode. Sign in to create and sync tasks across your devices.',
-        [{ text: 'OK' }]
-      );
-      return;
+    const task: Task = {
+      id: Date.now(),
+      text: newTask.text,
+      completed: false,
+      priority: newTask.priority,
+      dueDate: newTask.dueDate || undefined,
+      dueTime: newTask.dueTime || undefined,
+      category: newTask.category || undefined,
+      timeSpent: 0,
+      isTracking: false,
+      pomodoroActive: false,
+      sortOrder: 0,
+      status: 'todo',
+    };
+
+    if (isGuest) {
+      const updated = [task, ...tasks];
+      setTasks(updated);
+      await saveGuestTasks(updated);
+    } else {
+      try {
+        const dbTask = await supabaseService.createTask(task, userEmail);
+        setTasks(prev => [supabaseService.convertToAppFormat(dbTask), ...prev]);
+      } catch (e) { console.error(e); }
     }
-    try {
-      const task: Task = {
-        id: Date.now(),
-        text: newTask.text,
-        completed: false,
-        priority: newTask.priority,
-        dueDate: newTask.dueDate || undefined,
-        dueTime: newTask.dueTime || undefined,
-        category: newTask.category || undefined,
-        timeSpent: 0,
-        isTracking: false,
-        pomodoroActive: false,
-        sortOrder: 0,
-        status: 'todo',
-      };
-      const dbTask = await supabaseService.createTask(task, userEmail);
-      setTasks(prev => [supabaseService.convertToAppFormat(dbTask), ...prev]);
-    } catch (e) { console.error(e); }
   };
 
   if (loading) {
@@ -123,14 +153,14 @@ export default function AllTasksScreen({ user }: Props) {
       {/* Guest banner */}
       {isGuest && (
         <View style={styles.guestBanner}>
-          <Text style={styles.guestBannerText}>👤 Guest mode — sign in to save tasks</Text>
+          <Text style={styles.guestBannerText}>👤 Guest mode — tasks saved locally on this device</Text>
         </View>
       )}
 
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>All Tasks</Text>
-        <TouchableOpacity style={[styles.addBtn, isGuest && styles.addBtnDisabled]} onPress={() => setShowAddModal(true)}>
+        <TouchableOpacity style={styles.addBtn} onPress={() => setShowAddModal(true)}>
           <Text style={styles.addBtnText}>+ New</Text>
         </TouchableOpacity>
       </View>
@@ -212,7 +242,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   addBtnText: { color: '#fff', fontWeight: '600', fontSize: 15 },
-  addBtnDisabled: { backgroundColor: '#48484A' },
   guestBanner: {
     backgroundColor: 'rgba(255,159,10,0.15)',
     borderBottomWidth: 1,
