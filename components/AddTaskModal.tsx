@@ -68,7 +68,7 @@ export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
 
   const handleAdd = () => {
     if (!text.trim()) return;
-    onAdd({ text: text.trim(), priority, dueDate, dueTime, category });
+    onAdd({ text: text.trim(), priority, dueDate: dueDate || toLocalDateString(new Date()), dueTime, category });
     reset();
     onClose();
   };
