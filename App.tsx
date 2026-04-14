@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
 import { User } from '@supabase/supabase-js';
 import { supabase } from './services/supabase';
 import SignIn from './screens/Auth/SignIn';
 import SignUp from './screens/Auth/SignUp';
 import PasswordReset from './screens/Auth/PasswordReset';
+import MainTabs from './navigation/MainTabs';
 
 type AuthScreen = 'signin' | 'signup' | 'reset';
 
@@ -17,19 +19,23 @@ export default function App() {
   const [guestMode, setGuestMode] = useState(false);
 
   useEffect(() => {
-    // Check existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setGuestMode(false);
+    setAuthScreen('signin');
+  };
 
   if (loading) {
     return (
@@ -39,19 +45,17 @@ export default function App() {
     );
   }
 
-  // Authenticated or guest — placeholder for main app
   if (user || guestMode) {
     return (
       <SafeAreaProvider>
         <StatusBar style="light" />
-        <View style={styles.placeholder}>
-          {/* Dashboard coming next */}
-        </View>
+        <NavigationContainer>
+          <MainTabs user={user} onSignOut={handleSignOut} />
+        </NavigationContainer>
       </SafeAreaProvider>
     );
   }
 
-  // Auth flow
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
@@ -78,5 +82,4 @@ export default function App() {
 
 const styles = StyleSheet.create({
   loader: { flex: 1, backgroundColor: '#0A0A0F', justifyContent: 'center', alignItems: 'center' },
-  placeholder: { flex: 1, backgroundColor: '#0A0A0F' },
 });

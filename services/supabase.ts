@@ -1,15 +1,22 @@
 import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createClient, AuthChangeEvent, Session, User } from '@supabase/supabase-js';
+import { createClient, AuthChangeEvent, Session, User, SupportedStorage } from '@supabase/supabase-js';
 import { Task, DbTask } from '../types';
 
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// Create Supabase client with AsyncStorage for session persistence on device
+// Wrap AsyncStorage to satisfy Supabase's SupportedStorage interface
+// (Supabase expects getItem to return string | null, not Promise<string | null>)
+const ExpoSecureStorage: SupportedStorage = {
+  getItem: (key: string) => AsyncStorage.getItem(key),
+  setItem: (key: string, value: string) => AsyncStorage.setItem(key, value),
+  removeItem: (key: string) => AsyncStorage.removeItem(key),
+};
+
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    storage: AsyncStorage,
+    storage: ExpoSecureStorage,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
