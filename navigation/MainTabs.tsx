@@ -5,7 +5,7 @@ import { User } from '@supabase/supabase-js';
 import TodayScreen from '../screens/TodayScreen';
 import AllTasksScreen from '../screens/AllTasksScreen';
 import PomodoroScreen from '../screens/PomodoroScreen';
-import PlaceholderScreen from '../screens/PlaceholderScreen';
+import MoreScreen from '../screens/MoreScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -54,7 +54,7 @@ export default function MainTabs({ user, onSignOut }: Props) {
         name="More"
         options={{ tabBarIcon: ({ color, size }) => <Ionicons name="grid-outline" size={size} color={color} /> }}
       >
-        {() => <PlaceholderScreen title="More" icon="⊞" onSignOut={onSignOut} />}
+        {() => <MoreScreen user={user} onSignOut={onSignOut} />}
       </Tab.Screen>
     </Tab.Navigator>
   );
