@@ -1,17 +1,33 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { User } from '@supabase/supabase-js';
 import TodayScreen from '../screens/TodayScreen';
 import AllTasksScreen from '../screens/AllTasksScreen';
 import PomodoroScreen from '../screens/PomodoroScreen';
 import MoreScreen from '../screens/MoreScreen';
+import KanbanScreen from '../screens/KanbanScreen';
 
 const Tab = createBottomTabNavigator();
+const MoreStack = createNativeStackNavigator();
 
 interface Props {
   user: User | null;
   onSignOut: () => void;
+}
+
+function MoreStackNavigator({ user, onSignOut }: Props) {
+  return (
+    <MoreStack.Navigator screenOptions={{ headerShown: false }}>
+      <MoreStack.Screen name="MoreHome">
+        {() => <MoreScreen user={user} onSignOut={onSignOut} />}
+      </MoreStack.Screen>
+      <MoreStack.Screen name="Kanban">
+        {() => <KanbanScreen user={user} />}
+      </MoreStack.Screen>
+    </MoreStack.Navigator>
+  );
 }
 
 export default function MainTabs({ user, onSignOut }: Props) {
@@ -54,7 +70,7 @@ export default function MainTabs({ user, onSignOut }: Props) {
         name="More"
         options={{ tabBarIcon: ({ color, size }) => <Ionicons name="grid-outline" size={size} color={color} /> }}
       >
-        {() => <MoreScreen user={user} onSignOut={onSignOut} />}
+        {() => <MoreStackNavigator user={user} onSignOut={onSignOut} />}
       </Tab.Screen>
     </Tab.Navigator>
   );
