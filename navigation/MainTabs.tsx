@@ -65,7 +65,7 @@ function MoreStackNavigator({ user, onSignOut }: Props) {
         {() => <TimeBlocksScreen />}
       </MoreStack.Screen>
       <MoreStack.Screen name="ExpenseTracker">
-        {() => <ExpenseTrackerScreen />}
+        {() => <ExpenseTrackerScreen user={user} />}
       </MoreStack.Screen>
       <MoreStack.Screen name="RecurringExpenses">
         {() => <RecurringExpensesScreen />}
@@ -126,7 +126,7 @@ export default function MainTabs({ user, onSignOut }: Props) {
         name="Expenses"
         options={{ tabBarIcon: ({ color, size }) => <Ionicons name="wallet-outline" size={size} color={color} /> }}
       >
-        {() => <ExpenseTrackerScreen />}
+        {() => <ExpenseTrackerScreen user={user} />}
       </Tab.Screen>
 
       <Tab.Screen

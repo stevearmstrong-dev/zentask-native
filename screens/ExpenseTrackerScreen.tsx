@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { User } from '@supabase/supabase-js';
 import {
   View,
   Text,
@@ -12,9 +13,15 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const EXPENSES_KEY = 'zentask:expenses';
-const BUDGET_KEY = 'zentask:daily_budget';
 const DEFAULT_BUDGET = 18;
+
+function getKeys(userEmail: string) {
+  const ns = userEmail || 'guest';
+  return {
+    EXPENSES_KEY: `zentask:expenses:${ns}`,
+    BUDGET_KEY: `zentask:daily_budget:${ns}`,
+  };
+}
 
 interface Expense {
   id: number;
@@ -62,7 +69,12 @@ function getMotivation(spent: number, budget: number): string {
   return '⚠️ Over budget! Try to save tomorrow.';
 }
 
-export default function ExpenseTrackerScreen() {
+interface Props { user?: User | null; }
+
+export default function ExpenseTrackerScreen({ user }: Props) {
+  const userEmail = user?.email || '';
+  const { EXPENSES_KEY, BUDGET_KEY } = useMemo(() => getKeys(userEmail), [userEmail]);
+
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [budget, setBudget] = useState(DEFAULT_BUDGET);
   const [loaded, setLoaded] = useState(false);
@@ -82,8 +94,11 @@ export default function ExpenseTrackerScreen() {
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const [budgetInput, setBudgetInput] = useState('');
 
-  // Load
+  // Reload from the correct namespace whenever user changes
   useEffect(() => {
+    setLoaded(false);
+    setExpenses([]);
+    setBudget(DEFAULT_BUDGET);
     Promise.all([
       AsyncStorage.getItem(EXPENSES_KEY),
       AsyncStorage.getItem(BUDGET_KEY),
@@ -92,7 +107,7 @@ export default function ExpenseTrackerScreen() {
       if (rawBudget) setBudget(Number(rawBudget));
       setLoaded(true);
     }).catch(console.error);
-  }, []);
+  }, [EXPENSES_KEY, BUDGET_KEY]);
 
   // Persist expenses
   useEffect(() => {
