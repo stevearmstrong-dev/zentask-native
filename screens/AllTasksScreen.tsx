@@ -14,6 +14,7 @@ import { Task } from '../types';
 import { useTasks } from '../context/TasksContext';
 import TaskItem from '../components/TaskItem';
 import AddTaskModal from '../components/AddTaskModal';
+import FocusMode from '../components/FocusMode';
 
 interface Props {
   user: User | null;
@@ -31,6 +32,7 @@ export default function AllTasksScreen({ user }: Props) {
   const { tasks, loading, reload, toggleTask, deleteTask, editTask, addTask } = useTasks();
   const [filter, setFilter] = useState<Filter>('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [focusTask, setFocusTask] = useState<Task | null>(null);
 
   const userEmail = user?.email || '';
   const isGuest = !userEmail;
@@ -69,6 +71,13 @@ export default function AllTasksScreen({ user }: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <FocusMode
+        visible={!!focusTask}
+        task={focusTask}
+        onClose={() => setFocusTask(null)}
+        onComplete={id => { toggleTask(id); setFocusTask(null); }}
+        onUpdateTime={(id, data) => editTask(id, data)}
+      />
       {/* Guest banner */}
       {isGuest && (
         <View style={styles.guestBanner}>
@@ -112,6 +121,7 @@ export default function AllTasksScreen({ user }: Props) {
             onToggle={toggleTask}
             onDelete={deleteTask}
             onEdit={editTask}
+            onFocus={setFocusTask}
           />
         )}
         refreshControl={

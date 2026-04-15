@@ -14,6 +14,7 @@ interface Props {
   onToggle: (id: number) => void;
   onDelete: (id: number) => void;
   onEdit: (id: number, updates: Partial<Task>) => void;
+  onFocus?: (task: Task) => void;
 }
 
 const PRIORITY_COLOR: Record<string, string> = {
@@ -39,7 +40,7 @@ function isOverdue(task: Task): boolean {
   return due < today;
 }
 
-export default function TaskItem({ task, onToggle, onDelete, onEdit }: Props) {
+export default function TaskItem({ task, onToggle, onDelete, onEdit, onFocus }: Props) {
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(task.text);
   const [editPriority, setEditPriority] = useState<Priority>(task.priority || 'medium');
@@ -129,10 +130,18 @@ export default function TaskItem({ task, onToggle, onDelete, onEdit }: Props) {
               {overdue ? '⚠️ ' : '📅 '}{formatDate(task.dueDate)}
             </Text>
           ) : null}
+          {(task.timeSpent ?? 0) > 0 && (
+            <Text style={styles.timeSpentText}>⏱ {Math.round((task.timeSpent ?? 0) / 60)}m</Text>
+          )}
         </View>
       </View>
 
       <View style={styles.actions}>
+        {!task.completed && onFocus && (
+          <TouchableOpacity style={styles.focusBtn} onPress={() => onFocus(task)}>
+            <Text style={styles.focusBtnText}>🎯</Text>
+          </TouchableOpacity>
+        )}
         {!task.completed && (
           <TouchableOpacity style={styles.editBtn} onPress={() => setEditing(true)}>
             <Text style={styles.editBtnText}>✏️</Text>
@@ -181,10 +190,13 @@ const styles = StyleSheet.create({
   dueText: { fontSize: 12, color: '#636366' },
   overdueText: { color: '#FF453A' },
   actions: { flexDirection: 'column', gap: 4 },
+  focusBtn: { padding: 4 },
+  focusBtnText: { fontSize: 16 },
   editBtn: { padding: 4 },
   editBtnText: { fontSize: 16 },
   deleteBtn: { padding: 4 },
   deleteBtnText: { fontSize: 16 },
+  timeSpentText: { fontSize: 11, color: '#636366' },
   editContainer: {
     backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: 14,

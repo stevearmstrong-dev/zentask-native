@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { User } from '@supabase/supabase-js';
 import { Task } from '../types';
 import { useTasks } from '../context/TasksContext';
+import FocusMode from '../components/FocusMode';
 
 interface Props {
   user: User | null;
@@ -33,7 +34,8 @@ const PRIORITY_COLOR: Record<string, string> = {
 };
 
 export default function TodayScreen({ user }: Props) {
-  const { tasks, loading, reload, toggleTask } = useTasks();
+  const { tasks, loading, reload, toggleTask, editTask } = useTasks();
+  const [focusTask, setFocusTask] = useState<Task | null>(null);
 
   const userEmail = user?.email || '';
   const userName = user?.user_metadata?.name || (userEmail ? userEmail.split('@')[0] : 'Guest');
@@ -49,7 +51,13 @@ export default function TodayScreen({ user }: Props) {
   const completionRate = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
 
   const renderTask = ({ item }: { item: Task }) => (
-    <TouchableOpacity style={styles.taskRow} onPress={() => toggleTask(item.id as number)} activeOpacity={0.7}>
+    <TouchableOpacity
+      style={styles.taskRow}
+      onPress={() => toggleTask(item.id as number)}
+      onLongPress={() => setFocusTask(item)}
+      delayLongPress={400}
+      activeOpacity={0.7}
+    >
       <View style={[styles.checkbox, item.completed && styles.checkboxDone]}>
         {item.completed && <Text style={styles.checkmark}>✓</Text>}
       </View>
@@ -58,8 +66,14 @@ export default function TodayScreen({ user }: Props) {
           {item.text}
         </Text>
         {item.dueTime && <Text style={styles.taskTime}>{item.dueTime}</Text>}
+        {(item.timeSpent ?? 0) > 0 && (
+          <Text style={styles.taskTimeSpent}>⏱ {Math.round((item.timeSpent ?? 0) / 60)}m tracked</Text>
+        )}
       </View>
-      <View style={[styles.priorityDot, { backgroundColor: PRIORITY_COLOR[item.priority] }]} />
+      <View style={styles.taskRight}>
+        <View style={[styles.priorityDot, { backgroundColor: PRIORITY_COLOR[item.priority] }]} />
+        <Text style={styles.focusHint}>hold</Text>
+      </View>
     </TouchableOpacity>
   );
 
@@ -73,6 +87,13 @@ export default function TodayScreen({ user }: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <FocusMode
+        visible={!!focusTask}
+        task={focusTask}
+        onClose={() => setFocusTask(null)}
+        onComplete={id => { toggleTask(id); setFocusTask(null); }}
+        onUpdateTime={(id, data) => editTask(id, data)}
+      />
       <View style={styles.header}>
         <Text style={styles.greeting}>{greeting()}, {userName} 👋</Text>
         <Text style={styles.date}>{formatDate()}</Text>
@@ -146,7 +167,10 @@ const styles = StyleSheet.create({
   taskText: { fontSize: 15, color: '#EBEBF5' },
   taskTextDone: { color: '#48484A', textDecorationLine: 'line-through' },
   taskTime: { fontSize: 12, color: '#636366', marginTop: 2 },
+  taskRight: { alignItems: 'center', gap: 4 },
   priorityDot: { width: 8, height: 8, borderRadius: 4 },
+  focusHint: { fontSize: 9, color: '#48484A' },
+  taskTimeSpent: { fontSize: 11, color: '#636366', marginTop: 2 },
   empty: { alignItems: 'center', paddingTop: 60 },
   emptyIcon: { fontSize: 48, marginBottom: 12 },
   emptyText: { fontSize: 17, color: '#636366' },
