@@ -78,12 +78,12 @@ interface PeriodBucket {
 
 function buildDayBuckets(logs: WaterLog[], dailyGoal: number, n = 14): PeriodBucket[] {
   const buckets: PeriodBucket[] = [];
-  for (let i = n - 1; i >= 0; i--) {
+  for (let i = 0; i < n; i++) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     const key = getDateStr(d);
     const total = logs.filter(l => l.timestamp.startsWith(key)).reduce((s, l) => s + l.amount, 0);
-    buckets.push({ label: formatDateLabel(key), total, goal: dailyGoal, days: 1 });
+    buckets.push({ label: i === 0 ? 'Today' : formatDateLabel(key), total, goal: dailyGoal, days: 1 });
   }
   return buckets;
 }
@@ -97,7 +97,7 @@ function buildWeekBuckets(logs: WaterLog[], dailyGoal: number, n = 8): PeriodBuc
   thisMon.setHours(0, 0, 0, 0);
 
   const buckets: PeriodBucket[] = [];
-  for (let i = n - 1; i >= 0; i--) {
+  for (let i = 0; i < n; i++) {
     const mon = new Date(thisMon);
     mon.setDate(thisMon.getDate() - i * 7);
     const sun = new Date(mon);
@@ -120,7 +120,7 @@ function buildWeekBuckets(logs: WaterLog[], dailyGoal: number, n = 8): PeriodBuc
 function buildMonthBuckets(logs: WaterLog[], dailyGoal: number, n = 12): PeriodBucket[] {
   const now = new Date();
   const buckets: PeriodBucket[] = [];
-  for (let i = n - 1; i >= 0; i--) {
+  for (let i = 0; i < n; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const y = d.getFullYear();
     const m = d.getMonth();
@@ -140,7 +140,7 @@ function buildMonthBuckets(logs: WaterLog[], dailyGoal: number, n = 12): PeriodB
 function buildYearBuckets(logs: WaterLog[], dailyGoal: number, n = 3): PeriodBucket[] {
   const now = new Date();
   const buckets: PeriodBucket[] = [];
-  for (let i = n - 1; i >= 0; i--) {
+  for (let i = 0; i < n; i++) {
     const y = now.getFullYear() - i;
     const start = new Date(y, 0, 1);
     const end = new Date(y, 11, 31, 23, 59, 59, 999);
@@ -447,7 +447,7 @@ export default function WaterTrackerScreen() {
             const barPct = maxBucketTotal > 0 ? bucket.total / maxBucketTotal : 0;
             const metGoal = bucket.total >= (bucket.goal / bucket.days);
             const barColor = bucket.total === 0 ? 'rgba(255,255,255,0.06)' : metGoal ? '#30D158' : '#1877F2';
-            const isToday = i === historyBuckets.length - 1 && historyPeriod === 'day';
+            const isToday = i === 0 && historyPeriod === 'day';
             return (
               <View key={i} style={styles.chartBar}>
                 <Text style={styles.chartBarValue}>
@@ -458,7 +458,7 @@ export default function WaterTrackerScreen() {
                 </View>
                 <Text style={[styles.chartBarLabel, isToday && { color: '#1877F2', fontWeight: '700' }]} numberOfLines={2}>
                   {historyPeriod === 'day'
-                    ? (isToday ? 'Today' : bucket.label.split(',')[0])
+                    ? bucket.label.split(',')[0]
                     : historyPeriod === 'year'
                     ? bucket.label
                     : bucket.label.split(' ')[0] + '\n' + bucket.label.split(' ').slice(1).join(' ')}
