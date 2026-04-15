@@ -226,6 +226,12 @@ export default function TimeBlocksScreen() {
                           <View style={[s.pillDot, { backgroundColor: PRIORITY_COLOR[task.priority] }]} />
                           <Text style={s.pillText} numberOfLines={1}>{task.text}</Text>
                           <TouchableOpacity
+                            onPress={() => { setEditingBlock(task); setShowDurationPicker(true); }}
+                            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                          >
+                            <Text style={s.pillAction}>✏️</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
                             onPress={() => handleUnschedule(task)}
                             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                           >
