@@ -61,7 +61,7 @@ const GEMS: Gem[] = [
     emoji: '🍽️',
     color: '#10B981',
     description: 'Nourishment Gem',
-    hint: 'Log at least 2 meals today',
+    hint: 'Log at least 1 meal today',
   },
   {
     key: 'wealth',
@@ -103,13 +103,13 @@ async function checkDiscipline(): Promise<boolean> {
   } catch { return false; }
 }
 
-// Nourishment: ≥2 meals logged today
+// Nourishment: ≥1 meal logged today
 async function checkNourishment(): Promise<boolean> {
   try {
     const raw = await AsyncStorage.getItem(MEALS_KEY);
     if (!raw) return false;
     const meals: { date: string }[] = JSON.parse(raw);
-    return meals.filter(m => m.date === todayStr()).length >= 2;
+    return meals.some(m => m.date === todayStr());
   } catch { return false; }
 }
 
