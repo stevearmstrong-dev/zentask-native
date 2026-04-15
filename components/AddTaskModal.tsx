@@ -18,6 +18,7 @@ interface NewTask {
   dueDate: string;
   dueTime: string;
   category: string;
+  reminderMinutes: number | null;
 }
 
 interface Props {
@@ -47,6 +48,15 @@ function toTimeString(date: Date): string {
   return `${h}:${m}`;
 }
 
+const REMINDER_OPTIONS: { label: string; value: number | null }[] = [
+  { label: 'None', value: null },
+  { label: '5m', value: 5 },
+  { label: '15m', value: 15 },
+  { label: '30m', value: 30 },
+  { label: '1h', value: 60 },
+  { label: '1 day', value: 1440 },
+];
+
 export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
   const [text, setText] = useState('');
   const [priority, setPriority] = useState<Priority>('medium');
@@ -55,6 +65,7 @@ export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [dueDate, setDueDate] = useState('');
   const [dueTime, setDueTime] = useState('');
+  const [reminderMinutes, setReminderMinutes] = useState<number | null>(null);
 
   const reset = () => {
     setText('');
@@ -62,13 +73,14 @@ export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
     setCategory('');
     setDueDate('');
     setDueTime('');
+    setReminderMinutes(null);
     setShowDatePicker(false);
     setShowTimePicker(false);
   };
 
   const handleAdd = () => {
     if (!text.trim()) return;
-    onAdd({ text: text.trim(), priority, dueDate: dueDate || toLocalDateString(new Date()), dueTime, category });
+    onAdd({ text: text.trim(), priority, dueDate: dueDate || toLocalDateString(new Date()), dueTime, category, reminderMinutes });
     reset();
     onClose();
   };
@@ -169,6 +181,20 @@ export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
               }}
             />
           )}
+
+          {/* Reminder */}
+          <Text style={styles.sectionLabel}>Reminder</Text>
+          <View style={styles.row}>
+            {REMINDER_OPTIONS.map(opt => (
+              <TouchableOpacity
+                key={String(opt.value)}
+                style={[styles.chip, reminderMinutes === opt.value && styles.chipActive]}
+                onPress={() => setReminderMinutes(opt.value)}
+              >
+                <Text style={[styles.chipText, reminderMinutes === opt.value && styles.chipTextActive]}>{opt.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
           {/* Category */}
           <Text style={styles.sectionLabel}>Category</Text>

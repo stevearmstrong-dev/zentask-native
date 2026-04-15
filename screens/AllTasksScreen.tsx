@@ -43,7 +43,7 @@ export default function AllTasksScreen({ user }: Props) {
     return true;
   });
 
-  const handleAdd = async (newTask: { text: string; priority: any; dueDate: string; dueTime: string; category: string }) => {
+  const handleAdd = async (newTask: { text: string; priority: any; dueDate: string; dueTime: string; category: string; reminderMinutes: number | null }) => {
     const task: Task = {
       id: Date.now(),
       text: newTask.text,
@@ -52,6 +52,7 @@ export default function AllTasksScreen({ user }: Props) {
       dueDate: newTask.dueDate || undefined,
       dueTime: newTask.dueTime || undefined,
       category: newTask.category || undefined,
+      reminderMinutes: newTask.reminderMinutes ?? undefined,
       timeSpent: 0,
       isTracking: false,
       pomodoroActive: false,

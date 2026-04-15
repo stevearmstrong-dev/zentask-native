@@ -10,6 +10,7 @@ import SignIn from './screens/Auth/SignIn';
 import SignUp from './screens/Auth/SignUp';
 import PasswordReset from './screens/Auth/PasswordReset';
 import MainTabs from './navigation/MainTabs';
+import { requestNotificationPermission } from './utils/notifications';
 
 type AuthScreen = 'signin' | 'signup' | 'reset';
 
@@ -20,6 +21,9 @@ export default function App() {
   const [guestMode, setGuestMode] = useState(false);
 
   useEffect(() => {
+    // Request notification permissions at startup
+    requestNotificationPermission().catch(console.warn);
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
