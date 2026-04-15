@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,21 +9,16 @@ import {
   Alert,
   Modal,
   ActivityIndicator,
-  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '@supabase/supabase-js';
 import { Task, TaskStatus, Priority } from '../types';
-import supabaseService from '../services/supabase';
-
-const GUEST_TASKS_KEY = 'zentask:guest_tasks';
+import { useTasks } from '../context/TasksContext';
 
 const COLUMNS: { id: TaskStatus; title: string; icon: string; color: string; desc: string }[] = [
-  { id: 'todo',       title: 'To Do',       icon: '🧠', color: '#1877F2', desc: 'Ideas & upcoming' },
-  { id: 'inprogress', title: 'In Progress', icon: '⚙️', color: '#FF9F0A', desc: 'Currently active'  },
-  { id: 'done',       title: 'Done',        icon: '🎉', color: '#30D158', desc: 'Wrapped up'         },
+  { id: 'todo',        title: 'To Do',       icon: '🧠', color: '#1877F2', desc: 'Ideas & upcoming' },
+  { id: 'inprogress',  title: 'In Progress', icon: '⚙️', color: '#FF9F0A', desc: 'Currently active'  },
+  { id: 'done',        title: 'Done',        icon: '🎉', color: '#30D158', desc: 'Wrapped up'         },
 ];
 
 const PRIORITY_COLOR: Record<string, string> = {
@@ -44,69 +39,30 @@ function formatDue(task: Task): string | null {
 interface Props { user: User | null; }
 
 export default function KanbanScreen({ user }: Props) {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const { tasks, loading, deleteTask, addTask, moveTask } = useTasks();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showMoveModal, setShowMoveModal] = useState(false);
 
-  const userEmail = user?.email || '';
-  const isGuest = !userEmail;
-
-  const loadTasks = useCallback(async () => {
-    try {
-      if (isGuest) {
-        const raw = await AsyncStorage.getItem(GUEST_TASKS_KEY);
-        setTasks(raw ? JSON.parse(raw) : []);
-      } else {
-        const dbTasks = await supabaseService.fetchTasks(userEmail);
-        setTasks(dbTasks.map(t => supabaseService.convertToAppFormat(t)));
-      }
-    } catch (e) { console.error(e); }
-    finally { setLoading(false); setRefreshing(false); }
-  }, [userEmail, isGuest]);
-
-  useFocusEffect(useCallback(() => { loadTasks(); }, [loadTasks]));
-
-  const persist = async (updated: Task[]) => {
-    if (isGuest) {
-      await AsyncStorage.setItem(GUEST_TASKS_KEY, JSON.stringify(updated));
-    }
-  };
-
-  const moveTask = async (task: Task, newStatus: TaskStatus) => {
-    const completed = newStatus === 'done';
-    const updated = tasks.map(t => t.id === task.id ? { ...t, status: newStatus, completed } : t);
-    setTasks(updated);
-    await persist(updated);
-    if (!isGuest) {
-      supabaseService.updateTask(task.id as number, { status: newStatus, completed }, userEmail).catch(console.error);
-    }
+  const handleMove = async (task: Task, newStatus: TaskStatus) => {
+    await moveTask(task.id as number, newStatus);
     setShowMoveModal(false);
     setSelectedTask(null);
   };
 
-  const deleteTask = async (id: number) => {
-    const updated = tasks.filter(t => t.id !== id);
-    setTasks(updated);
-    await persist(updated);
-    if (!isGuest) supabaseService.deleteTask(id, userEmail).catch(console.error);
+  const handleDelete = (id: number) => {
+    Alert.alert('Delete', 'Delete this task?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => deleteTask(id) },
+    ]);
   };
 
-  const addTask = async (text: string, priority: Priority, status: TaskStatus) => {
+  const handleAdd = async (text: string, priority: Priority, status: TaskStatus) => {
     const task: Task = {
       id: Date.now(), text, completed: status === 'done', priority,
       status, timeSpent: 0, isTracking: false, pomodoroActive: false, sortOrder: 0,
       dueDate: new Date().toISOString().split('T')[0],
     };
-    const updated = [task, ...tasks];
-    setTasks(updated);
-    await persist(updated);
-    if (!isGuest) {
-      supabaseService.createTask(task, userEmail)
-        .then(db => setTasks(prev => [supabaseService.convertToAppFormat(db), ...prev.filter(t => t.id !== task.id)]))
-        .catch(console.error);
-    }
+    await addTask(task);
   };
 
   const columnTasks = (col: TaskStatus) => tasks.filter(t => getStatus(t) === col);
@@ -127,11 +83,8 @@ export default function KanbanScreen({ user }: Props) {
             col={col}
             tasks={columnTasks(col.id)}
             onCardPress={task => { setSelectedTask(task); setShowMoveModal(true); }}
-            onDelete={id => Alert.alert('Delete', 'Delete this task?', [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Delete', style: 'destructive', onPress: () => deleteTask(id) },
-            ])}
-            onAdd={addTask}
+            onDelete={handleDelete}
+            onAdd={handleAdd}
           />
         ))}
       </ScrollView>
@@ -149,7 +102,7 @@ export default function KanbanScreen({ user }: Props) {
                   <TouchableOpacity
                     key={col.id}
                     style={[s.moveOption, isCurrent && { borderColor: col.color, backgroundColor: col.color + '22' }]}
-                    onPress={() => selectedTask && moveTask(selectedTask, col.id)}
+                    onPress={() => selectedTask && handleMove(selectedTask, col.id)}
                     disabled={isCurrent}
                   >
                     <Text style={s.moveOptionIcon}>{col.icon}</Text>
