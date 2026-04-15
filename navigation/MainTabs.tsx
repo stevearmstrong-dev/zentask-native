@@ -13,6 +13,7 @@ import WaterTrackerScreen from '../screens/WaterTrackerScreen';
 import MealTrackerScreen from '../screens/MealTrackerScreen';
 import SleepTrackerScreen from '../screens/SleepTrackerScreen';
 import WorkoutTrackerScreen from '../screens/WorkoutTrackerScreen';
+import NoFapTrackerScreen from '../screens/NoFapTrackerScreen';
 
 const Tab = createBottomTabNavigator();
 const MoreStack = createNativeStackNavigator();
@@ -45,6 +46,9 @@ function MoreStackNavigator({ user, onSignOut }: Props) {
       </MoreStack.Screen>
       <MoreStack.Screen name="WorkoutTracker">
         {() => <WorkoutTrackerScreen />}
+      </MoreStack.Screen>
+      <MoreStack.Screen name="NoFapTracker">
+        {() => <NoFapTrackerScreen />}
       </MoreStack.Screen>
     </MoreStack.Navigator>
   );
