@@ -11,7 +11,9 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
+import { getTodaySessions, incrementSessions } from '../utils/pomodoroSessions';
 
 type PomodoroMode = 'work' | 'shortBreak' | 'longBreak';
 
@@ -44,6 +46,11 @@ export default function PomodoroScreen() {
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const progressAnim = useRef(new Animated.Value(0)).current;
+
+  // Load persisted session count on mount and whenever this tab is focused
+  useFocusEffect(useCallback(() => {
+    getTodaySessions().then(setSessions);
+  }, []));
 
   const totalSeconds = useCallback(() => {
     if (mode === 'work') return workMin * 60;
@@ -78,10 +85,9 @@ export default function PomodoroScreen() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     if (mode === 'work') {
-      setSessions(prev => {
-        const next = prev + 1;
+      incrementSessions().then(next => {
+        setSessions(next);
         switchMode(next % 4 === 0 ? 'longBreak' : 'shortBreak');
-        return next;
       });
     } else {
       switchMode('work');
