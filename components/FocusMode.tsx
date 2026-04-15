@@ -187,6 +187,15 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
     pomodoroRef.current && clearInterval(pomodoroRef.current);
     setIsTracking(false);
     setPomodoroRunning(false);
+
+    if (next === 'pomodoro') {
+      // Carry over elapsed time — subtract from the 25-min work session
+      const remaining = Math.max(0, WORK_SECS - timeSpentRef.current);
+      setPomodoroTime(remaining);
+      setPomodoroMode('work');
+      pomodoroModeRef.current = 'work';
+    }
+
     setMode(next);
   }, []);
 
