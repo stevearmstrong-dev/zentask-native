@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import { User } from '@supabase/supabase-js';
 
 interface MenuItem {
@@ -15,13 +16,14 @@ interface MenuItem {
   label: string;
   sublabel: string;
   comingSoon?: boolean;
+  screen?: string;
 }
 
 const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
   {
     title: 'Productivity',
     items: [
-      { icon: '📋', label: 'Kanban Board', sublabel: 'Visual task management', comingSoon: true },
+      { icon: '📋', label: 'Kanban Board', sublabel: 'Visual task management', screen: 'Kanban' },
       { icon: '⊞', label: 'Eisenhower Matrix', sublabel: 'Prioritise by urgency & importance', comingSoon: true },
       { icon: '🕒', label: 'Time Blocks', sublabel: 'Schedule your day', comingSoon: true },
     ],
@@ -58,6 +60,7 @@ interface Props {
 }
 
 export default function MoreScreen({ user, onSignOut }: Props) {
+  const navigation = useNavigation<any>();
   const userEmail = user?.email || '';
   const userName = user?.user_metadata?.name || (userEmail ? userEmail.split('@')[0] : 'Guest');
   const isGuest = !userEmail;
@@ -102,7 +105,7 @@ export default function MoreScreen({ user, onSignOut }: Props) {
             <View style={styles.sectionCard}>
               {section.items.map((item, idx) => (
                 <View key={item.label}>
-                  <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
+                  <TouchableOpacity style={styles.menuItem} activeOpacity={0.7} onPress={() => item.screen && navigation.navigate(item.screen)}>
                     <Text style={styles.menuIcon}>{item.icon}</Text>
                     <View style={styles.menuText}>
                       <Text style={styles.menuLabel}>{item.label}</Text>
