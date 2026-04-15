@@ -34,7 +34,7 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
       { icon: '💧', label: 'Water Tracker', sublabel: 'Stay hydrated', screen: 'WaterTracker' },
       { icon: '🍳', label: 'Meal Tracker', sublabel: 'Log your meals', screen: 'MealTracker' },
       { icon: '🏋️', label: 'Workout Tracker', sublabel: 'Track your workouts', comingSoon: true },
-      { icon: '😴', label: 'Sleep Tracker', sublabel: 'Monitor sleep quality', comingSoon: true },
+      { icon: '😴', label: 'Sleep Tracker', sublabel: 'Monitor sleep quality', screen: 'SleepTracker' },
       { icon: '💪', label: 'NoFap Tracker', sublabel: 'Streak tracking', comingSoon: true },
     ],
   },
