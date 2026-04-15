@@ -20,6 +20,7 @@ import RecurringExpensesScreen from '../screens/RecurringExpensesScreen';
 import CreditScoreScreen from '../screens/CreditScoreScreen';
 import GemCollectorScreen from '../screens/GemCollectorScreen';
 import PowerSwordHallScreen from '../screens/PowerSwordHallScreen';
+import DashboardScreen from '../screens/DashboardScreen';
 
 const Tab = createBottomTabNavigator();
 const MoreStack = createNativeStackNavigator();
@@ -105,6 +106,13 @@ export default function MainTabs({ user, onSignOut }: Props) {
         options={{ tabBarIcon: ({ color, size }) => <Ionicons name="checkmark-circle-outline" size={size} color={color} /> }}
       >
         {() => <AllTasksScreen user={user} />}
+      </Tab.Screen>
+
+      <Tab.Screen
+        name="Dashboard"
+        options={{ tabBarIcon: ({ color, size }) => <Ionicons name="bar-chart-outline" size={size} color={color} /> }}
+      >
+        {() => <DashboardScreen />}
       </Tab.Screen>
 
       <Tab.Screen

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Task } from '../types';
+import { incrementSessions } from '../utils/pomodoroSessions';
 
 const PRIORITY_COLOR: Record<string, string> = {
   high: '#FF453A', medium: '#FF9F0A', low: '#30D158',
@@ -144,10 +145,11 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
     pomodoroRef.current = setInterval(() => {
       setPomodoroTime(prev => {
         if (prev <= 1) {
-          // Switch modes
-          const next = pomodoroModeRef.current === 'work' ? 'break' : 'work';
+          const completedWork = pomodoroModeRef.current === 'work';
+          const next = completedWork ? 'break' : 'work';
           pomodoroModeRef.current = next;
           setPomodoroMode(next);
+          if (completedWork) incrementSessions();
           return next === 'work' ? WORK_SECS : BREAK_SECS;
         }
         // Only add to timeSpent during work sessions
