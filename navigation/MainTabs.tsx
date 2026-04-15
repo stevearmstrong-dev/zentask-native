@@ -15,6 +15,8 @@ import SleepTrackerScreen from '../screens/SleepTrackerScreen';
 import WorkoutTrackerScreen from '../screens/WorkoutTrackerScreen';
 import NoFapTrackerScreen from '../screens/NoFapTrackerScreen';
 import TimeBlocksScreen from '../screens/TimeBlocksScreen';
+import ExpenseTrackerScreen from '../screens/ExpenseTrackerScreen';
+import RecurringExpensesScreen from '../screens/RecurringExpensesScreen';
 
 const Tab = createBottomTabNavigator();
 const MoreStack = createNativeStackNavigator();
@@ -53,6 +55,12 @@ function MoreStackNavigator({ user, onSignOut }: Props) {
       </MoreStack.Screen>
       <MoreStack.Screen name="TimeBlocks">
         {() => <TimeBlocksScreen />}
+      </MoreStack.Screen>
+      <MoreStack.Screen name="ExpenseTracker">
+        {() => <ExpenseTrackerScreen />}
+      </MoreStack.Screen>
+      <MoreStack.Screen name="RecurringExpenses">
+        {() => <RecurringExpensesScreen />}
       </MoreStack.Screen>
     </MoreStack.Navigator>
   );
