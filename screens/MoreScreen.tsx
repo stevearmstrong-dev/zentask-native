@@ -49,7 +49,8 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
   {
     title: 'Gamification',
     items: [
-      { icon: '⚔️', label: 'Power Sword Hall', sublabel: 'Unlock achievements', comingSoon: true },
+      { icon: '💎', label: 'Gem Collector',    sublabel: 'Collect daily gems',       screen: 'GemCollector' },
+      { icon: '⚔️', label: 'Power Sword Hall', sublabel: 'Your hall of achievements', screen: 'PowerSwordHall' },
     ],
   },
 ];
