@@ -21,6 +21,7 @@ import CreditScoreScreen from '../screens/CreditScoreScreen';
 import GemCollectorScreen from '../screens/GemCollectorScreen';
 import PowerSwordHallScreen from '../screens/PowerSwordHallScreen';
 import DashboardScreen from '../screens/DashboardScreen';
+import UpcomingScreen from '../screens/UpcomingScreen';
 
 const Tab = createBottomTabNavigator();
 const MoreStack = createNativeStackNavigator();
@@ -106,6 +107,13 @@ export default function MainTabs({ user, onSignOut }: Props) {
         options={{ tabBarIcon: ({ color, size }) => <Ionicons name="checkmark-circle-outline" size={size} color={color} /> }}
       >
         {() => <AllTasksScreen user={user} />}
+      </Tab.Screen>
+
+      <Tab.Screen
+        name="Upcoming"
+        options={{ tabBarIcon: ({ color, size }) => <Ionicons name="calendar-outline" size={size} color={color} /> }}
+      >
+        {() => <UpcomingScreen />}
       </Tab.Screen>
 
       <Tab.Screen
