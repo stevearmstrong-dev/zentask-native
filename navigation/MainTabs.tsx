@@ -37,6 +37,9 @@ function MoreStackNavigator({ user, onSignOut }: Props) {
       <MoreStack.Screen name="MoreHome">
         {() => <MoreScreen user={user} onSignOut={onSignOut} />}
       </MoreStack.Screen>
+      <MoreStack.Screen name="AllTasks">
+        {() => <AllTasksScreen user={user} />}
+      </MoreStack.Screen>
       <MoreStack.Screen name="Kanban">
         {() => <KanbanScreen user={user} />}
       </MoreStack.Screen>
@@ -103,10 +106,10 @@ export default function MainTabs({ user, onSignOut }: Props) {
       </Tab.Screen>
 
       <Tab.Screen
-        name="Tasks"
-        options={{ tabBarIcon: ({ color, size }) => <Ionicons name="checkmark-circle-outline" size={size} color={color} /> }}
+        name="Water"
+        options={{ tabBarIcon: ({ color, size }) => <Ionicons name="water-outline" size={size} color={color} /> }}
       >
-        {() => <AllTasksScreen user={user} />}
+        {() => <WaterTrackerScreen />}
       </Tab.Screen>
 
       <Tab.Screen
