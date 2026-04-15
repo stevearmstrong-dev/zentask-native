@@ -17,6 +17,7 @@ import NoFapTrackerScreen from '../screens/NoFapTrackerScreen';
 import TimeBlocksScreen from '../screens/TimeBlocksScreen';
 import ExpenseTrackerScreen from '../screens/ExpenseTrackerScreen';
 import RecurringExpensesScreen from '../screens/RecurringExpensesScreen';
+import CreditScoreScreen from '../screens/CreditScoreScreen';
 
 const Tab = createBottomTabNavigator();
 const MoreStack = createNativeStackNavigator();
@@ -61,6 +62,9 @@ function MoreStackNavigator({ user, onSignOut }: Props) {
       </MoreStack.Screen>
       <MoreStack.Screen name="RecurringExpenses">
         {() => <RecurringExpensesScreen />}
+      </MoreStack.Screen>
+      <MoreStack.Screen name="CreditScore">
+        {() => <CreditScoreScreen />}
       </MoreStack.Screen>
     </MoreStack.Navigator>
   );
