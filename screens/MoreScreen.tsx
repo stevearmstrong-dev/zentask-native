@@ -24,14 +24,14 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
     title: 'Productivity',
     items: [
       { icon: '📋', label: 'Kanban Board', sublabel: 'Visual task management', screen: 'Kanban' },
-      { icon: '⊞', label: 'Eisenhower Matrix', sublabel: 'Prioritise by urgency & importance', comingSoon: true },
+      { icon: '⊞', label: 'Eisenhower Matrix', sublabel: 'Prioritise by urgency & importance', screen: 'Eisenhower' },
       { icon: '🕒', label: 'Time Blocks', sublabel: 'Schedule your day', comingSoon: true },
     ],
   },
   {
     title: 'Health & Lifestyle',
     items: [
-      { icon: '💧', label: 'Water Tracker', sublabel: 'Stay hydrated', comingSoon: true },
+      { icon: '💧', label: 'Water Tracker', sublabel: 'Stay hydrated', screen: 'WaterTracker' },
       { icon: '🍳', label: 'Meal Tracker', sublabel: 'Log your meals', comingSoon: true },
       { icon: '🏋️', label: 'Workout Tracker', sublabel: 'Track your workouts', comingSoon: true },
       { icon: '😴', label: 'Sleep Tracker', sublabel: 'Monitor sleep quality', comingSoon: true },
