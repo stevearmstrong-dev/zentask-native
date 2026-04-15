@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -9,13 +9,9 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '@supabase/supabase-js';
 import { Task } from '../types';
-import supabaseService from '../services/supabase';
-
-const GUEST_TASKS_KEY = 'zentask:guest_tasks';
+import { useTasks } from '../context/TasksContext';
 
 interface Props {
   user: User | null;
@@ -33,38 +29,14 @@ function formatDate(): string {
 }
 
 const PRIORITY_COLOR: Record<string, string> = {
-  high: '#FF453A',
-  medium: '#FF9F0A',
-  low: '#30D158',
+  high: '#FF453A', medium: '#FF9F0A', low: '#30D158',
 };
 
 export default function TodayScreen({ user }: Props) {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const { tasks, loading, reload, toggleTask } = useTasks();
 
   const userEmail = user?.email || '';
   const userName = user?.user_metadata?.name || (userEmail ? userEmail.split('@')[0] : 'Guest');
-
-  const loadTasks = useCallback(async () => {
-    try {
-      if (!userEmail) {
-        const raw = await AsyncStorage.getItem(GUEST_TASKS_KEY);
-        setTasks(raw ? JSON.parse(raw) : []);
-      } else {
-        const dbTasks = await supabaseService.fetchTasks(userEmail);
-        setTasks(dbTasks.map(t => supabaseService.convertToAppFormat(t)));
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [userEmail]);
-
-  // Reload every time this tab comes into focus
-  useFocusEffect(useCallback(() => { loadTasks(); }, [loadTasks]));
 
   const todayStr = new Date().toISOString().split('T')[0];
   const todayTasks = tasks.filter(t => !t.completed && t.dueDate === todayStr);
@@ -76,18 +48,8 @@ export default function TodayScreen({ user }: Props) {
   const totalToday = todayTasks.length + completedToday;
   const completionRate = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
 
-  const toggleTask = async (task: Task) => {
-    const updated = tasks.map(t => t.id === task.id ? { ...t, completed: !t.completed } : t);
-    setTasks(updated);
-    if (!userEmail) {
-      await AsyncStorage.setItem(GUEST_TASKS_KEY, JSON.stringify(updated));
-    } else {
-      supabaseService.updateTask(task.id as number, { completed: !task.completed }, userEmail).catch(console.error);
-    }
-  };
-
   const renderTask = ({ item }: { item: Task }) => (
-    <TouchableOpacity style={styles.taskRow} onPress={() => toggleTask(item)} activeOpacity={0.7}>
+    <TouchableOpacity style={styles.taskRow} onPress={() => toggleTask(item.id as number)} activeOpacity={0.7}>
       <View style={[styles.checkbox, item.completed && styles.checkboxDone]}>
         {item.completed && <Text style={styles.checkmark}>✓</Text>}
       </View>
@@ -111,15 +73,11 @@ export default function TodayScreen({ user }: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>{greeting()}, {userName} 👋</Text>
-          <Text style={styles.date}>{formatDate()}</Text>
-        </View>
+        <Text style={styles.greeting}>{greeting()}, {userName} 👋</Text>
+        <Text style={styles.date}>{formatDate()}</Text>
       </View>
 
-      {/* Stats row */}
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
           <Text style={styles.statNum}>{todayTasks.length}</Text>
@@ -135,12 +93,11 @@ export default function TodayScreen({ user }: Props) {
         </View>
       </View>
 
-      {/* Today's tasks */}
       <FlatList
         data={[...overdueTasks, ...todayTasks]}
         keyExtractor={item => String(item.id)}
         renderItem={renderTask}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadTasks(); }} tintColor="#1877F2" />}
+        refreshControl={<RefreshControl refreshing={false} onRefresh={reload} tintColor="#1877F2" />}
         ListHeaderComponent={
           <Text style={styles.sectionTitle}>
             {overdueTasks.length > 0 ? 'Overdue & Today' : "Today's Tasks"}
@@ -166,13 +123,8 @@ const styles = StyleSheet.create({
   date: { fontSize: 14, color: '#636366', marginTop: 2 },
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginBottom: 8 },
   statCard: {
-    flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 16,
-    padding: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    flex: 1, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, alignItems: 'center',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
   statNum: { fontSize: 24, fontWeight: '700', color: '#FFFFFF' },
   statRed: { color: '#FF453A' },
@@ -181,24 +133,12 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 17, fontWeight: '600', color: '#EBEBF5', marginBottom: 12 },
   list: { padding: 20, paddingTop: 8 },
   taskRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    gap: 12,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', gap: 12,
   },
   checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 24, height: 24, borderRadius: 12, borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center',
   },
   checkboxDone: { backgroundColor: '#30D158', borderColor: '#30D158' },
   checkmark: { color: '#fff', fontSize: 13, fontWeight: '700' },

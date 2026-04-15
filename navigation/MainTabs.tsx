@@ -8,6 +8,7 @@ import AllTasksScreen from '../screens/AllTasksScreen';
 import PomodoroScreen from '../screens/PomodoroScreen';
 import MoreScreen from '../screens/MoreScreen';
 import KanbanScreen from '../screens/KanbanScreen';
+import EisenhowerScreen from '../screens/EisenhowerScreen';
 
 const Tab = createBottomTabNavigator();
 const MoreStack = createNativeStackNavigator();
@@ -25,6 +26,9 @@ function MoreStackNavigator({ user, onSignOut }: Props) {
       </MoreStack.Screen>
       <MoreStack.Screen name="Kanban">
         {() => <KanbanScreen user={user} />}
+      </MoreStack.Screen>
+      <MoreStack.Screen name="Eisenhower">
+        {() => <EisenhowerScreen user={user} />}
       </MoreStack.Screen>
     </MoreStack.Navigator>
   );

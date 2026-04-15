@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,10 +9,9 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '@supabase/supabase-js';
 import { Task } from '../types';
-import supabaseService from '../services/supabase';
+import { useTasks } from '../context/TasksContext';
 import TaskItem from '../components/TaskItem';
 import AddTaskModal from '../components/AddTaskModal';
 
@@ -28,89 +27,19 @@ const FILTERS: { label: string; value: Filter }[] = [
   { label: 'Completed', value: 'completed' },
 ];
 
-const GUEST_TASKS_KEY = 'zentask:guest_tasks';
-
 export default function AllTasksScreen({ user }: Props) {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const { tasks, loading, reload, toggleTask, deleteTask, editTask, addTask } = useTasks();
   const [filter, setFilter] = useState<Filter>('all');
   const [showAddModal, setShowAddModal] = useState(false);
 
   const userEmail = user?.email || '';
   const isGuest = !userEmail;
 
-  // --- Guest local storage helpers ---
-  const loadGuestTasks = async (): Promise<Task[]> => {
-    try {
-      const raw = await AsyncStorage.getItem(GUEST_TASKS_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch { return []; }
-  };
-
-  const saveGuestTasks = async (updated: Task[]) => {
-    try {
-      await AsyncStorage.setItem(GUEST_TASKS_KEY, JSON.stringify(updated));
-    } catch (e) { console.error(e); }
-  };
-
-  // --- Load ---
-  const loadTasks = useCallback(async () => {
-    try {
-      if (isGuest) {
-        setTasks(await loadGuestTasks());
-      } else {
-        const dbTasks = await supabaseService.fetchTasks(userEmail);
-        setTasks(dbTasks.map(t => supabaseService.convertToAppFormat(t)));
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [userEmail, isGuest]);
-
-  useEffect(() => { loadTasks(); }, [loadTasks]);
-
-  // --- Filtered view ---
   const filteredTasks = tasks.filter(t => {
     if (filter === 'active') return !t.completed;
     if (filter === 'completed') return t.completed;
     return true;
   });
-
-  // --- Actions ---
-  const handleToggle = async (id: number) => {
-    const updated = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
-    setTasks(updated);
-    if (isGuest) {
-      await saveGuestTasks(updated);
-    } else {
-      const task = tasks.find(t => t.id === id);
-      if (task) await supabaseService.updateTask(id, { completed: !task.completed }, userEmail).catch(console.error);
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    const updated = tasks.filter(t => t.id !== id);
-    setTasks(updated);
-    if (isGuest) {
-      await saveGuestTasks(updated);
-    } else {
-      await supabaseService.deleteTask(id, userEmail).catch(console.error);
-    }
-  };
-
-  const handleEdit = async (id: number, updates: Partial<Task>) => {
-    const updated = tasks.map(t => t.id === id ? { ...t, ...updates } : t);
-    setTasks(updated);
-    if (isGuest) {
-      await saveGuestTasks(updated);
-    } else {
-      await supabaseService.updateTask(id, updates, userEmail).catch(console.error);
-    }
-  };
 
   const handleAdd = async (newTask: { text: string; priority: any; dueDate: string; dueTime: string; category: string }) => {
     const task: Task = {
@@ -127,17 +56,7 @@ export default function AllTasksScreen({ user }: Props) {
       sortOrder: 0,
       status: 'todo',
     };
-
-    if (isGuest) {
-      const updated = [task, ...tasks];
-      setTasks(updated);
-      await saveGuestTasks(updated);
-    } else {
-      try {
-        const dbTask = await supabaseService.createTask(task, userEmail);
-        setTasks(prev => [supabaseService.convertToAppFormat(dbTask), ...prev]);
-      } catch (e) { console.error(e); }
-    }
+    await addTask(task);
   };
 
   if (loading) {
@@ -190,13 +109,13 @@ export default function AllTasksScreen({ user }: Props) {
         renderItem={({ item }) => (
           <TaskItem
             task={item}
-            onToggle={handleToggle}
-            onDelete={handleDelete}
-            onEdit={handleEdit}
+            onToggle={toggleTask}
+            onDelete={deleteTask}
+            onEdit={editTask}
           />
         )}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadTasks(); }} tintColor="#1877F2" />
+          <RefreshControl refreshing={false} onRefresh={reload} tintColor="#1877F2" />
         }
         ListEmptyComponent={
           <View style={styles.empty}>

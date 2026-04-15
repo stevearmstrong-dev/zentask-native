@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { User } from '@supabase/supabase-js';
 import { supabase } from './services/supabase';
+import { TasksProvider } from './context/TasksContext';
 import SignIn from './screens/Auth/SignIn';
 import SignUp from './screens/Auth/SignUp';
 import PasswordReset from './screens/Auth/PasswordReset';
@@ -49,9 +50,11 @@ export default function App() {
     return (
       <SafeAreaProvider>
         <StatusBar style="light" />
-        <NavigationContainer>
-          <MainTabs user={user} onSignOut={handleSignOut} />
-        </NavigationContainer>
+        <TasksProvider user={user}>
+          <NavigationContainer>
+            <MainTabs user={user} onSignOut={handleSignOut} />
+          </NavigationContainer>
+        </TasksProvider>
       </SafeAreaProvider>
     );
   }
