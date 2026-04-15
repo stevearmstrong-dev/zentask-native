@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -39,6 +39,123 @@ function formatTime(isoString: string): string {
   });
 }
 
+type HistoryPeriod = 'day' | 'week' | 'month' | 'year';
+
+function getDateStr(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function formatDateLabel(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function getWeekLabel(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00');
+  // Start of week (Monday)
+  const day = d.getDay() || 7;
+  const mon = new Date(d);
+  mon.setDate(d.getDate() - day + 1);
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  const fmt = (dt: Date) => dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return `${fmt(mon)} – ${fmt(sun)}`;
+}
+
+function getMonthLabel(year: number, month: number): string {
+  return new Date(year, month, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
+interface PeriodBucket {
+  label: string;
+  total: number;
+  goal: number; // daily goal * days in bucket
+  days: number;
+}
+
+function buildDayBuckets(logs: WaterLog[], dailyGoal: number, n = 14): PeriodBucket[] {
+  const buckets: PeriodBucket[] = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = getDateStr(d);
+    const total = logs.filter(l => l.timestamp.startsWith(key)).reduce((s, l) => s + l.amount, 0);
+    buckets.push({ label: formatDateLabel(key), total, goal: dailyGoal, days: 1 });
+  }
+  return buckets;
+}
+
+function buildWeekBuckets(logs: WaterLog[], dailyGoal: number, n = 8): PeriodBucket[] {
+  // Get Monday of current week
+  const now = new Date();
+  const day = now.getDay() || 7;
+  const thisMon = new Date(now);
+  thisMon.setDate(now.getDate() - day + 1);
+  thisMon.setHours(0, 0, 0, 0);
+
+  const buckets: PeriodBucket[] = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const mon = new Date(thisMon);
+    mon.setDate(thisMon.getDate() - i * 7);
+    const sun = new Date(mon);
+    sun.setDate(mon.getDate() + 6);
+    sun.setHours(23, 59, 59, 999);
+
+    const total = logs
+      .filter(l => { const t = new Date(l.timestamp); return t >= mon && t <= sun; })
+      .reduce((s, l) => s + l.amount, 0);
+
+    // Count actual days in this week that have any data or up to today
+    const today = new Date();
+    const daysInBucket = Math.min(7, Math.floor((Math.min(today.getTime(), sun.getTime()) - mon.getTime()) / 86400000) + 1);
+
+    buckets.push({ label: getWeekLabel(getDateStr(mon)), total, goal: dailyGoal * 7, days: daysInBucket });
+  }
+  return buckets;
+}
+
+function buildMonthBuckets(logs: WaterLog[], dailyGoal: number, n = 12): PeriodBucket[] {
+  const now = new Date();
+  const buckets: PeriodBucket[] = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const y = d.getFullYear();
+    const m = d.getMonth();
+    const start = new Date(y, m, 1);
+    const end = new Date(y, m + 1, 0, 23, 59, 59, 999);
+    const daysInMonth = end.getDate();
+
+    const total = logs
+      .filter(l => { const t = new Date(l.timestamp); return t >= start && t <= end; })
+      .reduce((s, l) => s + l.amount, 0);
+
+    buckets.push({ label: getMonthLabel(y, m), total, goal: dailyGoal * daysInMonth, days: daysInMonth });
+  }
+  return buckets;
+}
+
+function buildYearBuckets(logs: WaterLog[], dailyGoal: number, n = 3): PeriodBucket[] {
+  const now = new Date();
+  const buckets: PeriodBucket[] = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const y = now.getFullYear() - i;
+    const start = new Date(y, 0, 1);
+    const end = new Date(y, 11, 31, 23, 59, 59, 999);
+    const isLeap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+    const daysInYear = isLeap ? 366 : 365;
+
+    const total = logs
+      .filter(l => { const t = new Date(l.timestamp); return t >= start && t <= end; })
+      .reduce((s, l) => s + l.amount, 0);
+
+    buckets.push({ label: String(y), total, goal: dailyGoal * daysInYear, days: daysInYear });
+  }
+  return buckets;
+}
+
 function getMotivationalMessage(percentage: number, isOverflowing: boolean): string {
   if (isOverflowing) return '🌊 Overflowing with hydration! Amazing!';
   if (percentage >= 100) return '🎉 Goal achieved! Stay hydrated!';
@@ -55,6 +172,7 @@ export default function WaterTrackerScreen() {
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [goalInput, setGoalInput] = useState('');
   const [loaded, setLoaded] = useState(false);
+  const [historyPeriod, setHistoryPeriod] = useState<HistoryPeriod>('day');
 
   const waveAnim = useRef(new Animated.Value(0)).current;
   const fillAnim = useRef(new Animated.Value(0)).current;
@@ -140,6 +258,15 @@ export default function WaterTrackerScreen() {
     if (n && n > 0) setDailyGoal(n);
     setShowGoalModal(false);
   };
+
+  const historyBuckets = useMemo(() => {
+    if (historyPeriod === 'day') return buildDayBuckets(logs, dailyGoal);
+    if (historyPeriod === 'week') return buildWeekBuckets(logs, dailyGoal);
+    if (historyPeriod === 'month') return buildMonthBuckets(logs, dailyGoal);
+    return buildYearBuckets(logs, dailyGoal);
+  }, [logs, dailyGoal, historyPeriod]);
+
+  const maxBucketTotal = useMemo(() => Math.max(...historyBuckets.map(b => b.total), dailyGoal), [historyBuckets, dailyGoal]);
 
   const GLASS_HEIGHT = 220;
 
@@ -271,6 +398,83 @@ export default function WaterTrackerScreen() {
             </View>
           ))
         )}
+
+        {/* History */}
+        <Text style={styles.sectionTitle}>History</Text>
+
+        {/* Period tabs */}
+        <View style={styles.periodTabs}>
+          {(['day', 'week', 'month', 'year'] as HistoryPeriod[]).map(p => (
+            <TouchableOpacity
+              key={p}
+              style={[styles.periodTab, historyPeriod === p && styles.periodTabActive]}
+              onPress={() => setHistoryPeriod(p)}
+            >
+              <Text style={[styles.periodTabText, historyPeriod === p && styles.periodTabTextActive]}>
+                {p.charAt(0).toUpperCase() + p.slice(1)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Summary stat for selected period */}
+        {(() => {
+          const totalAll = historyBuckets.reduce((s, b) => s + b.total, 0);
+          const daysWithData = historyBuckets.filter(b => b.total > 0).length;
+          const avg = daysWithData > 0 ? Math.round(totalAll / daysWithData) : 0;
+          const goalDays = historyBuckets.filter(b => b.total >= b.goal / b.days).length;
+          return (
+            <View style={styles.historySummary}>
+              <View style={styles.historyStat}>
+                <Text style={styles.historyStatValue}>{(totalAll / 1000).toFixed(1)}L</Text>
+                <Text style={styles.historyStatLabel}>Total</Text>
+              </View>
+              <View style={styles.historyStat}>
+                <Text style={styles.historyStatValue}>{(avg / 1000).toFixed(1)}L</Text>
+                <Text style={styles.historyStatLabel}>Avg/Day</Text>
+              </View>
+              <View style={styles.historyStat}>
+                <Text style={[styles.historyStatValue, { color: '#30D158' }]}>{goalDays}</Text>
+                <Text style={styles.historyStatLabel}>Goal Days</Text>
+              </View>
+            </View>
+          );
+        })()}
+
+        {/* Bar chart */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chartScroll} contentContainerStyle={styles.chartContent}>
+          {historyBuckets.map((bucket, i) => {
+            const barPct = maxBucketTotal > 0 ? bucket.total / maxBucketTotal : 0;
+            const metGoal = bucket.total >= (bucket.goal / bucket.days);
+            const barColor = bucket.total === 0 ? 'rgba(255,255,255,0.06)' : metGoal ? '#30D158' : '#1877F2';
+            const isToday = i === historyBuckets.length - 1 && historyPeriod === 'day';
+            return (
+              <View key={i} style={styles.chartBar}>
+                <Text style={styles.chartBarValue}>
+                  {bucket.total > 0 ? `${(bucket.total / 1000).toFixed(1)}L` : ''}
+                </Text>
+                <View style={styles.chartBarTrack}>
+                  <View style={[styles.chartBarFill, { height: `${Math.max(barPct * 100, bucket.total > 0 ? 4 : 0)}%`, backgroundColor: barColor }]} />
+                </View>
+                <Text style={[styles.chartBarLabel, isToday && { color: '#1877F2', fontWeight: '700' }]} numberOfLines={2}>
+                  {historyPeriod === 'day'
+                    ? (isToday ? 'Today' : bucket.label.split(',')[0])
+                    : historyPeriod === 'year'
+                    ? bucket.label
+                    : bucket.label.split(' ')[0] + '\n' + bucket.label.split(' ').slice(1).join(' ')}
+                </Text>
+              </View>
+            );
+          })}
+        </ScrollView>
+
+        {/* Goal line legend */}
+        <View style={styles.legendRow}>
+          <View style={[styles.legendDot, { backgroundColor: '#1877F2' }]} />
+          <Text style={styles.legendText}>Below goal</Text>
+          <View style={[styles.legendDot, { backgroundColor: '#30D158', marginLeft: 12 }]} />
+          <Text style={styles.legendText}>Goal met</Text>
+        </View>
 
         <View style={{ height: 32 }} />
       </ScrollView>
@@ -514,4 +718,51 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalSaveText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+
+  // History
+  periodTabs: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+  periodTab: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 10,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  periodTabActive: { backgroundColor: '#1877F2', borderColor: '#1877F2' },
+  periodTabText: { fontSize: 13, fontWeight: '600', color: '#636366' },
+  periodTabTextActive: { color: '#FFFFFF' },
+
+  historySummary: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+  historyStat: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  historyStatValue: { fontSize: 20, fontWeight: '700', color: '#FFFFFF' },
+  historyStatLabel: { fontSize: 11, color: '#636366', marginTop: 2 },
+
+  chartScroll: { marginBottom: 8 },
+  chartContent: { paddingBottom: 4, gap: 6, alignItems: 'flex-end' },
+  chartBar: { width: 52, alignItems: 'center', gap: 4 },
+  chartBarValue: { fontSize: 9, color: '#636366', height: 14, textAlign: 'center' },
+  chartBarTrack: {
+    width: 36,
+    height: 100,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 6,
+    justifyContent: 'flex-end',
+    overflow: 'hidden',
+  },
+  chartBarFill: { width: '100%', borderRadius: 6 },
+  chartBarLabel: { fontSize: 10, color: '#8E8E93', textAlign: 'center' },
+
+  legendRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16 },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
+  legendText: { fontSize: 11, color: '#636366' },
 });
