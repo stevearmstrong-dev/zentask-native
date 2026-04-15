@@ -28,7 +28,11 @@ interface WaterLog {
 const QUICK_AMOUNTS = [250, 500, 750, 1000];
 
 function getTodayStr(): string {
-  return new Date().toISOString().split('T')[0];
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 function formatTime(isoString: string): string {
@@ -234,10 +238,13 @@ export default function WaterTrackerScreen() {
 
   const addWater = useCallback((amount: number) => {
     if (amount <= 0) return;
+    // Store as local ISO string (not UTC) so date comparisons work correctly in any timezone
+    const now = new Date();
+    const localISO = `${getTodayStr()}T${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
     const log: WaterLog = {
       id: Date.now(),
       amount,
-      timestamp: new Date().toISOString(),
+      timestamp: localISO,
     };
     setLogs(prev => [log, ...prev]);
     setCustomAmount('');
