@@ -43,10 +43,10 @@ interface PaymentPlan {
 const CARD_COLORS = ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#EF4444'];
 
 const DEFAULT_CARDS: CreditCard[] = [
-  { id: 'cibc',   name: 'CIBC',            balance: 3618, limit: 4000,  color: '#3B82F6' },
-  { id: 'amex',   name: 'Amex *0100',      balance: 8500, limit: 8900,  color: '#8B5CF6' },
-  { id: 'td',     name: 'TD **822',        balance: 7797, limit: 10000, color: '#EC4899' },
-  { id: 'pcf',    name: 'PC Financial **130', balance: 2039, limit: 2500, color: '#F59E0B' },
+  { id: 'cibc',   name: 'CIBC',         balance: 3618, limit: 4000,  color: '#3B82F6' },
+  { id: 'amex',   name: 'Amex',         balance: 8500, limit: 8900,  color: '#8B5CF6' },
+  { id: 'td',     name: 'TD',           balance: 7797, limit: 10000, color: '#EC4899' },
+  { id: 'pcf',    name: 'PC Financial', balance: 2039, limit: 2500,  color: '#F59E0B' },
 ];
 
 const MILESTONES = [
