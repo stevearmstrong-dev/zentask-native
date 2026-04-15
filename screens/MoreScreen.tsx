@@ -25,7 +25,7 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
     items: [
       { icon: '📋', label: 'Kanban Board', sublabel: 'Visual task management', screen: 'Kanban' },
       { icon: '⊞', label: 'Eisenhower Matrix', sublabel: 'Prioritise by urgency & importance', screen: 'Eisenhower' },
-      { icon: '🕒', label: 'Time Blocks', sublabel: 'Schedule your day', comingSoon: true },
+      { icon: '🕒', label: 'Time Blocks', sublabel: 'Schedule your day', screen: 'TimeBlocks' },
     ],
   },
   {
