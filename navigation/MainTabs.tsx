@@ -79,6 +79,9 @@ function MoreStackNavigator({ user, onSignOut }: Props) {
       <MoreStack.Screen name="PowerSwordHall">
         {() => <PowerSwordHallScreen />}
       </MoreStack.Screen>
+      <MoreStack.Screen name="Dashboard">
+        {() => <DashboardScreen />}
+      </MoreStack.Screen>
     </MoreStack.Navigator>
   );
 }
@@ -120,10 +123,10 @@ export default function MainTabs({ user, onSignOut }: Props) {
       </Tab.Screen>
 
       <Tab.Screen
-        name="Dashboard"
-        options={{ tabBarIcon: ({ color, size }) => <Ionicons name="bar-chart-outline" size={size} color={color} /> }}
+        name="Expenses"
+        options={{ tabBarIcon: ({ color, size }) => <Ionicons name="wallet-outline" size={size} color={color} /> }}
       >
-        {() => <DashboardScreen />}
+        {() => <ExpenseTrackerScreen />}
       </Tab.Screen>
 
       <Tab.Screen

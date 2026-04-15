@@ -24,6 +24,7 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
     title: 'Productivity',
     items: [
       { icon: '✅', label: 'All Tasks', sublabel: 'View and manage all tasks', screen: 'AllTasks' },
+      { icon: '📊', label: 'Dashboard', sublabel: 'Stats and insights', screen: 'Dashboard' },
       { icon: '📋', label: 'Kanban Board', sublabel: 'Visual task management', screen: 'Kanban' },
       { icon: '⊞', label: 'Eisenhower Matrix', sublabel: 'Prioritise by urgency & importance', screen: 'Eisenhower' },
       { icon: '🕒', label: 'Time Blocks', sublabel: 'Schedule your day', screen: 'TimeBlocks' },
@@ -42,7 +43,6 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
   {
     title: 'Finance',
     items: [
-      { icon: '💰', label: 'Expense Tracker', sublabel: 'Track spending', screen: 'ExpenseTracker' },
       { icon: '📅', label: 'Recurring Expenses', sublabel: 'Subscriptions & bills', screen: 'RecurringExpenses' },
       { icon: '💳', label: 'Credit Score', sublabel: 'Monitor your score', screen: 'CreditScore' },
     ],
