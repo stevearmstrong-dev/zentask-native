@@ -45,7 +45,13 @@ export function TasksProvider({ user, children }: { user: User | null; children:
     finally { setLoading(false); }
   }, [userEmail, isGuest]);
 
-  useEffect(() => { reload(); }, [reload]);
+  // Clear tasks immediately when user identity changes to avoid showing stale guest
+  // tasks while the authenticated fetch is in flight (and vice versa on sign-out).
+  useEffect(() => {
+    setTasks([]);
+    setLoading(true);
+    reload();
+  }, [reload]);
 
   // Schedule or reschedule a reminder for a task
   const syncReminder = useCallback(async (task: Task) => {
