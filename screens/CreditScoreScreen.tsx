@@ -163,7 +163,11 @@ export default function CreditScoreScreen() {
       AsyncStorage.getItem(BUDGET_KEY),
       AsyncStorage.getItem(PLANS_KEY),
     ]).then(([rawCards, rawScore, rawBudget, rawPlans]) => {
-      if (rawCards)  setCards(JSON.parse(rawCards));
+      if (rawCards) {
+        // Strip any partial card numbers (legacy data migration)
+        const parsed: CreditCard[] = JSON.parse(rawCards);
+        setCards(parsed.map(c => ({ ...c, name: c.name.replace(/\s*[\*]+\d+/g, '').trim() })));
+      }
       if (rawScore)  setCurrentScore(Number(rawScore));
       if (rawBudget) setMonthlyBudget(Number(rawBudget));
       if (rawPlans)  setPlans(JSON.parse(rawPlans));
