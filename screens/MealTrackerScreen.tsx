@@ -120,24 +120,26 @@ export default function MealTrackerScreen() {
   }, [meals, loaded]);
 
   const today = getTodayStr();
-  const todayMeal = meals.find(m => m.date === today);
+  const todayMeals = meals.filter(m => m.date === today);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const currentStreak = calcCurrentStreak(meals);
   const longestStreak = calcLongestStreak(meals, currentStreak);
-  const daysThisMonth = meals.filter(m => m.date.startsWith(today.slice(0, 7))).length;
+  const daysThisMonth = new Set(meals.filter(m => m.date.startsWith(today.slice(0, 7))).map(m => m.date)).size;
 
   const openForm = (prefill?: MealEntry) => {
     setMealName(prefill?.mealName ?? '');
     setNotes(prefill?.notes ?? '');
+    setEditingId(prefill?.id ?? null);
     setShowForm(true);
   };
 
   const handleSave = useCallback(() => {
     if (!mealName.trim()) return;
 
-    if (todayMeal) {
+    if (editingId !== null) {
       // Update existing
       setMeals(prev => prev.map(m =>
-        m.id === todayMeal.id
+        m.id === editingId
           ? { ...m, mealName: mealName.trim(), notes: notes.trim() }
           : m
       ));
@@ -155,8 +157,9 @@ export default function MealTrackerScreen() {
 
     setMealName('');
     setNotes('');
+    setEditingId(null);
     setShowForm(false);
-  }, [mealName, notes, today, todayMeal]);
+  }, [mealName, notes, today, editingId]);
 
   const handleDelete = (id: number) => {
     Alert.alert('Delete Meal', 'Remove this meal entry?', [
@@ -179,29 +182,35 @@ export default function MealTrackerScreen() {
             <Text style={styles.subtitle}>Cook one meal a day, build a healthy habit</Text>
           </View>
 
-          {/* Today's status */}
-          {todayMeal ? (
-            <View style={styles.todayCard}>
-              <View style={styles.todayCheck}>
-                <Text style={styles.todayCheckText}>✓</Text>
-              </View>
-              <View style={styles.todayInfo}>
-                <Text style={styles.todayMealName}>{todayMeal.mealName}</Text>
-                {todayMeal.notes ? <Text style={styles.todayNotes}>{todayMeal.notes}</Text> : null}
-              </View>
-              <TouchableOpacity style={styles.editBtn} onPress={() => openForm(todayMeal)}>
-                <Text style={styles.editBtnText}>Edit</Text>
+          {/* Today's meals */}
+          <View style={styles.todaySection}>
+            <View style={styles.todaySectionHeader}>
+              <Text style={styles.todaySectionTitle}>Today's Meals ({todayMeals.length})</Text>
+              <TouchableOpacity style={styles.logBtn} onPress={() => { setEditingId(null); setMealName(''); setNotes(''); setShowForm(s => !s); }}>
+                <Text style={styles.logBtnText}>{showForm && editingId === null ? 'Cancel' : '+ Log Meal'}</Text>
               </TouchableOpacity>
             </View>
-          ) : (
-            <View style={styles.todayEmpty}>
-              <Text style={styles.todayEmptyIcon}>🍳</Text>
-              <Text style={styles.todayEmptyText}>No meal logged today yet</Text>
-              <TouchableOpacity style={styles.logBtn} onPress={() => showForm ? setShowForm(false) : openForm()}>
-                <Text style={styles.logBtnText}>{showForm ? 'Cancel' : '+ Log Meal'}</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+            {todayMeals.length === 0 && !showForm && (
+              <View style={styles.todayEmpty}>
+                <Text style={styles.todayEmptyIcon}>🍳</Text>
+                <Text style={styles.todayEmptyText}>No meals logged today yet</Text>
+              </View>
+            )}
+            {todayMeals.map(meal => (
+              <View key={meal.id} style={styles.todayCard}>
+                <View style={styles.todayCheck}>
+                  <Text style={styles.todayCheckText}>✓</Text>
+                </View>
+                <View style={styles.todayInfo}>
+                  <Text style={styles.todayMealName}>{meal.mealName}</Text>
+                  {meal.notes ? <Text style={styles.todayNotes}>{meal.notes}</Text> : null}
+                </View>
+                <TouchableOpacity style={styles.editBtn} onPress={() => openForm(meal)}>
+                  <Text style={styles.editBtnText}>Edit</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
 
           {/* Add / Edit form */}
           {showForm && (
@@ -234,7 +243,7 @@ export default function MealTrackerScreen() {
                   onPress={handleSave}
                   disabled={!mealName.trim()}
                 >
-                  <Text style={styles.saveBtnText}>{todayMeal ? 'Update' : 'Save Meal'}</Text>
+                  <Text style={styles.saveBtnText}>{editingId !== null ? 'Update' : 'Save Meal'}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -297,6 +306,11 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: '700', color: '#FFFFFF' },
   subtitle: { fontSize: 14, color: '#636366', marginTop: 4 },
 
+  // Today section
+  todaySection: { marginBottom: 16 },
+  todaySectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
+  todaySectionTitle: { fontSize: 17, fontWeight: '600', color: '#EBEBF5' },
+
   // Today card (completed)
   todayCard: {
     flexDirection: 'row',
@@ -304,7 +318,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(48,209,88,0.1)',
     borderRadius: 18,
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: 'rgba(48,209,88,0.3)',
     gap: 14,

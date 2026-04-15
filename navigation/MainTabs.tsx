@@ -18,6 +18,8 @@ import TimeBlocksScreen from '../screens/TimeBlocksScreen';
 import ExpenseTrackerScreen from '../screens/ExpenseTrackerScreen';
 import RecurringExpensesScreen from '../screens/RecurringExpensesScreen';
 import CreditScoreScreen from '../screens/CreditScoreScreen';
+import GemCollectorScreen from '../screens/GemCollectorScreen';
+import PowerSwordHallScreen from '../screens/PowerSwordHallScreen';
 
 const Tab = createBottomTabNavigator();
 const MoreStack = createNativeStackNavigator();
@@ -65,6 +67,12 @@ function MoreStackNavigator({ user, onSignOut }: Props) {
       </MoreStack.Screen>
       <MoreStack.Screen name="CreditScore">
         {() => <CreditScoreScreen />}
+      </MoreStack.Screen>
+      <MoreStack.Screen name="GemCollector">
+        {() => <GemCollectorScreen />}
+      </MoreStack.Screen>
+      <MoreStack.Screen name="PowerSwordHall">
+        {() => <PowerSwordHallScreen />}
       </MoreStack.Screen>
     </MoreStack.Navigator>
   );
