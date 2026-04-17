@@ -10,6 +10,11 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useTasks } from '../context/TasksContext';
 import { getLastNDays, getSessionHistory } from '../utils/pomodoroSessions';
 import { Task } from '../types';
+import { User } from '@supabase/supabase-js';
+
+interface Props {
+  user?: User | null;
+}
 
 const PRIORITY_COLOR: Record<string, string> = {
   high: '#FF453A', medium: '#FF9F0A', low: '#30D158',
@@ -105,15 +110,16 @@ const wbc = StyleSheet.create({
   dow: { fontSize: 10, color: '#48484A' },
 });
 
-export default function DashboardScreen() {
+export default function DashboardScreen({ user }: Props) {
+  const userEmail = user?.email;
   const { tasks } = useTasks();
   const [last7, setLast7] = useState<{ date: string; count: number }[]>([]);
   const [pomodoroHistory, setPomodoroHistory] = useState<Record<string, number>>({});
 
   useFocusEffect(useCallback(() => {
-    getLastNDays(7).then(setLast7);
-    getSessionHistory().then(setPomodoroHistory);
-  }, []));
+    getLastNDays(7, userEmail).then(setLast7);
+    getSessionHistory(userEmail).then(setPomodoroHistory);
+  }, [userEmail]));
 
   const today = todayStr();
   const now = new Date();

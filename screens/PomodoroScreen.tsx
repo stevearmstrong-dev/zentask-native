@@ -14,8 +14,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
 import { getTodaySessions, incrementSessions } from '../utils/pomodoroSessions';
+import { User } from '@supabase/supabase-js';
 
 type PomodoroMode = 'work' | 'shortBreak' | 'longBreak';
+
+interface Props {
+  user?: User | null;
+}
 
 const MODE_CONFIG: Record<PomodoroMode, { label: string; color: string; defaultMin: number }> = {
   work:       { label: 'Focus Time',   color: '#1877F2', defaultMin: 25 },
@@ -34,7 +39,8 @@ function formatTime(secs: number): string {
   return `${m}:${s}`;
 }
 
-export default function PomodoroScreen() {
+export default function PomodoroScreen({ user }: Props) {
+  const userEmail = user?.email;
   const [mode, setMode] = useState<PomodoroMode>('work');
   const [workMin, setWorkMin] = useState(25);
   const [shortMin, setShortMin] = useState(5);
@@ -49,8 +55,8 @@ export default function PomodoroScreen() {
 
   // Load persisted session count; refresh whenever this tab gains focus
   useFocusEffect(useCallback(() => {
-    getTodaySessions().then(setSessions);
-  }, []));
+    getTodaySessions(userEmail).then(setSessions);
+  }, [userEmail]));
 
   const totalSeconds = useCallback(() => {
     if (mode === 'work') return workMin * 60;
@@ -85,14 +91,14 @@ export default function PomodoroScreen() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     if (mode === 'work') {
-      incrementSessions().then(next => {
+      incrementSessions(userEmail).then(next => {
         setSessions(next);
         switchMode(next % 4 === 0 ? 'longBreak' : 'shortBreak');
       });
     } else {
       switchMode('work');
     }
-  }, [mode, switchMode]);
+  }, [mode, switchMode, userEmail]);
 
   useEffect(() => {
     if (isActive && timeLeft > 0) {

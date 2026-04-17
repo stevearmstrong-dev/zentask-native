@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { User } from '@supabase/supabase-js';
 import {
   View,
   Text,
@@ -10,14 +11,20 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PowerSwordUnlock from '../components/PowerSwordUnlock';
-import { SWORD_RECORDS_KEY, SwordRecord } from './PowerSwordHallScreen';
+import { getSwordRecordsKey, SwordRecord } from './PowerSwordHallScreen';
 
 // Keys used by the respective tracker screens (must match each screen's constants)
-const WATER_KEY    = 'zentask:water_logs';
-const NOFAP_KEY    = 'zentask:nofap_start';
-const MEALS_KEY    = 'zentask:meal_logs';
-const EXPENSES_KEY = 'zentask:expenses';
-const SLEEP_KEY    = 'zentask:sleep_logs';
+function getKeys(userEmail: string) {
+  const ns = userEmail || 'guest';
+  return {
+    WATER_KEY:        `zentask:water_logs:${ns}`,
+    NOFAP_KEY:        `zentask:nofap_start:${ns}`,
+    MEALS_KEY:        `zentask:meal_logs:${ns}`,
+    EXPENSES_KEY:     `zentask:expenses:${ns}`,
+    SLEEP_KEY:        `zentask:sleep_logs:${ns}`,
+    SWORD_UNLOCK_KEY: `zentask:sword_unlocked_today:${ns}`,
+  };
+}
 
 function todayStr() { return new Date().toISOString().split('T')[0]; }
 
@@ -82,9 +89,9 @@ const GEMS: Gem[] = [
 ];
 
 // Water: ≥1500ml logged today (75% of default 2000ml goal)
-async function checkWater(): Promise<boolean> {
+async function checkWater(key: string): Promise<boolean> {
   try {
-    const raw = await AsyncStorage.getItem(WATER_KEY);
+    const raw = await AsyncStorage.getItem(key);
     if (!raw) return false;
     const log: { timestamp: string; amount: number }[] = JSON.parse(raw);
     const today = todayStr();
@@ -96,17 +103,17 @@ async function checkWater(): Promise<boolean> {
 }
 
 // Discipline: NoFap streak is active (startDate exists)
-async function checkDiscipline(): Promise<boolean> {
+async function checkDiscipline(key: string): Promise<boolean> {
   try {
-    const raw = await AsyncStorage.getItem(NOFAP_KEY);
+    const raw = await AsyncStorage.getItem(key);
     return !!raw;
   } catch { return false; }
 }
 
 // Nourishment: ≥1 meal logged today
-async function checkNourishment(): Promise<boolean> {
+async function checkNourishment(key: string): Promise<boolean> {
   try {
-    const raw = await AsyncStorage.getItem(MEALS_KEY);
+    const raw = await AsyncStorage.getItem(key);
     if (!raw) return false;
     const meals: { date: string }[] = JSON.parse(raw);
     return meals.some(m => m.date === todayStr());
@@ -114,9 +121,9 @@ async function checkNourishment(): Promise<boolean> {
 }
 
 // Wealth: ≥1 expense logged today
-async function checkWealth(): Promise<boolean> {
+async function checkWealth(key: string): Promise<boolean> {
   try {
-    const raw = await AsyncStorage.getItem(EXPENSES_KEY);
+    const raw = await AsyncStorage.getItem(key);
     if (!raw) return false;
     const expenses: { date: string }[] = JSON.parse(raw);
     return expenses.some(e => e.date === todayStr());
@@ -124,18 +131,20 @@ async function checkWealth(): Promise<boolean> {
 }
 
 // Rest: any sleep entry logged today
-async function checkRest(): Promise<boolean> {
+async function checkRest(key: string): Promise<boolean> {
   try {
-    const raw = await AsyncStorage.getItem(SLEEP_KEY);
+    const raw = await AsyncStorage.getItem(key);
     if (!raw) return false;
     const log: { date: string }[] = JSON.parse(raw);
     return log.some(e => e.date === todayStr());
   } catch { return false; }
 }
 
-const SWORD_UNLOCK_KEY = 'zentask:sword_unlocked_today';
+interface Props { user?: User | null; }
 
-export default function GemCollectorScreen() {
+export default function GemCollectorScreen({ user }: Props) {
+  const userEmail = user?.email || '';
+  const { WATER_KEY, NOFAP_KEY, MEALS_KEY, EXPENSES_KEY, SLEEP_KEY, SWORD_UNLOCK_KEY } = useMemo(() => getKeys(userEmail), [userEmail]);
   const [gemStatus, setGemStatus] = useState<GemStatus>({
     water: false, discipline: false, nourishment: false, wealth: false, rest: false,
   });
@@ -151,7 +160,7 @@ export default function GemCollectorScreen() {
 
   const checkAllGems = useCallback(async () => {
     const [water, discipline, nourishment, wealth, rest] = await Promise.all([
-      checkWater(), checkDiscipline(), checkNourishment(), checkWealth(), checkRest(),
+      checkWater(WATER_KEY), checkDiscipline(NOFAP_KEY), checkNourishment(MEALS_KEY), checkWealth(EXPENSES_KEY), checkRest(SLEEP_KEY),
     ]);
     const next: GemStatus = { water, discipline, nourishment, wealth, rest };
 
@@ -181,7 +190,7 @@ export default function GemCollectorScreen() {
         setSwordUnlockedToday(true);
       }
     }
-  }, [scales]);
+  }, [scales, WATER_KEY, NOFAP_KEY, MEALS_KEY, EXPENSES_KEY, SLEEP_KEY, SWORD_UNLOCK_KEY]);
 
   // Check on mount and every 30 seconds (trackers may be updated while on this screen)
   useEffect(() => {
@@ -196,14 +205,15 @@ export default function GemCollectorScreen() {
     // Mark sword as unlocked today
     await AsyncStorage.setItem(SWORD_UNLOCK_KEY, todayStr());
     // Save sword record
-    const raw = await AsyncStorage.getItem(SWORD_RECORDS_KEY);
+    const swordRecordsKey = getSwordRecordsKey(userEmail);
+    const raw = await AsyncStorage.getItem(swordRecordsKey);
     const records: SwordRecord[] = raw ? JSON.parse(raw) : [];
     const today = todayStr();
     if (!records.some(r => r.date === today)) {
       records.push({ date: today, timestamp: new Date().toISOString() });
-      await AsyncStorage.setItem(SWORD_RECORDS_KEY, JSON.stringify(records));
+      await AsyncStorage.setItem(swordRecordsKey, JSON.stringify(records));
     }
-  }, []);
+  }, [SWORD_UNLOCK_KEY, userEmail]);
 
   const collectedCount = Object.values(gemStatus).filter(Boolean).length;
   const allCollected = collectedCount === 5;

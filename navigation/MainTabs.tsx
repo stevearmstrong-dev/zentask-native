@@ -47,19 +47,19 @@ function MoreStackNavigator({ user, onSignOut }: Props) {
         {() => <EisenhowerScreen user={user} />}
       </MoreStack.Screen>
       <MoreStack.Screen name="WaterTracker">
-        {() => <WaterTrackerScreen />}
+        {() => <WaterTrackerScreen user={user} />}
       </MoreStack.Screen>
       <MoreStack.Screen name="MealTracker">
-        {() => <MealTrackerScreen />}
+        {() => <MealTrackerScreen user={user} />}
       </MoreStack.Screen>
       <MoreStack.Screen name="SleepTracker">
-        {() => <SleepTrackerScreen />}
+        {() => <SleepTrackerScreen user={user} />}
       </MoreStack.Screen>
       <MoreStack.Screen name="WorkoutTracker">
-        {() => <WorkoutTrackerScreen />}
+        {() => <WorkoutTrackerScreen user={user} />}
       </MoreStack.Screen>
       <MoreStack.Screen name="NoFapTracker">
-        {() => <NoFapTrackerScreen />}
+        {() => <NoFapTrackerScreen user={user} />}
       </MoreStack.Screen>
       <MoreStack.Screen name="TimeBlocks">
         {() => <TimeBlocksScreen />}
@@ -68,19 +68,19 @@ function MoreStackNavigator({ user, onSignOut }: Props) {
         {() => <ExpenseTrackerScreen user={user} />}
       </MoreStack.Screen>
       <MoreStack.Screen name="RecurringExpenses">
-        {() => <RecurringExpensesScreen />}
+        {() => <RecurringExpensesScreen user={user} />}
       </MoreStack.Screen>
       <MoreStack.Screen name="CreditScore">
-        {() => <CreditScoreScreen />}
+        {() => <CreditScoreScreen user={user} />}
       </MoreStack.Screen>
       <MoreStack.Screen name="GemCollector">
-        {() => <GemCollectorScreen />}
+        {() => <GemCollectorScreen user={user} />}
       </MoreStack.Screen>
       <MoreStack.Screen name="PowerSwordHall">
-        {() => <PowerSwordHallScreen />}
+        {() => <PowerSwordHallScreen user={user} />}
       </MoreStack.Screen>
       <MoreStack.Screen name="Dashboard">
-        {() => <DashboardScreen />}
+        {() => <DashboardScreen user={user} />}
       </MoreStack.Screen>
     </MoreStack.Navigator>
   );
@@ -112,7 +112,7 @@ export default function MainTabs({ user, onSignOut }: Props) {
         name="Water"
         options={{ tabBarIcon: ({ color, size }) => <Ionicons name="water-outline" size={size} color={color} /> }}
       >
-        {() => <WaterTrackerScreen />}
+        {() => <WaterTrackerScreen user={user} />}
       </Tab.Screen>
 
       <Tab.Screen
@@ -133,7 +133,7 @@ export default function MainTabs({ user, onSignOut }: Props) {
         name="Pomodoro"
         options={{ tabBarIcon: ({ color, size }) => <Ionicons name="timer-outline" size={size} color={color} /> }}
       >
-        {() => <PomodoroScreen />}
+        {() => <PomodoroScreen user={user} />}
       </Tab.Screen>
 
       <Tab.Screen

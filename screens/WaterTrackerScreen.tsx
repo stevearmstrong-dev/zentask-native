@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { User } from '@supabase/supabase-js';
 import {
   View,
   Text,
@@ -15,8 +16,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const WATER_LOGS_KEY = 'zentask:water_logs';
-const WATER_GOAL_KEY = 'zentask:water_goal';
+function getKeys(userEmail: string) {
+  const ns = userEmail || 'guest';
+  return {
+    WATER_LOGS_KEY: `zentask:water_logs:${ns}`,
+    WATER_GOAL_KEY: `zentask:water_goal:${ns}`,
+  };
+}
+
 const DEFAULT_GOAL = 2000;
 
 interface WaterLog {
@@ -169,7 +176,12 @@ function getMotivationalMessage(percentage: number, isOverflowing: boolean): str
   return '💧 Let\'s start hydrating!';
 }
 
-export default function WaterTrackerScreen() {
+interface Props { user?: User | null; }
+
+export default function WaterTrackerScreen({ user }: Props) {
+  const userEmail = user?.email || '';
+  const { WATER_LOGS_KEY, WATER_GOAL_KEY } = useMemo(() => getKeys(userEmail), [userEmail]);
+
   const [logs, setLogs] = useState<WaterLog[]>([]);
   const [dailyGoal, setDailyGoal] = useState(DEFAULT_GOAL);
   const [customAmount, setCustomAmount] = useState('');
@@ -183,6 +195,9 @@ export default function WaterTrackerScreen() {
 
   // Load from storage
   useEffect(() => {
+    setLoaded(false);
+    setLogs([]);
+    setDailyGoal(DEFAULT_GOAL);
     (async () => {
       try {
         const [rawLogs, rawGoal] = await Promise.all([
@@ -194,7 +209,7 @@ export default function WaterTrackerScreen() {
       } catch (e) { console.error(e); }
       finally { setLoaded(true); }
     })();
-  }, []);
+  }, [WATER_LOGS_KEY, WATER_GOAL_KEY]);
 
   // Persist logs
   useEffect(() => {

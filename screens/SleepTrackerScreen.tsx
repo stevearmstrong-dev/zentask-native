@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { User } from '@supabase/supabase-js';
 import {
   View,
   Text,
@@ -13,8 +14,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const SLEEP_LOGS_KEY = 'zentask:sleep_logs';
-const SLEEP_GOAL_KEY = 'zentask:sleep_goal';
+function getKeys(userEmail: string) {
+  const ns = userEmail || 'guest';
+  return {
+    SLEEP_LOGS_KEY: `zentask:sleep_logs:${ns}`,
+    SLEEP_GOAL_KEY: `zentask:sleep_goal:${ns}`,
+  };
+}
+
 const DEFAULT_GOAL = 8; // hours
 
 interface SleepLog {
@@ -86,7 +93,12 @@ function Stars({ rating, onPress }: { rating: number; onPress?: (r: number) => v
   );
 }
 
-export default function SleepTrackerScreen() {
+interface Props { user?: User | null; }
+
+export default function SleepTrackerScreen({ user }: Props) {
+  const userEmail = user?.email || '';
+  const { SLEEP_LOGS_KEY, SLEEP_GOAL_KEY } = useMemo(() => getKeys(userEmail), [userEmail]);
+
   const [logs, setLogs] = useState<SleepLog[]>([]);
   const [sleepGoal, setSleepGoal] = useState(DEFAULT_GOAL);
   const [loaded, setLoaded] = useState(false);
@@ -101,6 +113,9 @@ export default function SleepTrackerScreen() {
 
   // Load
   useEffect(() => {
+    setLoaded(false);
+    setLogs([]);
+    setSleepGoal(DEFAULT_GOAL);
     Promise.all([
       AsyncStorage.getItem(SLEEP_LOGS_KEY),
       AsyncStorage.getItem(SLEEP_GOAL_KEY),
@@ -109,7 +124,7 @@ export default function SleepTrackerScreen() {
       if (rawGoal) setSleepGoal(parseFloat(rawGoal));
       setLoaded(true);
     }).catch(console.error);
-  }, []);
+  }, [SLEEP_LOGS_KEY, SLEEP_GOAL_KEY]);
 
   // Persist
   useEffect(() => {

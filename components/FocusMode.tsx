@@ -34,9 +34,10 @@ interface Props {
   onClose: () => void;
   onComplete: (id: number) => void;
   onUpdateTime: (id: number, data: Partial<Task>) => void;
+  userEmail?: string;
 }
 
-export default function FocusMode({ visible, task, onClose, onComplete, onUpdateTime }: Props) {
+export default function FocusMode({ visible, task, onClose, onComplete, onUpdateTime, userEmail }: Props) {
   const [mode, setMode] = useState<'timer' | 'pomodoro'>('timer');
 
   // Time tracking
@@ -149,7 +150,7 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
           const next = completedWork ? 'break' : 'work';
           pomodoroModeRef.current = next;
           setPomodoroMode(next);
-          if (completedWork) incrementSessions();
+          if (completedWork) incrementSessions(userEmail);
           return next === 'work' ? WORK_SECS : BREAK_SECS;
         }
         // Only add to timeSpent during work sessions

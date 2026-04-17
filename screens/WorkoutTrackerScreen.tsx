@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { User } from '@supabase/supabase-js';
 import {
   View,
   Text,
@@ -12,8 +13,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const WEEK_KEY = 'zentask:workout_week';
-const HISTORY_KEY = 'zentask:workout_history';
+function getKeys(userEmail: string) {
+  const ns = userEmail || 'guest';
+  return {
+    WEEK_KEY: `zentask:workout_week:${ns}`,
+    HISTORY_KEY: `zentask:workout_history:${ns}`,
+  };
+}
 
 interface Exercise {
   id: string;
@@ -92,7 +98,12 @@ function createWeeklyPlan(week: number): WorkoutDay[] {
   ];
 }
 
-export default function WorkoutTrackerScreen() {
+interface Props { user?: User | null; }
+
+export default function WorkoutTrackerScreen({ user }: Props) {
+  const userEmail = user?.email || '';
+  const { WEEK_KEY, HISTORY_KEY } = useMemo(() => getKeys(userEmail), [userEmail]);
+
   const [week, setWeek] = useState(1);
   const [plan, setPlan] = useState<WorkoutDay[]>([]);
   const [history, setHistory] = useState<WorkoutLog[]>([]);
@@ -102,6 +113,10 @@ export default function WorkoutTrackerScreen() {
 
   // Load
   useEffect(() => {
+    setLoaded(false);
+    setWeek(1);
+    setHistory([]);
+    setPlan([]);
     Promise.all([
       AsyncStorage.getItem(WEEK_KEY),
       AsyncStorage.getItem(HISTORY_KEY),
@@ -112,7 +127,7 @@ export default function WorkoutTrackerScreen() {
       setPlan(createWeeklyPlan(w));
       setLoaded(true);
     }).catch(console.error);
-  }, []);
+  }, [WEEK_KEY, HISTORY_KEY]);
 
   // Persist week + history
   useEffect(() => {

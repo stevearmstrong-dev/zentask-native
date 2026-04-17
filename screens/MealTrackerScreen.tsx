@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,8 +12,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { User } from '@supabase/supabase-js';
 
-const MEALS_KEY = 'zentask:meal_logs';
+function getKeys(userEmail: string) {
+  const ns = userEmail || 'guest';
+  return { MEALS_KEY: `zentask:meal_logs:${ns}` };
+}
 
 interface MealEntry {
   id: number;
@@ -98,7 +102,12 @@ function getMotivationalMessage(streak: number): string {
   return '🎖️ Ultimate home chef! Incredible!';
 }
 
-export default function MealTrackerScreen() {
+interface Props { user?: User | null; }
+
+export default function MealTrackerScreen({ user }: Props) {
+  const userEmail = user?.email || '';
+  const { MEALS_KEY } = useMemo(() => getKeys(userEmail), [userEmail]);
+
   const [meals, setMeals] = useState<MealEntry[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -107,11 +116,13 @@ export default function MealTrackerScreen() {
 
   // Load from storage
   useEffect(() => {
+    setLoaded(false);
+    setMeals([]);
     AsyncStorage.getItem(MEALS_KEY).then(raw => {
       if (raw) setMeals(JSON.parse(raw));
       setLoaded(true);
     }).catch(console.error);
-  }, []);
+  }, [MEALS_KEY]);
 
   // Persist
   useEffect(() => {

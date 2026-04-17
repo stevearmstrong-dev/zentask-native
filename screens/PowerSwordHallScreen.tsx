@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { User } from '@supabase/supabase-js';
 import {
   View,
   Text,
@@ -9,7 +10,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const SWORD_RECORDS_KEY = 'zentask:power_sword_records';
+export function getSwordRecordsKey(userEmail: string): string {
+  const ns = userEmail || 'guest';
+  return `zentask:power_sword_records:${ns}`;
+}
 
 export interface SwordRecord {
   date: string;      // YYYY-MM-DD
@@ -89,9 +93,12 @@ function pad2(n: number) { return String(n).padStart(2, '0'); }
 
 interface Props {
   onBack?: () => void;
+  user?: User | null;
 }
 
-export default function PowerSwordHallScreen({ onBack }: Props) {
+export default function PowerSwordHallScreen({ onBack, user }: Props) {
+  const userEmail = user?.email || '';
+  const SWORD_RECORDS_KEY = useMemo(() => getSwordRecordsKey(userEmail), [userEmail]);
   const [records, setRecords] = useState<SwordRecord[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(() => {
@@ -100,11 +107,13 @@ export default function PowerSwordHallScreen({ onBack }: Props) {
   });
 
   useEffect(() => {
+    setLoaded(false);
+    setRecords([]);
     AsyncStorage.getItem(SWORD_RECORDS_KEY).then(raw => {
       if (raw) setRecords(JSON.parse(raw));
       setLoaded(true);
     }).catch(console.error);
-  }, []);
+  }, [SWORD_RECORDS_KEY]);
 
   useEffect(() => {
     if (!loaded) return;

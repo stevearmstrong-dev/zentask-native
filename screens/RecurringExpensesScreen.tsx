@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { User } from '@supabase/supabase-js';
 import {
   View,
   Text,
@@ -12,7 +13,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const REMINDERS_KEY = 'zentask:recurring_reminders';
+function getKeys(userEmail: string) {
+  const ns = userEmail || 'guest';
+  return { REMINDERS_KEY: `zentask:recurring_reminders:${ns}` };
+}
 
 type DueDay = number | 'last' | 'weekly-thursday' | 'weekly-friday' | 'weekly-saturday';
 
@@ -120,6 +124,10 @@ const URGENCY_META: Record<Urgency, { label: string; color: string; bg: string }
 
 const URGENCY_ORDER: Urgency[] = ['overdue', 'today', 'tomorrow', 'this-week', 'upcoming'];
 
+interface Props {
+  user?: User | null;
+}
+
 const CATEGORIES = Object.keys(CATEGORY_META) as Array<keyof typeof CATEGORY_META>;
 const DUE_DAY_OPTIONS: { label: string; value: DueDay }[] = [
   ...Array.from({ length: 28 }, (_, i) => ({ label: `${i + 1}${['st','nd','rd'][i] ?? 'th'}`, value: i + 1 as DueDay })),
@@ -129,7 +137,10 @@ const DUE_DAY_OPTIONS: { label: string; value: DueDay }[] = [
   { label: 'Weekly Sat', value: 'weekly-saturday' },
 ];
 
-export default function RecurringExpensesScreen() {
+export default function RecurringExpensesScreen({ user }: Props) {
+  const userEmail = user?.email || '';
+  const { REMINDERS_KEY } = useMemo(() => getKeys(userEmail), [userEmail]);
+
   const [reminders, setReminders] = useState<Reminder[]>(DEFAULT_REMINDERS);
   const [loaded, setLoaded] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
@@ -143,11 +154,14 @@ export default function RecurringExpensesScreen() {
 
   // Load
   useEffect(() => {
+    setLoaded(false);
+    setReminders([]);
     AsyncStorage.getItem(REMINDERS_KEY).then(raw => {
       if (raw) setReminders(JSON.parse(raw));
+      else setReminders(DEFAULT_REMINDERS);
       setLoaded(true);
     }).catch(console.error);
-  }, []);
+  }, [REMINDERS_KEY]);
 
   // Persist
   useEffect(() => {

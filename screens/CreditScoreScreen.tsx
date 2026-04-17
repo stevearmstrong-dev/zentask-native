@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { User } from '@supabase/supabase-js';
 import {
   View,
   Text,
@@ -12,10 +13,15 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const CARDS_KEY  = 'zentask:credit_cards';
-const SCORE_KEY  = 'zentask:credit_score';
-const BUDGET_KEY = 'zentask:debt_budget';
-const PLANS_KEY  = 'zentask:payment_plans';
+function getKeys(userEmail: string) {
+  const ns = userEmail || 'guest';
+  return {
+    CARDS_KEY:  `zentask:credit_cards:${ns}`,
+    SCORE_KEY:  `zentask:credit_score:${ns}`,
+    BUDGET_KEY: `zentask:debt_budget:${ns}`,
+    PLANS_KEY:  `zentask:payment_plans:${ns}`,
+  };
+}
 
 interface CreditCard {
   id: string;
@@ -135,7 +141,12 @@ function generatePaymentPlans(cards: CreditCard[], currentScore: number, monthly
   return plans;
 }
 
-export default function CreditScoreScreen() {
+interface Props { user?: User | null; }
+
+export default function CreditScoreScreen({ user }: Props) {
+  const userEmail = user?.email || '';
+  const { CARDS_KEY, SCORE_KEY, BUDGET_KEY, PLANS_KEY } = useMemo(() => getKeys(userEmail), [userEmail]);
+
   const [cards, setCards] = useState<CreditCard[]>(DEFAULT_CARDS);
   const [currentScore, setCurrentScore] = useState(638);
   const [monthlyBudget, setMonthlyBudget] = useState(1000);
@@ -157,6 +168,10 @@ export default function CreditScoreScreen() {
 
   // Load
   useEffect(() => {
+    setLoaded(false);
+    setCards([]);
+    setCurrentScore(638);
+    setMonthlyBudget(1000);
     Promise.all([
       AsyncStorage.getItem(CARDS_KEY),
       AsyncStorage.getItem(SCORE_KEY),
@@ -173,7 +188,7 @@ export default function CreditScoreScreen() {
       if (rawPlans)  setPlans(JSON.parse(rawPlans));
       setLoaded(true);
     }).catch(console.error);
-  }, []);
+  }, [CARDS_KEY, SCORE_KEY, BUDGET_KEY, PLANS_KEY]);
 
   // Persist
   useEffect(() => { if (loaded) AsyncStorage.setItem(CARDS_KEY,  JSON.stringify(cards)).catch(console.error); }, [cards, loaded]);

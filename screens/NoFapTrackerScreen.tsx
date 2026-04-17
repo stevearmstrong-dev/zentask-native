@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { User } from '@supabase/supabase-js';
 import {
   View,
   Text,
@@ -10,8 +11,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const START_DATE_KEY = 'zentask:nofap_start';
-const STREAKS_KEY = 'zentask:nofap_streaks';
+function getKeys(userEmail: string) {
+  const ns = userEmail || 'guest';
+  return {
+    START_DATE_KEY: `zentask:nofap_start:${ns}`,
+    STREAKS_KEY: `zentask:nofap_streaks:${ns}`,
+  };
+}
 
 interface StreakLog {
   id: number;
@@ -58,7 +64,12 @@ function getMilestoneProgress(days: number) {
   return { next, progress: Math.min(progress, 100), remaining: next - days };
 }
 
-export default function NoFapTrackerScreen() {
+interface Props { user?: User | null; }
+
+export default function NoFapTrackerScreen({ user }: Props) {
+  const userEmail = user?.email || '';
+  const { START_DATE_KEY, STREAKS_KEY } = useMemo(() => getKeys(userEmail), [userEmail]);
+
   const [startDate, setStartDate] = useState<string | null>(null);
   const [streaks, setStreaks] = useState<StreakLog[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -72,6 +83,9 @@ export default function NoFapTrackerScreen() {
 
   // Load
   useEffect(() => {
+    setLoaded(false);
+    setStartDate(null);
+    setStreaks([]);
     Promise.all([
       AsyncStorage.getItem(START_DATE_KEY),
       AsyncStorage.getItem(STREAKS_KEY),
@@ -80,19 +94,19 @@ export default function NoFapTrackerScreen() {
       if (rawStreaks) setStreaks(JSON.parse(rawStreaks));
       setLoaded(true);
     }).catch(console.error);
-  }, []);
+  }, [START_DATE_KEY, STREAKS_KEY]);
 
   // Persist
   useEffect(() => {
     if (!loaded) return;
     if (startDate) AsyncStorage.setItem(START_DATE_KEY, startDate).catch(console.error);
     else AsyncStorage.removeItem(START_DATE_KEY).catch(console.error);
-  }, [startDate, loaded]);
+  }, [startDate, loaded, START_DATE_KEY]);
 
   useEffect(() => {
     if (!loaded) return;
     AsyncStorage.setItem(STREAKS_KEY, JSON.stringify(streaks)).catch(console.error);
-  }, [streaks, loaded]);
+  }, [streaks, loaded, STREAKS_KEY]);
 
   const currentStreak = startDate ? calcDays(startDate) : 0;
   const longestStreak = Math.max(0, currentStreak, ...streaks.map(s => s.duration));
