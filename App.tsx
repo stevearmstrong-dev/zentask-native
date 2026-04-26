@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Linking } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
@@ -33,7 +33,38 @@ export default function App() {
       setUser(session?.user ?? null);
     });
 
-    return () => subscription.unsubscribe();
+    // Handle deep links for email verification
+    const handleDeepLink = (event: { url: string }) => {
+      const url = event.url;
+      if (url.includes('auth/callback')) {
+        // Extract the token from the URL and let Supabase handle it
+        const params = new URL(url).searchParams;
+        const access_token = params.get('access_token');
+        const refresh_token = params.get('refresh_token');
+
+        if (access_token && refresh_token) {
+          supabase.auth.setSession({
+            access_token,
+            refresh_token,
+          });
+        }
+      }
+    };
+
+    // Listen for deep link events
+    const subscription2 = Linking.addEventListener('url', handleDeepLink);
+
+    // Check if app was opened via deep link
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeepLink({ url });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      subscription2.remove();
+    };
   }, []);
 
   const handleSignOut = async () => {

@@ -44,7 +44,11 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { name: name || email.split('@')[0] } },
+        options: {
+          data: { name: name || email.split('@')[0] },
+          // Use GitHub Pages hosted confirmation page for better UX
+          emailRedirectTo: 'https://stevearmstrong-dev.github.io/zentask-native/auth-success.html',
+        },
       });
       if (error) throw error;
       setSubmittedEmail(email);
