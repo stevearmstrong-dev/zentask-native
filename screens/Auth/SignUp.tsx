@@ -49,7 +49,6 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
       if (error) throw error;
       setSubmittedEmail(email);
       setVerified(true);
-      setTimeout(onSignUpSuccess, 3000);
     } catch (err: any) {
       setError(err.message || 'Failed to sign up. Please try again.');
     } finally {
