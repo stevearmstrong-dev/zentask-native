@@ -95,11 +95,14 @@ async function checkWater(key: string): Promise<boolean> {
     if (!raw) return false;
     const log: { timestamp: string; amount: number }[] = JSON.parse(raw);
     const today = todayStr();
-    const total = log
-      .filter(e => e.timestamp.startsWith(today))
-      .reduce((s, e) => s + e.amount, 0);
+    const todayLogs = log.filter(e => e.timestamp.startsWith(today));
+    const total = todayLogs.reduce((s, e) => s + e.amount, 0);
+    console.log('[GemCollector] Water check:', { today, todayLogs, total, threshold: 1500, passed: total >= 1500 });
     return total >= 1500;
-  } catch { return false; }
+  } catch (e) {
+    console.error('[GemCollector] Water check error:', e);
+    return false;
+  }
 }
 
 // Discipline: NoFap streak is active (startDate exists)
