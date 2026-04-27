@@ -36,25 +36,48 @@ export default function App() {
     // Handle deep links for OAuth and email verification
     const handleDeepLink = async (event: { url: string }) => {
       const url = event.url;
+      console.log('Deep link received:', url);
+
       if (url.includes('auth/callback')) {
-        // For OAuth, Supabase sends the full callback URL
-        // We need to extract the session from it
-        const urlObj = new URL(url);
+        try {
+          // For OAuth, Supabase sends the full callback URL
+          // We need to extract the session from it
+          const urlObj = new URL(url);
 
-        // Check if this is an OAuth callback (has code or access_token)
-        const code = urlObj.searchParams.get('code');
-        const access_token = urlObj.searchParams.get('access_token');
-        const refresh_token = urlObj.searchParams.get('refresh_token');
+          // Check if this is an OAuth callback (has code or access_token)
+          const code = urlObj.searchParams.get('code');
+          const access_token = urlObj.searchParams.get('access_token');
+          const refresh_token = urlObj.searchParams.get('refresh_token');
+          const error = urlObj.searchParams.get('error');
+          const error_description = urlObj.searchParams.get('error_description');
 
-        if (code) {
-          // OAuth callback with authorization code - let Supabase handle the exchange
-          await supabase.auth.exchangeCodeForSession(code);
-        } else if (access_token && refresh_token) {
-          // Direct token callback (email verification)
-          await supabase.auth.setSession({
-            access_token,
-            refresh_token,
-          });
+          if (error) {
+            console.error('OAuth error:', error, error_description);
+            return;
+          }
+
+          if (code) {
+            console.log('Exchanging code for session...');
+            // OAuth callback with authorization code - let Supabase handle the exchange
+            const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+            if (error) {
+              console.error('Exchange error:', error);
+            } else {
+              console.log('Session established:', data.session?.user?.email);
+            }
+          } else if (access_token && refresh_token) {
+            console.log('Setting session directly...');
+            // Direct token callback (email verification)
+            const { error } = await supabase.auth.setSession({
+              access_token,
+              refresh_token,
+            });
+            if (error) {
+              console.error('SetSession error:', error);
+            }
+          }
+        } catch (err) {
+          console.error('Deep link handling error:', err);
         }
       }
     };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -28,6 +28,21 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [verified, setVerified] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState('');
+
+  useEffect(() => {
+    // Listen for auth state changes to reset loading and trigger success
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setGoogleLoading(false);
+        setLoading(false);
+        onSignUpSuccess();
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [onSignUpSuccess]);
 
   const validate = (): boolean => {
     if (!email.trim()) { setError('Please enter your email'); return false; }
