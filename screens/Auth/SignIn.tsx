@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import Constants from 'expo-constants';
 import { supabase } from '../../services/supabase';
 import { User } from '@supabase/supabase-js';
@@ -32,8 +33,12 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleAvailable, setAppleAvailable] = useState(false);
 
   useEffect(() => {
+    // Check if Apple Authentication is available
+    AppleAuthentication.isAvailableAsync().then(setAppleAvailable);
+
     // Listen for auth state changes to reset loading and trigger success
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
@@ -73,6 +78,37 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    setError('');
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      if (credential.identityToken) {
+        const { data, error } = await supabase.auth.signInWithIdToken({
+          provider: 'apple',
+          token: credential.identityToken,
+        });
+
+        if (error) throw error;
+        if (data.user) onSignInSuccess(data.user);
+      } else {
+        throw new Error('No identity token returned');
+      }
+    } catch (err: any) {
+      if (err.code === 'ERR_CANCELED') {
+        // User canceled the sign-in flow
+        return;
+      }
+      console.error('Apple sign in error:', err);
+      setError(err.message || 'Failed to sign in with Apple. Please try again.');
     }
   };
 
@@ -198,6 +234,16 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
             )}
           </TouchableOpacity>
 
+          {appleAvailable && (
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+              cornerRadius={14}
+              style={styles.appleButton}
+              onPress={handleAppleSignIn}
+            />
+          )}
+
           <TouchableOpacity style={styles.guestButton} onPress={onGuestMode} disabled={loading || googleLoading}>
             <Text style={styles.guestButtonText}>Continue as Guest</Text>
           </TouchableOpacity>
@@ -278,6 +324,10 @@ const styles = StyleSheet.create({
     color: '#1F1F1F',
     fontSize: 17,
     fontWeight: '600',
+  },
+  appleButton: {
+    height: 50,
+    marginBottom: 12,
   },
   guestButton: {
     backgroundColor: 'rgba(255,255,255,0.08)',

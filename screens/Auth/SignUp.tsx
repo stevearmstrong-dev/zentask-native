@@ -11,6 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { supabase } from '../../services/supabase';
 import GoogleLogo from '../../components/GoogleLogo';
 
@@ -31,8 +32,12 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [verified, setVerified] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState('');
+  const [appleAvailable, setAppleAvailable] = useState(false);
 
   useEffect(() => {
+    // Check if Apple Authentication is available
+    AppleAuthentication.isAvailableAsync().then(setAppleAvailable);
+
     // Listen for auth state changes to reset loading and trigger success
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
@@ -77,6 +82,36 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
       setError(err.message || 'Failed to sign up. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAppleSignUp = async () => {
+    setError('');
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      if (credential.identityToken) {
+        const { data, error } = await supabase.auth.signInWithIdToken({
+          provider: 'apple',
+          token: credential.identityToken,
+        });
+
+        if (error) throw error;
+        // The onAuthStateChange listener will handle success
+      } else {
+        throw new Error('No identity token returned');
+      }
+    } catch (err: any) {
+      if (err.code === 'ERR_CANCELED') {
+        return;
+      }
+      console.error('Apple sign up error:', err);
+      setError(err.message || 'Failed to sign up with Apple. Please try again.');
     }
   };
 
@@ -234,6 +269,16 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
             )}
           </TouchableOpacity>
 
+          {appleAvailable && (
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+              cornerRadius={14}
+              style={styles.appleButton}
+              onPress={handleAppleSignUp}
+            />
+          )}
+
           <View style={styles.footer}>
             <Text style={styles.footerText}>Already have an account? </Text>
             <TouchableOpacity onPress={onSwitchToSignIn} disabled={loading}>
@@ -308,10 +353,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 24,
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.1)',
     gap: 12,
+  },
+  appleButton: {
+    height: 50,
+    marginBottom: 24,
   },
   googleButtonText: {
     color: '#1F1F1F',
