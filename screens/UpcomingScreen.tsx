@@ -201,6 +201,144 @@ const sm = StyleSheet.create({
   saveText: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
 });
 
+// ─── Edit Task Modal ─────────────────────────────────────────────────────────
+
+interface EditModalProps {
+  task: Task | null;
+  onSave: (taskId: number, updates: Partial<Task>) => void;
+  onClose: () => void;
+}
+
+function EditTaskModal({ task, onSave, onClose }: EditModalProps) {
+  const [text, setText] = useState('');
+  const [priority, setPriority] = useState<Priority>('medium');
+  const [category, setCategory] = useState('');
+
+  React.useEffect(() => {
+    if (task) {
+      setText(task.text);
+      setPriority(task.priority);
+      setCategory(task.category || '');
+    }
+  }, [task]);
+
+  if (!task) return null;
+
+  const handleSave = () => {
+    if (!text.trim()) return;
+    onSave(task.id as number, {
+      text: text.trim(),
+      priority,
+      category: category || undefined,
+    });
+    onClose();
+  };
+
+  const PRIORITIES: { label: string; value: Priority; color: string }[] = [
+    { label: 'High', value: 'high', color: '#FF453A' },
+    { label: 'Medium', value: 'medium', color: '#FF9F0A' },
+    { label: 'Low', value: 'low', color: '#30D158' },
+  ];
+
+  const CATEGORIES = ['Work', 'Personal', 'Health', 'Finance', 'Learning', 'Other'];
+
+  return (
+    <Modal visible transparent animationType="slide" onRequestClose={onClose}>
+      <View style={em.overlay}>
+        <View style={em.card}>
+          <View style={em.header}>
+            <Text style={em.title}>Edit Task</Text>
+            <TouchableOpacity onPress={onClose} style={em.closeBtn}>
+              <Text style={em.closeText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={em.label}>Task</Text>
+          <TextInput
+            style={em.input}
+            value={text}
+            onChangeText={setText}
+            placeholder="What needs to be done?"
+            placeholderTextColor="#636366"
+            autoFocus
+            multiline
+          />
+
+          <Text style={em.label}>Priority</Text>
+          <View style={em.priorityRow}>
+            {PRIORITIES.map(p => (
+              <TouchableOpacity
+                key={p.value}
+                onPress={() => setPriority(p.value)}
+                style={[em.priorityBtn, priority === p.value && { backgroundColor: p.color, borderColor: p.color }]}
+              >
+                <Text style={[em.priorityText, priority === p.value && em.priorityTextActive]}>{p.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <Text style={em.label}>Category (Optional)</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={em.categoryScroll}>
+            <View style={em.categoryRow}>
+              <TouchableOpacity
+                onPress={() => setCategory('')}
+                style={[em.categoryChip, !category && em.categoryChipActive]}
+              >
+                <Text style={[em.categoryText, !category && em.categoryTextActive]}>None</Text>
+              </TouchableOpacity>
+              {CATEGORIES.map(cat => (
+                <TouchableOpacity
+                  key={cat}
+                  onPress={() => setCategory(cat)}
+                  style={[em.categoryChip, category === cat && em.categoryChipActive]}
+                >
+                  <Text style={[em.categoryText, category === cat && em.categoryTextActive]}>{cat}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+
+          <View style={em.actions}>
+            <TouchableOpacity onPress={onClose} style={em.cancelBtn}>
+              <Text style={em.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleSave} style={[em.saveBtn, !text.trim() && em.saveBtnDisabled]} disabled={!text.trim()}>
+              <Text style={em.saveText}>Save Changes</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const em = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
+  card: { backgroundColor: '#1C1C1E', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  title: { fontSize: 20, fontWeight: '700', color: '#FFFFFF' },
+  closeBtn: { padding: 4 },
+  closeText: { fontSize: 20, color: '#636366' },
+  label: { fontSize: 12, fontWeight: '600', color: '#8E8E93', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8, marginTop: 16 },
+  input: { backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 12, padding: 14, fontSize: 16, color: '#FFFFFF', borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', minHeight: 80, textAlignVertical: 'top' },
+  priorityRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  priorityBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.06)' },
+  priorityText: { fontSize: 14, color: '#EBEBF5', fontWeight: '500' },
+  priorityTextActive: { color: '#FFFFFF', fontWeight: '700' },
+  categoryScroll: { maxHeight: 50 },
+  categoryRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  categoryChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.06)' },
+  categoryChipActive: { backgroundColor: '#1877F2', borderColor: '#1877F2' },
+  categoryText: { fontSize: 14, color: '#EBEBF5' },
+  categoryTextActive: { color: '#FFFFFF', fontWeight: '600' },
+  actions: { flexDirection: 'row', gap: 10, marginTop: 24 },
+  cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', alignItems: 'center' },
+  cancelText: { fontSize: 16, color: '#EBEBF5', fontWeight: '500' },
+  saveBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, backgroundColor: '#1877F2', alignItems: 'center' },
+  saveBtnDisabled: { backgroundColor: '#2C2C2E', opacity: 0.5 },
+  saveText: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
+});
+
 // ─── Task Row ────────────────────────────────────────────────────────────────
 
 interface TaskRowProps {
@@ -210,10 +348,11 @@ interface TaskRowProps {
   onSchedule: () => void;
   onUnschedule: () => void;
   onFocus: () => void;
+  onEdit: () => void;
   isScheduled: boolean;
 }
 
-function TaskRow({ task, onToggle, onDelete, onSchedule, onUnschedule, onFocus, isScheduled }: TaskRowProps) {
+function TaskRow({ task, onToggle, onDelete, onSchedule, onUnschedule, onFocus, onEdit, isScheduled }: TaskRowProps) {
   const priorityColor = PRIORITY_COLORS[task.priority] || '#636366';
 
   const timeLabel = useMemo(() => {
@@ -250,6 +389,9 @@ function TaskRow({ task, onToggle, onDelete, onSchedule, onUnschedule, onFocus, 
 
         {/* Actions */}
         <View style={tr.actions}>
+          <TouchableOpacity onPress={onEdit} style={tr.actionBtn}>
+            <Text style={tr.actionIcon}>✎</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={onFocus} style={tr.actionBtn}>
             <Text style={tr.actionIcon}>🎯</Text>
           </TouchableOpacity>
@@ -297,6 +439,7 @@ export default function UpcomingScreen() {
   const [newTaskText, setNewTaskText] = useState('');
   const [scheduleTarget, setScheduleTarget] = useState<Task | null>(null);
   const [focusTask, setFocusTask] = useState<Task | null>(null);
+  const [editTarget, setEditTarget] = useState<Task | null>(null);
   const dayScrollRef = useRef<ScrollView>(null);
 
   // Re-render when screen is focused
@@ -358,6 +501,10 @@ export default function UpcomingScreen() {
 
   const handleUnschedule = (taskId: number) => {
     editTask(taskId, { scheduledStart: undefined, scheduledDuration: undefined });
+  };
+
+  const handleEdit = (taskId: number, updates: Partial<Task>) => {
+    editTask(taskId, updates);
   };
 
   const totalCount = dayTasks.length;
@@ -435,6 +582,7 @@ export default function UpcomingScreen() {
               onSchedule={() => setScheduleTarget(task)}
               onUnschedule={() => handleUnschedule(task.id as number)}
               onFocus={() => setFocusTask(task)}
+              onEdit={() => setEditTarget(task)}
             />
           ))
         )}
@@ -468,6 +616,7 @@ export default function UpcomingScreen() {
               onSchedule={() => setScheduleTarget(task)}
               onUnschedule={() => handleUnschedule(task.id as number)}
               onFocus={() => setFocusTask(task)}
+              onEdit={() => setEditTarget(task)}
             />
           ))
         )}
@@ -500,6 +649,13 @@ export default function UpcomingScreen() {
         dayKey={selectedDay}
         onSave={handleSchedule}
         onClose={() => setScheduleTarget(null)}
+      />
+
+      {/* Edit modal */}
+      <EditTaskModal
+        task={editTarget}
+        onSave={handleEdit}
+        onClose={() => setEditTarget(null)}
       />
 
       {/* Focus mode */}

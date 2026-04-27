@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { supabase } from '../../services/supabase';
 
 interface Props {
@@ -24,8 +25,15 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [verified, setVerified] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState('');
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      iosClientId: '746695542469-uiivr684mi6athshaeac6grb3hj2l3u7.apps.googleusercontent.com',
+    });
+  }, []);
 
   const validate = (): boolean => {
     if (!email.trim()) { setError('Please enter your email'); return false; }
@@ -57,6 +65,38 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
       setError(err.message || 'Failed to sign up. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    setError('');
+    setGoogleLoading(true);
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+
+      if (userInfo.data?.idToken) {
+        const { data, error } = await supabase.auth.signInWithIdToken({
+          provider: 'google',
+          token: userInfo.data.idToken,
+        });
+
+        if (error) throw error;
+        // Google sign-in automatically creates an account if it doesn't exist
+        onSignUpSuccess();
+      } else {
+        throw new Error('No ID token returned from Google');
+      }
+    } catch (err: any) {
+      console.error('Google sign up error:', err);
+      if (err.code === '-5') {
+        // User cancelled
+        setError('');
+      } else {
+        setError(err.message || 'Failed to sign up with Google. Please try again.');
+      }
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -127,8 +167,25 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          <TouchableOpacity style={styles.primaryButton} onPress={handleSignUp} disabled={loading}>
+          <TouchableOpacity style={styles.primaryButton} onPress={handleSignUp} disabled={loading || googleLoading}>
             {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryButtonText}>Sign Up</Text>}
+          </TouchableOpacity>
+
+          <View style={styles.dividerContainer}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>OR</Text>
+            <View style={styles.divider} />
+          </View>
+
+          <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignUp} disabled={loading || googleLoading}>
+            {googleLoading ? (
+              <ActivityIndicator color="#1877F2" />
+            ) : (
+              <>
+                <Text style={styles.googleIcon}>G</Text>
+                <Text style={styles.googleButtonText}>Continue with Google</Text>
+              </>
+            )}
           </TouchableOpacity>
 
           <View style={styles.footer}>
@@ -178,10 +235,48 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
     marginTop: 4,
   },
   primaryButtonText: { color: '#fff', fontSize: 17, fontWeight: '600' },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  dividerText: {
+    color: '#636366',
+    fontSize: 13,
+    marginHorizontal: 12,
+    fontWeight: '500',
+  },
+  googleButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 16,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  googleIcon: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1877F2',
+    marginRight: 8,
+  },
+  googleButtonText: {
+    color: '#1F1F1F',
+    fontSize: 17,
+    fontWeight: '600',
+  },
   secondaryButton: {
     backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: 14,
