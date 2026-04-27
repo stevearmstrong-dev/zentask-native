@@ -86,6 +86,9 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
         options: {
           redirectTo: redirectUrl,
           skipBrowserRedirect: true,
+          queryParams: {
+            prompt: 'select_account',
+          },
         },
       });
 
@@ -104,21 +107,27 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
       console.log('WebBrowser result:', result);
 
       if (result.type === 'success' && result.url) {
-        // Extract the code from the callback URL
-        const urlObj = new URL(result.url);
-        const code = urlObj.searchParams.get('code');
+        // Parse the URL fragment to get the session tokens
+        const url = result.url.replace('#', '?'); // Convert fragment to query string
+        const urlObj = new URL(url);
+        const accessToken = urlObj.searchParams.get('access_token');
+        const refreshToken = urlObj.searchParams.get('refresh_token');
 
-        if (code) {
-          console.log('Exchanging code for session...');
-          const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
-          if (sessionError) {
-            console.error('Exchange error:', sessionError);
-            throw sessionError;
+        if (accessToken && refreshToken) {
+          console.log('Setting session from OAuth tokens...');
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (error) {
+            console.error('Session error:', error);
+            throw error;
           }
-          console.log('Session established:', sessionData.session?.user?.email);
+          console.log('Session established:', data.session?.user?.email);
           // The onAuthStateChange listener will handle the success callback
         } else {
-          throw new Error('No code in callback URL');
+          throw new Error('No tokens in callback URL');
         }
       } else if (result.type === 'cancel') {
         setGoogleLoading(false);
