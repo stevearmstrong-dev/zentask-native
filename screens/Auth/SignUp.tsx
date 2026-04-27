@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Linking,
 } from 'react-native';
 import { supabase } from '../../services/supabase';
 
@@ -69,16 +70,29 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
         provider: 'google',
         options: {
           redirectTo: 'zentask://auth/callback',
+          skipBrowserRedirect: true,
         },
       });
 
       if (error) throw error;
+
+      // Open the OAuth URL in browser
+      if (data?.url) {
+        const supported = await Linking.canOpenURL(data.url);
+        if (supported) {
+          await Linking.openURL(data.url);
+        } else {
+          throw new Error('Cannot open Google sign-in page');
+        }
+      } else {
+        throw new Error('No OAuth URL returned');
+      }
     } catch (err: any) {
       console.error('Google sign up error:', err);
       setError(err.message || 'Failed to sign up with Google. Please try again.');
-    } finally {
       setGoogleLoading(false);
     }
+    // Note: Don't set googleLoading to false here - it will be set when the user returns from OAuth
   };
 
   if (verified) {
