@@ -9,6 +9,7 @@
     "build:ios:testflight": "npx eas-cli build --platform ios --profile testflight --local",
     "ios": "npx expo run:ios",
     "ios:select": "npx expo run:ios --device",
+    "postinstall": "node scripts/patch-expo-constants-ios.mjs",
     "start": "expo start",
     "start:dev-client": "expo start --dev-client --tunnel",
     "start:tunnel": "expo start --tunnel",

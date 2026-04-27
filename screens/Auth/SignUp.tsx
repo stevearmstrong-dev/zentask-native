@@ -33,7 +33,7 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [verified, setVerified] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState('');
-  const [appleAvailable, setAppleAvailable] = useState(false);
+  const [appleAvailable, setAppleAvailable] = useState<boolean | null>(null);
 
   useEffect(() => {
     // Check if Apple Authentication is available
@@ -259,12 +259,18 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
 
           {appleAvailable && (
             <AppleAuthentication.AppleAuthenticationButton
-              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_UP}
               buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
               cornerRadius={14}
               style={styles.appleButton}
               onPress={handleAppleSignUp}
             />
+          )}
+
+          {Platform.OS === 'ios' && appleAvailable === false && (
+            <Text style={styles.appleUnavailableText}>
+              Sign in with Apple is unavailable on this simulator or build.
+            </Text>
           )}
 
           <View style={styles.footer}>
@@ -349,6 +355,13 @@ const styles = StyleSheet.create({
   appleButton: {
     height: 50,
     marginBottom: 24,
+  },
+  appleUnavailableText: {
+    color: '#8E8E93',
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 18,
   },
   googleButtonText: {
     color: '#1F1F1F',

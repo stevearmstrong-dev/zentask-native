@@ -32,7 +32,7 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [appleAvailable, setAppleAvailable] = useState(false);
+  const [appleAvailable, setAppleAvailable] = useState<boolean | null>(null);
 
   useEffect(() => {
     // Check if Apple Authentication is available
@@ -230,6 +230,12 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
             />
           )}
 
+          {Platform.OS === 'ios' && appleAvailable === false && (
+            <Text style={styles.appleUnavailableText}>
+              Sign in with Apple is unavailable on this simulator or build.
+            </Text>
+          )}
+
           <TouchableOpacity style={styles.guestButton} onPress={onGuestMode} disabled={loading || googleLoading}>
             <Text style={styles.guestButtonText}>Continue as Guest</Text>
           </TouchableOpacity>
@@ -314,6 +320,13 @@ const styles = StyleSheet.create({
   appleButton: {
     height: 50,
     marginBottom: 12,
+  },
+  appleUnavailableText: {
+    color: '#8E8E93',
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: 12,
+    lineHeight: 18,
   },
   guestButton: {
     backgroundColor: 'rgba(255,255,255,0.08)',
