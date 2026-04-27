@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { supabase } from '../../services/supabase';
+import GoogleLogo from '../../components/GoogleLogo';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -224,10 +225,10 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
 
           <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignUp} disabled={loading || googleLoading}>
             {googleLoading ? (
-              <ActivityIndicator color="#1877F2" />
+              <ActivityIndicator color="#666" />
             ) : (
               <>
-                <Text style={styles.googleIcon}>G</Text>
+                <GoogleLogo size={20} />
                 <Text style={styles.googleButtonText}>Continue with Google</Text>
               </>
             )}
@@ -309,13 +310,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  googleIcon: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1877F2',
-    marginRight: 8,
+    borderColor: 'rgba(0,0,0,0.1)',
+    gap: 12,
   },
   googleButtonText: {
     color: '#1F1F1F',

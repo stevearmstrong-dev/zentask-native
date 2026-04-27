@@ -15,6 +15,7 @@ import * as WebBrowser from 'expo-web-browser';
 import Constants from 'expo-constants';
 import { supabase } from '../../services/supabase';
 import { User } from '@supabase/supabase-js';
+import GoogleLogo from '../../components/GoogleLogo';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -188,10 +189,10 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
 
           <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignIn} disabled={loading || googleLoading}>
             {googleLoading ? (
-              <ActivityIndicator color="#1877F2" />
+              <ActivityIndicator color="#666" />
             ) : (
               <>
-                <Text style={styles.googleIcon}>G</Text>
+                <GoogleLogo size={20} />
                 <Text style={styles.googleButtonText}>Continue with Google</Text>
               </>
             )}
@@ -270,13 +271,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  googleIcon: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1877F2',
-    marginRight: 8,
+    borderColor: 'rgba(0,0,0,0.1)',
+    gap: 12,
   },
   googleButtonText: {
     color: '#1F1F1F',
