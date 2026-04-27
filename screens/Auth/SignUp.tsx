@@ -36,7 +36,10 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
 
   useEffect(() => {
     // Check if Apple Authentication is available
-    AppleAuthentication.isAvailableAsync().then(setAppleAvailable);
+    AppleAuthentication.isAvailableAsync().then(available => {
+      console.log('[SignUp] Apple Authentication available:', available);
+      setAppleAvailable(available);
+    });
 
     // Listen for auth state changes to reset loading and trigger success
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
