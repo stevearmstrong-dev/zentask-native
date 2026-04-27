@@ -9,12 +9,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Linking,
   Alert,
 } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 import Constants from 'expo-constants';
 import { supabase } from '../../services/supabase';
 import { User } from '@supabase/supabase-js';
+
+WebBrowser.maybeCompleteAuthSession();
 
 interface Props {
   onSignInSuccess: (user: User) => void;
@@ -77,11 +79,7 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
     setError('');
     setGoogleLoading(true);
     try {
-      // Use different redirect URL for Expo Go vs standalone build
-      const isExpoGo = Constants.appOwnership === 'expo';
-      const redirectUrl = isExpoGo
-        ? 'https://stevearmstrong-dev.github.io/zentask-native/auth-success.html'
-        : 'zentask://auth/callback';
+      const redirectUrl = 'zentask://auth/callback';
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -93,32 +91,45 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
 
       if (error) throw error;
 
-      // Open the OAuth URL in browser
-      if (data?.url) {
-        const supported = await Linking.canOpenURL(data.url);
-        if (supported) {
-          await Linking.openURL(data.url);
-
-          // For Expo Go, show instructions to manually copy the URL
-          if (isExpoGo) {
-            Alert.alert(
-              'Sign In with Google',
-              'After signing in, you\'ll be redirected to a success page. The app will automatically detect your sign-in.',
-              [{ text: 'OK' }]
-            );
-          }
-        } else {
-          throw new Error('Cannot open Google sign-in page');
-        }
-      } else {
+      if (!data?.url) {
         throw new Error('No OAuth URL returned');
+      }
+
+      // Use WebBrowser to open OAuth - this properly handles redirects
+      const result = await WebBrowser.openAuthSessionAsync(
+        data.url,
+        redirectUrl
+      );
+
+      console.log('WebBrowser result:', result);
+
+      if (result.type === 'success' && result.url) {
+        // Extract the code from the callback URL
+        const urlObj = new URL(result.url);
+        const code = urlObj.searchParams.get('code');
+
+        if (code) {
+          console.log('Exchanging code for session...');
+          const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
+          if (sessionError) {
+            console.error('Exchange error:', sessionError);
+            throw sessionError;
+          }
+          console.log('Session established:', sessionData.session?.user?.email);
+          // The onAuthStateChange listener will handle the success callback
+        } else {
+          throw new Error('No code in callback URL');
+        }
+      } else if (result.type === 'cancel') {
+        setGoogleLoading(false);
+      } else {
+        throw new Error('Authentication was not completed');
       }
     } catch (err: any) {
       console.error('Google sign in error:', err);
       setError(err.message || 'Failed to sign in with Google. Please try again.');
       setGoogleLoading(false);
     }
-    // Note: Don't set googleLoading to false here - it will be set when the user returns from OAuth
   };
 
   return (
