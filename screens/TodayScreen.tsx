@@ -9,10 +9,12 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { User } from '@supabase/supabase-js';
 import { Task } from '../types';
 import { useTasks } from '../context/TasksContext';
 import FocusMode from '../components/FocusMode';
+import AddTaskModal from '../components/AddTaskModal';
 
 interface Props {
   user: User | null;
@@ -33,9 +35,19 @@ const PRIORITY_COLOR: Record<string, string> = {
   high: '#FF453A', medium: '#FF9F0A', low: '#30D158',
 };
 
+interface NewTaskInput {
+  text: string;
+  priority: Task['priority'];
+  dueDate: string;
+  dueTime: string;
+  category: string;
+  reminderMinutes: number | null;
+}
+
 export default function TodayScreen({ user }: Props) {
-  const { tasks, loading, reload, toggleTask, editTask } = useTasks();
+  const { tasks, loading, reload, toggleTask, editTask, addTask } = useTasks();
   const [focusTask, setFocusTask] = useState<Task | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const userEmail = user?.email || '';
   const userName = user?.user_metadata?.name || (userEmail ? userEmail.split('@')[0] : 'Guest');
@@ -49,6 +61,25 @@ export default function TodayScreen({ user }: Props) {
   const completedToday = tasks.filter(t => t.completed && t.dueDate === todayStr).length;
   const totalToday = todayTasks.length + completedToday;
   const completionRate = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
+
+  const handleAdd = async (newTask: NewTaskInput) => {
+    const task: Task = {
+      id: Date.now(),
+      text: newTask.text,
+      completed: false,
+      priority: newTask.priority,
+      dueDate: newTask.dueDate || todayStr,
+      dueTime: newTask.dueTime || undefined,
+      category: newTask.category || undefined,
+      reminderMinutes: newTask.reminderMinutes ?? undefined,
+      timeSpent: 0,
+      isTracking: false,
+      pomodoroActive: false,
+      sortOrder: 0,
+      status: 'todo',
+    };
+    await addTask(task);
+  };
 
   const renderTask = ({ item }: { item: Task }) => (
     <TouchableOpacity
@@ -95,8 +126,19 @@ export default function TodayScreen({ user }: Props) {
         onUpdateTime={(id, data) => editTask(id, data)}
       />
       <View style={styles.header}>
-        <Text style={styles.greeting}>{greeting()}, {userName} 👋</Text>
-        <Text style={styles.date}>{formatDate()}</Text>
+        <View style={styles.headerCopy}>
+          <Text style={styles.greeting}>{greeting()}, {userName} 👋</Text>
+          <Text style={styles.date}>{formatDate()}</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => setShowAddModal(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Add task for today"
+          activeOpacity={0.8}
+        >
+          <Ionicons name="add" size={22} color="#FFFFFF" />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.statsRow}>
@@ -132,6 +174,12 @@ export default function TodayScreen({ user }: Props) {
         }
         contentContainerStyle={styles.list}
       />
+
+      <AddTaskModal
+        visible={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={handleAdd}
+      />
     </SafeAreaView>
   );
 }
@@ -139,9 +187,33 @@ export default function TodayScreen({ user }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0A0A0F' },
   loader: { flex: 1, backgroundColor: '#0A0A0F', justifyContent: 'center', alignItems: 'center' },
-  header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 16 },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 16,
+    gap: 16,
+  },
+  headerCopy: { flex: 1 },
   greeting: { fontSize: 22, fontWeight: '700', color: '#FFFFFF' },
   date: { fontSize: 14, color: '#636366', marginTop: 2 },
+  addButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1877F2',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    shadowColor: '#1877F2',
+    shadowOpacity: 0.28,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+  },
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginBottom: 8 },
   statCard: {
     flex: 1, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, alignItems: 'center',
