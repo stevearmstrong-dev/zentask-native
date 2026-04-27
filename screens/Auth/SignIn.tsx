@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,6 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { supabase } from '../../services/supabase';
 import { User } from '@supabase/supabase-js';
 
@@ -27,12 +26,6 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-
-  useEffect(() => {
-    GoogleSignin.configure({
-      iosClientId: '746695542469-uiivr684mi6athshaeac6grb3hj2l3u7.apps.googleusercontent.com',
-    });
-  }, []);
 
   const validate = (): boolean => {
     if (!email.trim()) { setError('Please enter your email'); return false; }
@@ -66,28 +59,17 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
     setError('');
     setGoogleLoading(true);
     try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'zentask://auth/callback',
+        },
+      });
 
-      if (userInfo.data?.idToken) {
-        const { data, error } = await supabase.auth.signInWithIdToken({
-          provider: 'google',
-          token: userInfo.data.idToken,
-        });
-
-        if (error) throw error;
-        if (data.user) onSignInSuccess(data.user);
-      } else {
-        throw new Error('No ID token returned from Google');
-      }
+      if (error) throw error;
     } catch (err: any) {
       console.error('Google sign in error:', err);
-      if (err.code === '-5') {
-        // User cancelled
-        setError('');
-      } else {
-        setError(err.message || 'Failed to sign in with Google. Please try again.');
-      }
+      setError(err.message || 'Failed to sign in with Google. Please try again.');
     } finally {
       setGoogleLoading(false);
     }
