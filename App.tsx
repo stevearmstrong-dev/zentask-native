@@ -33,17 +33,25 @@ export default function App() {
       setUser(session?.user ?? null);
     });
 
-    // Handle deep links for email verification
-    const handleDeepLink = (event: { url: string }) => {
+    // Handle deep links for OAuth and email verification
+    const handleDeepLink = async (event: { url: string }) => {
       const url = event.url;
       if (url.includes('auth/callback')) {
-        // Extract the token from the URL and let Supabase handle it
-        const params = new URL(url).searchParams;
-        const access_token = params.get('access_token');
-        const refresh_token = params.get('refresh_token');
+        // For OAuth, Supabase sends the full callback URL
+        // We need to extract the session from it
+        const urlObj = new URL(url);
 
-        if (access_token && refresh_token) {
-          supabase.auth.setSession({
+        // Check if this is an OAuth callback (has code or access_token)
+        const code = urlObj.searchParams.get('code');
+        const access_token = urlObj.searchParams.get('access_token');
+        const refresh_token = urlObj.searchParams.get('refresh_token');
+
+        if (code) {
+          // OAuth callback with authorization code - let Supabase handle the exchange
+          await supabase.auth.exchangeCodeForSession(code);
+        } else if (access_token && refresh_token) {
+          // Direct token callback (email verification)
+          await supabase.auth.setSession({
             access_token,
             refresh_token,
           });
