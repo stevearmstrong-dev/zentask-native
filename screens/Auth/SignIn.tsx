@@ -12,6 +12,7 @@ import {
   Linking,
   Alert,
 } from 'react-native';
+import Constants from 'expo-constants';
 import { supabase } from '../../services/supabase';
 import { User } from '@supabase/supabase-js';
 
@@ -76,10 +77,16 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
     setError('');
     setGoogleLoading(true);
     try {
+      // Use different redirect URL for Expo Go vs standalone build
+      const isExpoGo = Constants.appOwnership === 'expo';
+      const redirectUrl = isExpoGo
+        ? 'https://stevearmstrong-dev.github.io/zentask-native/auth-success.html'
+        : 'zentask://auth/callback';
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'zentask://auth/callback',
+          redirectTo: redirectUrl,
           skipBrowserRedirect: true,
         },
       });
@@ -91,6 +98,15 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
         const supported = await Linking.canOpenURL(data.url);
         if (supported) {
           await Linking.openURL(data.url);
+
+          // For Expo Go, show instructions to manually copy the URL
+          if (isExpoGo) {
+            Alert.alert(
+              'Sign In with Google',
+              'After signing in, you\'ll be redirected to a success page. The app will automatically detect your sign-in.',
+              [{ text: 'OK' }]
+            );
+          }
         } else {
           throw new Error('Cannot open Google sign-in page');
         }
