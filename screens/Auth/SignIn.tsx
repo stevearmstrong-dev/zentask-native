@@ -9,12 +9,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import Constants from 'expo-constants';
 import { supabase } from '../../services/supabase';
+import { isAppleAuthCanceledError, signInWithApple } from '../../services/appleAuth';
 import { User } from '@supabase/supabase-js';
 import GoogleLogo from '../../components/GoogleLogo';
 
@@ -87,26 +86,10 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
   const handleAppleSignIn = async () => {
     setError('');
     try {
-      const credential = await AppleAuthentication.signInAsync({
-        requestedScopes: [
-          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-          AppleAuthentication.AppleAuthenticationScope.EMAIL,
-        ],
-      });
-
-      if (credential.identityToken) {
-        const { data, error } = await supabase.auth.signInWithIdToken({
-          provider: 'apple',
-          token: credential.identityToken,
-        });
-
-        if (error) throw error;
-        if (data.user) onSignInSuccess(data.user);
-      } else {
-        throw new Error('No identity token returned');
-      }
+      const user = await signInWithApple();
+      if (user) onSignInSuccess(user);
     } catch (err: any) {
-      if (err.code === 'ERR_CANCELED') {
+      if (isAppleAuthCanceledError(err)) {
         // User canceled the sign-in flow
         return;
       }

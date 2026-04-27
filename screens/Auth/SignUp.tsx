@@ -13,6 +13,7 @@ import {
 import * as WebBrowser from 'expo-web-browser';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { supabase } from '../../services/supabase';
+import { isAppleAuthCanceledError, signInWithApple } from '../../services/appleAuth';
 import GoogleLogo from '../../components/GoogleLogo';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -91,26 +92,10 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
   const handleAppleSignUp = async () => {
     setError('');
     try {
-      const credential = await AppleAuthentication.signInAsync({
-        requestedScopes: [
-          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-          AppleAuthentication.AppleAuthenticationScope.EMAIL,
-        ],
-      });
-
-      if (credential.identityToken) {
-        const { data, error } = await supabase.auth.signInWithIdToken({
-          provider: 'apple',
-          token: credential.identityToken,
-        });
-
-        if (error) throw error;
-        // The onAuthStateChange listener will handle success
-      } else {
-        throw new Error('No identity token returned');
-      }
+      await signInWithApple();
+      // The onAuthStateChange listener will handle success
     } catch (err: any) {
-      if (err.code === 'ERR_CANCELED') {
+      if (isAppleAuthCanceledError(err)) {
         return;
       }
       console.error('Apple sign up error:', err);

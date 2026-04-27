@@ -17,6 +17,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.stevearmstrong.zentask",
       "buildNumber": "2",
+      "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
