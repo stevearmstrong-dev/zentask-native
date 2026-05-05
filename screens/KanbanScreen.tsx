@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { User } from '@supabase/supabase-js';
 import { Task, TaskStatus, Priority } from '../types';
 import { useTasks } from '../context/TasksContext';
+import { toLocalDateString } from '../utils/date';
 
 const COLUMNS: { id: TaskStatus; title: string; icon: string; color: string; desc: string }[] = [
   { id: 'todo',        title: 'To Do',       icon: '🧠', color: '#1877F2', desc: 'Ideas & upcoming' },
@@ -60,7 +61,7 @@ export default function KanbanScreen({ user }: Props) {
     const task: Task = {
       id: Date.now(), text, completed: status === 'done', priority,
       status, timeSpent: 0, isTracking: false, pomodoroActive: false, sortOrder: 0,
-      dueDate: new Date().toISOString().split('T')[0],
+      dueDate: toLocalDateString(),
     };
     await addTask(task);
   };

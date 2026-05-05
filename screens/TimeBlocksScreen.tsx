@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Task } from '../types';
 import { useTasks } from '../context/TasksContext';
+import { toLocalDateString } from '../utils/date';
 
 const PRIORITY_COLOR: Record<string, string> = {
   high: '#FF453A', medium: '#FF9F0A', low: '#30D158',
@@ -77,7 +78,7 @@ export default function TimeBlocksScreen() {
   const [editingBlock, setEditingBlock] = useState<Task | null>(null);
   const [showDurationPicker, setShowDurationPicker] = useState(false);
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = toLocalDateString();
 
   // Tasks with a dueTime set for today → scheduled (show on timeline)
   // All others (no dueDate, different date, or no dueTime) → unscheduled panel

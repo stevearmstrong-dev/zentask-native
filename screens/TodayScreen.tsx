@@ -15,6 +15,7 @@ import { Task } from '../types';
 import { useTasks } from '../context/TasksContext';
 import FocusMode from '../components/FocusMode';
 import AddTaskModal from '../components/AddTaskModal';
+import { toLocalDateString } from '../utils/date';
 
 interface Props {
   user: User | null;
@@ -52,7 +53,7 @@ export default function TodayScreen({ user }: Props) {
   const userEmail = user?.email || '';
   const userName = user?.user_metadata?.name || (userEmail ? userEmail.split('@')[0] : 'Guest');
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = toLocalDateString();
   const todayTasks = tasks.filter(t => !t.completed && t.dueDate === todayStr);
   const overdueTasks = tasks.filter(t => {
     if (!t.dueDate || t.completed) return false;

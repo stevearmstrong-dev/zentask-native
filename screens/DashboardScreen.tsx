@@ -11,6 +11,7 @@ import { useTasks } from '../context/TasksContext';
 import { getLastNDays, getSessionHistory } from '../utils/pomodoroSessions';
 import { Task } from '../types';
 import { User } from '@supabase/supabase-js';
+import { toLocalDateString } from '../utils/date';
 
 interface Props {
   user?: User | null;
@@ -22,7 +23,7 @@ const PRIORITY_COLOR: Record<string, string> = {
 
 const CATEGORY_COLORS = ['#1877F2', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#EF4444', '#06B6D4'];
 
-function todayStr() { return new Date().toISOString().split('T')[0]; }
+function todayStr() { return toLocalDateString(); }
 
 function parseLocalDate(dateStr: string): Date {
   const [y, m, d] = dateStr.split('-').map(Number);
