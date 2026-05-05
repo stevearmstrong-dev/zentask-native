@@ -8,9 +8,12 @@ import {
   Modal,
   ScrollView,
   Platform,
+  Alert,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Priority } from '../types';
+import AIAssistButton from './AIAssistButton';
+import { AIAssistAuthRequiredError, parseNaturalLanguageTask } from '../services/claude';
 
 interface NewTask {
   text: string;
@@ -66,6 +69,7 @@ export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
   const [dueDate, setDueDate] = useState('');
   const [dueTime, setDueTime] = useState('');
   const [reminderMinutes, setReminderMinutes] = useState<number | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   const reset = () => {
     setText('');
@@ -88,6 +92,45 @@ export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
   const handleClose = () => {
     reset();
     onClose();
+  };
+
+  const handleAIAssist = async () => {
+    if (!text.trim()) {
+      Alert.alert('Enter Task First', 'Please type a task description before using AI Assist.');
+      return;
+    }
+
+    setAiLoading(true);
+    try {
+      const parsed = await parseNaturalLanguageTask(text);
+
+      // Update form fields with parsed data
+      setText(parsed.text);
+      if (parsed.priority) setPriority(parsed.priority);
+      if (parsed.dueDate) setDueDate(parsed.dueDate);
+      if (parsed.dueTime) setDueTime(parsed.dueTime);
+      if (parsed.category) setCategory(parsed.category);
+      if (parsed.reminderMinutes) setReminderMinutes(parsed.reminderMinutes);
+
+      Alert.alert(
+        'AI Assist Complete',
+        'I\'ve parsed your task and filled in the details. Review and adjust as needed!',
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.warn('AI assist failed:', error);
+      const message = error instanceof AIAssistAuthRequiredError
+        ? 'Please sign in before using AI Assist.'
+        : 'Sorry, I couldn\'t parse your task. Please try again or fill in the details manually.';
+
+      Alert.alert(
+        'AI Assist Failed',
+        message,
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   return (
@@ -114,6 +157,20 @@ export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
             multiline
             autoFocus
           />
+
+          {/* AI Assist Button */}
+          <View style={styles.aiAssistContainer}>
+            <AIAssistButton
+              onPress={handleAIAssist}
+              loading={aiLoading}
+              disabled={!text.trim()}
+              variant="secondary"
+              text="Parse with AI"
+            />
+            <Text style={styles.aiHint}>
+              Try: "Dentist tomorrow 2pm" or "Weekly team meeting every Monday at 9am"
+            </Text>
+          </View>
 
           {/* Priority */}
           <Text style={styles.sectionLabel}>Priority</Text>
@@ -269,4 +326,15 @@ const styles = StyleSheet.create({
   fieldValue: { flex: 1, fontSize: 16, color: '#FFFFFF' },
   fieldPlaceholder: { color: '#636366' },
   clearBtn: { color: '#636366', fontSize: 16, paddingHorizontal: 4 },
+  aiAssistContainer: {
+    marginBottom: 24,
+    gap: 8,
+  },
+  aiHint: {
+    fontSize: 12,
+    color: '#636366',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    paddingHorizontal: 16,
+  },
 });
