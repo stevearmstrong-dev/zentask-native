@@ -17,9 +17,10 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.stevearmstrong.zentask",
       "buildNumber": "2",
-      "usesAppleSignIn": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSSpeechRecognitionUsageDescription": "ZenTask needs access to speech recognition to convert your voice into tasks.",
+        "NSMicrophoneUsageDescription": "ZenTask needs access to your microphone to record your voice for task creation."
       }
     },
     "android": {
@@ -47,7 +48,7 @@
           "iosUrlScheme": "com.googleusercontent.apps.746695542469-uiivr684mi6athshaeac6grb3hj2l3u7"
         }
       ],
-      "expo-apple-authentication"
+      "expo-speech-recognition"
     ]
   }
 }
