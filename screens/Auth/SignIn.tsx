@@ -220,22 +220,6 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
             )}
           </TouchableOpacity>
 
-          {appleAvailable && (
-            <AppleAuthentication.AppleAuthenticationButton
-              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-              cornerRadius={14}
-              style={styles.appleButton}
-              onPress={handleAppleSignIn}
-            />
-          )}
-
-          {Platform.OS === 'ios' && appleAvailable === false && (
-            <Text style={styles.appleUnavailableText}>
-              Sign in with Apple is unavailable on this simulator or build.
-            </Text>
-          )}
-
           <TouchableOpacity style={styles.guestButton} onPress={onGuestMode} disabled={loading || googleLoading}>
             <Text style={styles.guestButtonText}>Continue as Guest</Text>
           </TouchableOpacity>
