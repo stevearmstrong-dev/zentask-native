@@ -146,13 +146,13 @@ const styles = StyleSheet.create({
   userCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(20,180,120,0.08)',
     borderRadius: 18,
     marginHorizontal: 20,
     padding: 16,
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(20,180,120,0.18)',
     gap: 14,
   },
   avatar: {
@@ -172,10 +172,10 @@ const styles = StyleSheet.create({
   section: { marginBottom: 24, paddingHorizontal: 20 },
   sectionTitle: { fontSize: 13, fontWeight: '600', color: '#636366', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 },
   sectionCard: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(20,180,120,0.08)',
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(20,180,120,0.18)',
     overflow: 'hidden',
   },
   menuItem: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12 },
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   chevron: { fontSize: 20, color: '#48484A', fontWeight: '300' },
   comingSoonBadge: { backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
   comingSoonText: { fontSize: 11, color: '#636366', fontWeight: '500' },
-  divider: { height: 1, backgroundColor: 'rgba(255,255,255,0.06)', marginLeft: 58 },
+  divider: { height: 1, backgroundColor: 'rgba(20,180,120,0.12)', marginLeft: 58 },
   signOutBtn: {
     marginHorizontal: 20,
     marginBottom: 12,
