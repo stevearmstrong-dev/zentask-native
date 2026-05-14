@@ -24,6 +24,7 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
     title: 'Productivity',
     items: [
       { icon: '✅', label: 'All Tasks', sublabel: 'View and manage all tasks', screen: 'AllTasks' },
+      { icon: '📓', label: 'Journal', sublabel: 'Notes & reflections', screen: 'Journal' },
       { icon: '📊', label: 'Dashboard', sublabel: 'Stats and insights', screen: 'Dashboard' },
       { icon: '📋', label: 'Kanban Board', sublabel: 'Visual task management', screen: 'Kanban' },
       { icon: '⊞', label: 'Eisenhower Matrix', sublabel: 'Prioritise by urgency & importance', screen: 'Eisenhower' },

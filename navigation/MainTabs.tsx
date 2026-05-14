@@ -23,6 +23,7 @@ import PowerSwordHallScreen from '../screens/PowerSwordHallScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import UpcomingScreen from '../screens/UpcomingScreen';
 import CalmPracticeScreen from '../screens/CalmPracticeScreen';
+import JournalScreen from '../screens/JournalScreen';
 
 const Tab = createBottomTabNavigator();
 const MoreStack = createNativeStackNavigator();
@@ -58,6 +59,9 @@ function MoreStackNavigator({ user, onSignOut }: Props) {
       </MoreStack.Screen>
       <MoreStack.Screen name="CalmPractice">
         {() => <CalmPracticeScreen />}
+      </MoreStack.Screen>
+      <MoreStack.Screen name="Journal">
+        {() => <JournalScreen user={user} />}
       </MoreStack.Screen>
       <MoreStack.Screen name="WorkoutTracker">
         {() => <WorkoutTrackerScreen user={user} />}
