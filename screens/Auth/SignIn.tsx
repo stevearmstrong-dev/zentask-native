@@ -10,6 +10,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as WebBrowser from 'expo-web-browser';
 import { supabase } from '../../services/supabase';
 import { User } from '@supabase/supabase-js';
@@ -142,15 +143,28 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      {/* Deep teal background */}
+      <LinearGradient
+        colors={['#0A1F1A', '#061612', '#081A15']}
+        locations={[0, 0.5, 1]}
+        style={StyleSheet.absoluteFill}
+      />
+      {/* Radial glow from top */}
+      <LinearGradient
+        colors={['rgba(20,180,120,0.18)', 'transparent']}
+        style={styles.topGlow}
+      />
+
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.card}>
+
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to access your tasks from anywhere</Text>
 
           <TextInput
             style={styles.input}
             placeholder="your@email.com"
-            placeholderTextColor="#8E8E93"
+            placeholderTextColor="#2E5A4A"
             value={email}
             onChangeText={t => { setEmail(t); setError(''); }}
             keyboardType="email-address"
@@ -162,7 +176,7 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
           <TextInput
             style={styles.input}
             placeholder="Password"
-            placeholderTextColor="#8E8E93"
+            placeholderTextColor="#2E5A4A"
             value={password}
             onChangeText={t => { setPassword(t); setError(''); }}
             secureTextEntry
@@ -175,7 +189,7 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
             <Text style={styles.forgotLink}>Forgot password?</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.primaryButton} onPress={handleSignIn} disabled={loading || googleLoading}>
+          <TouchableOpacity style={styles.primaryButton} onPress={handleSignIn} disabled={loading || googleLoading} activeOpacity={0.85}>
             {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryButtonText}>Sign In</Text>}
           </TouchableOpacity>
 
@@ -213,92 +227,100 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
-  scroll: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-  card: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 24,
-    padding: 28,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+  container: { flex: 1, backgroundColor: '#081A15' },
+  scroll: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20, paddingVertical: 40 },
+
+  topGlow: {
+    position: 'absolute',
+    top: -80,
+    left: -60,
+    right: -60,
+    height: 400,
+    borderRadius: 300,
   },
-  title: { fontSize: 28, fontWeight: '700', color: '#FFFFFF', marginBottom: 8 },
-  subtitle: { fontSize: 15, color: '#8E8E93', marginBottom: 28 },
+
+  card: {
+    backgroundColor: 'rgba(10,40,30,0.9)',
+    borderRadius: 28,
+    padding: 30,
+    borderWidth: 1,
+    borderColor: 'rgba(20,180,120,0.15)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.7,
+    shadowRadius: 48,
+    elevation: 24,
+    overflow: 'hidden',
+  },
+
+  title: {
+    fontSize: 34,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 8,
+    letterSpacing: -1,
+  },
+  subtitle: { fontSize: 14, color: '#3D7A62', marginBottom: 32, lineHeight: 20 },
+
   input: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: 'rgba(5,25,18,0.8)',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 15,
     fontSize: 16,
     color: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(20,180,120,0.12)',
     marginBottom: 12,
   },
-  error: { color: '#FF453A', fontSize: 14, marginBottom: 8 },
-  forgotLink: { color: '#636366', fontSize: 14, textAlign: 'right', marginBottom: 20 },
+
+  error: { color: '#FF6B6B', fontSize: 13, marginBottom: 8 },
+  forgotLink: { color: '#14B478', fontSize: 13, textAlign: 'right', marginBottom: 22 },
+
   primaryButton: {
-    backgroundColor: '#1877F2',
+    backgroundColor: '#14B478',
     borderRadius: 14,
-    padding: 16,
+    height: 54,
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 16,
+    shadowColor: '#14B478',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.45,
+    shadowRadius: 16,
+    elevation: 10,
   },
-  primaryButtonText: { color: '#fff', fontSize: 17, fontWeight: '600' },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 16,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-  },
-  dividerText: {
-    color: '#636366',
-    fontSize: 13,
-    marginHorizontal: 12,
-    fontWeight: '500',
-  },
+  primaryButtonText: { color: '#fff', fontSize: 16, fontWeight: '700', letterSpacing: 0.3 },
+
+  dividerContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 14 },
+  divider: { flex: 1, height: 1, backgroundColor: 'rgba(20,180,120,0.08)' },
+  dividerText: { color: '#1A4A38', fontSize: 11, marginHorizontal: 12, fontWeight: '700', letterSpacing: 2 },
+
   googleButton: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F0FBF6',
     borderRadius: 14,
-    padding: 16,
+    height: 54,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.1)',
-    gap: 12,
+    marginBottom: 10,
+    gap: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  googleButtonText: {
-    color: '#1F1F1F',
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  appleButton: {
-    height: 50,
-    marginBottom: 12,
-  },
-  appleUnavailableText: {
-    color: '#8E8E93',
-    fontSize: 13,
-    textAlign: 'center',
-    marginBottom: 12,
-    lineHeight: 18,
-  },
+  googleButtonText: { color: '#0A1F18', fontSize: 16, fontWeight: '600' },
+
   guestButton: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 14,
-    padding: 16,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
-    marginBottom: 24,
+    paddingVertical: 14,
+    marginBottom: 16,
   },
-  guestButtonText: { color: '#EBEBF5', fontSize: 17, fontWeight: '500' },
+  guestButtonText: { color: '#1F5240', fontSize: 15, fontWeight: '500' },
+
   footer: { flexDirection: 'row', justifyContent: 'center' },
-  footerText: { color: '#636366', fontSize: 15 },
-  link: { color: '#1877F2', fontSize: 15, fontWeight: '600' },
+  footerText: { color: '#1F5240', fontSize: 15 },
+  link: { color: '#14B478', fontSize: 15, fontWeight: '700' },
 });
