@@ -16,9 +16,9 @@ import { useTasks } from '../context/TasksContext';
 import { toLocalDateString } from '../utils/date';
 
 const COLUMNS: { id: TaskStatus; title: string; icon: string; color: string; desc: string }[] = [
-  { id: 'todo',        title: 'To Do',       icon: '🧠', color: '#1877F2', desc: 'Ideas & upcoming' },
-  { id: 'inprogress',  title: 'In Progress', icon: '⚙️', color: '#FF9F0A', desc: 'Currently active'  },
-  { id: 'done',        title: 'Done',        icon: '🎉', color: '#30D158', desc: 'Wrapped up'         },
+  { id: 'todo',        title: 'To Do',       icon: '○', color: '#00E5CC', desc: 'Ideas & upcoming' },
+  { id: 'inprogress',  title: 'In Progress', icon: '◑', color: '#F59E0B', desc: 'Currently active'  },
+  { id: 'done',        title: 'Done',        icon: '●', color: '#4ADE80', desc: 'Wrapped up'         },
 ];
 
 const PRIORITY_COLOR: Record<string, string> = {
@@ -64,7 +64,7 @@ export default function KanbanScreen({ user }: Props) {
 
   const columnTasks = (col: TaskStatus) => tasks.filter(t => getStatus(t) === col);
 
-  if (loading) return <View style={s.loader}><ActivityIndicator size="large" color="#1877F2" /></View>;
+  if (loading) return <View style={s.loader}><ActivityIndicator size="large" color="#00E5CC" /></View>;
 
   return (
     <SafeAreaView style={s.container} edges={['top']}>
@@ -102,7 +102,7 @@ export default function KanbanScreen({ user }: Props) {
                     onPress={() => selectedTask && handleMove(selectedTask, col.id)}
                     disabled={isCurrent}
                   >
-                    <Text style={s.moveOptionIcon}>{col.icon}</Text>
+                    <Text style={[s.moveOptionIcon, { color: col.color }]}>{col.icon}</Text>
                     <Text style={[s.moveOptionLabel, isCurrent && { color: col.color }]}>{col.title}</Text>
                     {isCurrent && <Text style={[s.currentBadge, { color: col.color }]}>Current</Text>}
                   </TouchableOpacity>
@@ -214,58 +214,104 @@ function TaskCard({ task, colColor, onPress, onDelete }: { task: Task; colColor:
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
-  loader: { flex: 1, backgroundColor: '#0A0A0F', justifyContent: 'center', alignItems: 'center' },
+  container: { flex: 1, backgroundColor: '#080E12' },
+  loader: { flex: 1, backgroundColor: '#080E12', justifyContent: 'center', alignItems: 'center' },
   header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
-  title: { fontSize: 28, fontWeight: '700', color: '#FFFFFF' },
-  subtitle: { fontSize: 13, color: '#636366', marginTop: 2 },
+  title: { fontSize: 28, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.5 },
+  subtitle: { fontSize: 13, color: '#2A5A60', marginTop: 2 },
   board: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
-  moveModal: { backgroundColor: '#1C1C1E', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24 },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'flex-end' },
+  moveModal: {
+    backgroundColor: '#0D1C22',
+    borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    padding: 24,
+    borderWidth: 1, borderColor: 'rgba(0,229,204,0.12)',
+  },
   moveTitle: { fontSize: 18, fontWeight: '700', color: '#FFFFFF', marginBottom: 8 },
-  moveTaskText: { fontSize: 14, color: '#636366', marginBottom: 20 },
+  moveTaskText: { fontSize: 14, color: '#2A5A60', marginBottom: 20 },
   moveOptions: { gap: 10 },
-  moveOption: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 14, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', gap: 12 },
-  moveOptionIcon: { fontSize: 22 },
+  moveOption: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: 'rgba(0,229,204,0.04)', borderRadius: 16,
+    padding: 14, borderWidth: 1, borderColor: 'rgba(0,229,204,0.1)', gap: 12,
+  },
+  moveOptionIcon: { fontSize: 18, color: '#FFFFFF', width: 22, textAlign: 'center' },
   moveOptionLabel: { flex: 1, fontSize: 16, color: '#EBEBF5', fontWeight: '500' },
   currentBadge: { fontSize: 12, fontWeight: '600' },
 });
 
 const col_s = StyleSheet.create({
-  column: { width: 280, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', overflow: 'hidden', maxHeight: '90%' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 14, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' },
+  column: {
+    width: 280,
+    backgroundColor: '#0D1C22',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(0,229,204,0.08)',
+    overflow: 'hidden',
+    maxHeight: '90%',
+    shadowColor: '#00E5CC',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    padding: 14, borderBottomWidth: 1, borderBottomColor: 'rgba(0,229,204,0.08)',
+  },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  icon: { fontSize: 22 },
+  icon: { fontSize: 16, fontWeight: '700' },
   title: { fontSize: 15, fontWeight: '700' },
-  desc: { fontSize: 11, color: '#636366', marginTop: 1 },
-  badge: { borderRadius: 10, minWidth: 24, paddingHorizontal: 8, paddingVertical: 2, alignItems: 'center' },
-  badgeText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  desc: { fontSize: 11, color: '#2A5A60', marginTop: 1 },
+  badge: {
+    borderRadius: 10, minWidth: 24, paddingHorizontal: 8, paddingVertical: 2, alignItems: 'center',
+    shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.4, shadowRadius: 6, elevation: 3,
+  },
+  badgeText: { color: '#000', fontSize: 12, fontWeight: '700' },
   cards: { maxHeight: 420, padding: 10 },
   empty: { padding: 20, alignItems: 'center' },
-  emptyText: { color: '#48484A', fontSize: 14 },
-  addBox: { padding: 10, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)' },
+  emptyText: { color: '#1A3A40', fontSize: 14 },
+  addBox: { padding: 10, borderTopWidth: 1, borderTopColor: 'rgba(0,229,204,0.08)' },
   addRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
-  addInput: { flex: 1, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: 10, fontSize: 14, color: '#FFFFFF', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
-  addBtn: { width: 38, height: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  addBtnText: { color: '#fff', fontSize: 22, fontWeight: '300' },
+  addInput: {
+    flex: 1,
+    backgroundColor: 'rgba(0,229,204,0.05)',
+    borderRadius: 10, padding: 10,
+    fontSize: 14, color: '#FFFFFF',
+    borderWidth: 1, borderColor: 'rgba(0,229,204,0.12)',
+  },
+  addBtn: {
+    width: 38, height: 38, borderRadius: 10,
+    alignItems: 'center', justifyContent: 'center',
+    shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.45, shadowRadius: 8, elevation: 4,
+  },
+  addBtnText: { color: '#000', fontSize: 22, fontWeight: '300' },
   priorityRow: { flexDirection: 'row', gap: 6 },
-  priorityChip: { flex: 1, paddingVertical: 5, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.04)' },
-  priorityChipText: { fontSize: 11, color: '#636366', fontWeight: '500' },
+  priorityChip: {
+    flex: 1, paddingVertical: 5, borderRadius: 8,
+    borderWidth: 1, borderColor: 'rgba(0,229,204,0.1)',
+    alignItems: 'center', backgroundColor: 'rgba(0,229,204,0.03)',
+  },
+  priorityChipText: { fontSize: 11, color: '#2A5A60', fontWeight: '500' },
 });
 
 const card_s = StyleSheet.create({
-  card: { backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 14, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  card: {
+    backgroundColor: 'rgba(0,229,204,0.04)',
+    borderRadius: 14, padding: 12, marginBottom: 8,
+    borderWidth: 1, borderColor: 'rgba(0,229,204,0.1)',
+  },
   topRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
-  priorityDot: { width: 8, height: 8, borderRadius: 4 },
+  priorityDot: { width: 7, height: 7, borderRadius: 3.5 },
   priorityLabel: { fontSize: 11, fontWeight: '700', flex: 1 },
   deleteBtn: { padding: 2 },
-  deleteBtnText: { color: '#48484A', fontSize: 14 },
-  text: { fontSize: 14, color: '#EBEBF5', lineHeight: 20, marginBottom: 8 },
-  textDone: { color: '#48484A', textDecorationLine: 'line-through' },
+  deleteBtnText: { color: '#1A3A40', fontSize: 14 },
+  text: { fontSize: 14, color: '#C8F0EC', lineHeight: 20, marginBottom: 8 },
+  textDone: { color: '#1A3A40', textDecorationLine: 'line-through' },
   meta: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
-  tag: { backgroundColor: 'rgba(24,119,242,0.2)', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
-  tagText: { fontSize: 11, color: '#1877F2' },
-  due: { fontSize: 11, color: '#636366' },
+  tag: { backgroundColor: 'rgba(0,229,204,0.12)', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
+  tagText: { fontSize: 11, color: '#00E5CC' },
+  due: { fontSize: 11, color: '#2A5A60' },
   moveBadge: { borderRadius: 6, borderWidth: 1, paddingHorizontal: 8, paddingVertical: 3, alignSelf: 'flex-start' },
   moveBadgeText: { fontSize: 11, fontWeight: '500' },
 });
