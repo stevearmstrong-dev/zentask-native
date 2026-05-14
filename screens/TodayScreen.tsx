@@ -128,7 +128,7 @@ export default function TodayScreen({ user }: Props) {
       />
       <View style={styles.header}>
         <View style={styles.headerCopy}>
-          <Text style={styles.greeting}>{greeting()}, {userName} 👋</Text>
+          <Text style={styles.greeting}>{greeting()}, {userName}</Text>
           <Text style={styles.date}>{formatDate()}</Text>
         </View>
         <TouchableOpacity
