@@ -38,31 +38,52 @@ const CATEGORY_META: Record<string, { label: string; color: string }> = {
   'other':        { label: 'Other',        color: '#6B7280' },
 };
 
-const DEFAULT_REMINDERS: Reminder[] = [
+const SUGGESTIONS: Reminder[] = [
   // Credit cards
-  { id: 'pc-financial',   name: 'PC Financial',      category: 'credit-card',  dueDay: 20,                 icon: '💳' },
-  { id: 'td-bank',        name: 'TD Bank',            category: 'credit-card',  dueDay: 23,                 icon: '💳' },
-  { id: 'cibc',           name: 'CIBC Bank',          category: 'credit-card',  dueDay: 25,                 icon: '💳' },
-  { id: 'amex',           name: 'American Express',   category: 'credit-card',  dueDay: 27,                 icon: '💳' },
-  // EMI
-  { id: 'ipad',           name: 'iPad Payment',       category: 'emi',          dueDay: 20,                 icon: '📱' },
-  { id: 'edu-loan',       name: 'Education Loan EMI', category: 'emi',          dueDay: 1,                  icon: '🎓' },
+  { id: 's-visa',         name: 'Visa',               category: 'credit-card',  dueDay: 1,                  icon: '💳' },
+  { id: 's-mastercard',   name: 'Mastercard',         category: 'credit-card',  dueDay: 1,                  icon: '💳' },
+  { id: 's-amex',         name: 'Amex',               category: 'credit-card',  dueDay: 1,                  icon: '💳' },
+  { id: 's-pc-financial', name: 'PC Financial',       category: 'credit-card',  dueDay: 1,                  icon: '💳' },
+  { id: 's-td-bank',      name: 'TD Bank',            category: 'credit-card',  dueDay: 1,                  icon: '💳' },
+  { id: 's-cibc',         name: 'CIBC',               category: 'credit-card',  dueDay: 1,                  icon: '💳' },
+  { id: 's-scotiabank',   name: 'Scotiabank',         category: 'credit-card',  dueDay: 1,                  icon: '💳' },
+  { id: 's-rbc',          name: 'RBC',                category: 'credit-card',  dueDay: 1,                  icon: '💳' },
+  // EMI / Loans
+  { id: 's-car-loan',     name: 'Car Loan',           category: 'emi',          dueDay: 1,                  icon: '🚗' },
+  { id: 's-mortgage',     name: 'Mortgage',           category: 'emi',          dueDay: 1,                  icon: '🏦' },
+  { id: 's-student-loan', name: 'Student Loan',       category: 'emi',          dueDay: 1,                  icon: '🎓' },
+  { id: 's-personal-loan',name: 'Personal Loan',      category: 'emi',          dueDay: 1,                  icon: '💰' },
+  { id: 's-ipad',         name: 'iPad / Device EMI',  category: 'emi',          dueDay: 1,                  icon: '📱' },
   // Utilities
-  { id: 'phone',          name: 'Phone Bill',         category: 'utility',      dueDay: 27,                 icon: '📞' },
-  { id: 'wifi',           name: 'WiFi',               category: 'utility',      dueDay: 'last',             icon: '📶' },
-  { id: 'electricity',    name: 'Power / Electricity',category: 'utility',      dueDay: 'last',             icon: '💡' },
+  { id: 's-phone',        name: 'Phone Bill',         category: 'utility',      dueDay: 1,                  icon: '📞' },
+  { id: 's-wifi',         name: 'Internet / WiFi',    category: 'utility',      dueDay: 1,                  icon: '📶' },
+  { id: 's-electricity',  name: 'Electricity',        category: 'utility',      dueDay: 1,                  icon: '💡' },
+  { id: 's-gas',          name: 'Gas / Heating',      category: 'utility',      dueDay: 1,                  icon: '🔥' },
+  { id: 's-water',        name: 'Water Bill',         category: 'utility',      dueDay: 1,                  icon: '💧' },
+  { id: 's-insurance',    name: 'Insurance',          category: 'utility',      dueDay: 1,                  icon: '🛡️' },
   // Subscriptions
-  { id: 'chatgpt',        name: 'ChatGPT',            category: 'subscription', dueDay: 4,                  icon: '🤖' },
-  { id: 'walmart-plus',   name: 'Walmart+',           category: 'subscription', dueDay: 6,                  icon: '🛒' },
-  { id: 'claude',         name: 'Claude',             category: 'subscription', dueDay: 10,                 icon: '🧠' },
-  { id: 'cursor',         name: 'Cursor',             category: 'subscription', dueDay: 10,                 icon: '⌨️' },
-  { id: 'squarespace',    name: 'Squarespace',        category: 'subscription', dueDay: 10,                 icon: '🌐' },
-  { id: 'factor-meals',   name: 'Factor Meals',       category: 'subscription', dueDay: 'weekly-thursday',  icon: '🍳' },
+  { id: 's-netflix',      name: 'Netflix',            category: 'subscription', dueDay: 1,                  icon: '🎬' },
+  { id: 's-spotify',      name: 'Spotify',            category: 'subscription', dueDay: 1,                  icon: '🎵' },
+  { id: 's-youtube',      name: 'YouTube Premium',    category: 'subscription', dueDay: 1,                  icon: '▶️' },
+  { id: 's-disney',       name: 'Disney+',            category: 'subscription', dueDay: 1,                  icon: '🏰' },
+  { id: 's-apple',        name: 'Apple One',          category: 'subscription', dueDay: 1,                  icon: '🍎' },
+  { id: 's-chatgpt',      name: 'ChatGPT',            category: 'subscription', dueDay: 1,                  icon: '🤖' },
+  { id: 's-claude',       name: 'Claude',             category: 'subscription', dueDay: 1,                  icon: '🧠' },
+  { id: 's-cursor',       name: 'Cursor',             category: 'subscription', dueDay: 1,                  icon: '⌨️' },
+  { id: 's-amazon-prime', name: 'Amazon Prime',       category: 'subscription', dueDay: 1,                  icon: '📦' },
+  { id: 's-walmart-plus', name: 'Walmart+',           category: 'subscription', dueDay: 1,                  icon: '🛒' },
+  { id: 's-squarespace',  name: 'Squarespace',        category: 'subscription', dueDay: 1,                  icon: '🌐' },
+  { id: 's-dropbox',      name: 'Dropbox',            category: 'subscription', dueDay: 1,                  icon: '📂' },
+  { id: 's-icloud',       name: 'iCloud Storage',     category: 'subscription', dueDay: 1,                  icon: '☁️' },
+  { id: 's-factor-meals', name: 'Factor Meals',       category: 'subscription', dueDay: 'weekly-thursday',  icon: '🍳' },
+  // Rent
+  { id: 's-rent',         name: 'Monthly Rent',       category: 'rent',         dueDay: 1,                  icon: '🏠' },
   // Other
-  { id: 'mom',            name: 'Money to Mom',       category: 'other',        dueDay: 1,                  icon: '👩' },
-  { id: 'gym',            name: 'Gym Membership',     category: 'other',        dueDay: 2,                  icon: '🏋️' },
-  { id: 'walmart-groc',   name: 'Walmart Grocery',    category: 'other',        dueDay: 'weekly-saturday',  icon: '🛍️' },
-  { id: 'rent',           name: 'Monthly Rent',       category: 'rent',         dueDay: 'last',             icon: '🏠' },
+  { id: 's-gym',          name: 'Gym Membership',     category: 'other',        dueDay: 1,                  icon: '🏋️' },
+  { id: 's-parking',      name: 'Parking',            category: 'other',        dueDay: 1,                  icon: '🅿️' },
+  { id: 's-transit',      name: 'Transit Pass',       category: 'other',        dueDay: 1,                  icon: '🚌' },
+  { id: 's-grocery',      name: 'Grocery Run',        category: 'other',        dueDay: 'weekly-saturday',  icon: '🛍️' },
+  { id: 's-allowance',    name: 'Family Allowance',   category: 'other',        dueDay: 1,                  icon: '👨‍👩‍👧' },
 ];
 
 function getDueDate(dueDay: DueDay): Date {
@@ -141,9 +162,11 @@ export default function RecurringExpensesScreen({ user }: Props) {
   const userEmail = user?.email || '';
   const { REMINDERS_KEY } = useMemo(() => getKeys(userEmail), [userEmail]);
 
-  const [reminders, setReminders] = useState<Reminder[]>(DEFAULT_REMINDERS);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
+  const [addTab, setAddTab] = useState<'suggestions' | 'custom'>('suggestions');
+  const [suggestionCategory, setSuggestionCategory] = useState<Reminder['category']>('credit-card');
 
   // Add form
   const [newName, setNewName] = useState('');
@@ -158,7 +181,6 @@ export default function RecurringExpensesScreen({ user }: Props) {
     setReminders([]);
     AsyncStorage.getItem(REMINDERS_KEY).then(raw => {
       if (raw) setReminders(JSON.parse(raw));
-      else setReminders(DEFAULT_REMINDERS);
       setLoaded(true);
     }).catch(console.error);
   }, [REMINDERS_KEY]);
@@ -197,6 +219,14 @@ export default function RecurringExpensesScreen({ user }: Props) {
     setShowAdd(false);
     setNewName(''); setNewIcon('💳'); setNewCategory('other'); setNewDueDay(1); setNewAmount('');
   }, [newName, newIcon, newCategory, newDueDay, newAmount]);
+
+  const handleToggleSuggestion = useCallback((suggestion: Reminder) => {
+    setReminders(prev => {
+      const already = prev.some(r => r.id === suggestion.id);
+      if (already) return prev.filter(r => r.id !== suggestion.id);
+      return [...prev, { ...suggestion }];
+    });
+  }, []);
 
   const handleDelete = useCallback((id: string) => {
     Alert.alert('Remove', 'Remove this reminder?', [
@@ -282,7 +312,7 @@ export default function RecurringExpensesScreen({ user }: Props) {
         })}
 
         {/* Add button */}
-        <TouchableOpacity style={s.addFab} onPress={() => setShowAdd(true)}>
+        <TouchableOpacity style={s.addFab} onPress={() => { setAddTab('suggestions'); setSuggestionCategory('credit-card'); setShowAdd(true); }}>
           <Text style={s.addFabText}>+ Add Reminder</Text>
         </TouchableOpacity>
 
@@ -292,75 +322,135 @@ export default function RecurringExpensesScreen({ user }: Props) {
       {/* Add modal */}
       <Modal visible={showAdd} transparent animationType="slide" onRequestClose={() => setShowAdd(false)}>
         <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setShowAdd(false)}>
-          <ScrollView style={s.modalCard} keyboardShouldPersistTaps="handled" bounces={false}>
+          <View style={s.modalCard}>
             <Text style={s.modalTitle}>Add Reminder</Text>
 
-            <Text style={s.fieldLabel}>Name</Text>
-            <TextInput
-              style={s.textInput}
-              placeholder="e.g. Netflix"
-              placeholderTextColor="#48484A"
-              value={newName}
-              onChangeText={setNewName}
-            />
-
-            <Text style={s.fieldLabel}>Icon (emoji)</Text>
-            <TextInput
-              style={s.textInput}
-              placeholder="💳"
-              placeholderTextColor="#48484A"
-              value={newIcon}
-              onChangeText={setNewIcon}
-              maxLength={4}
-            />
-
-            <Text style={s.fieldLabel}>Amount (optional)</Text>
-            <View style={s.amountWrap}>
-              <Text style={s.dollarSign}>$</Text>
-              <TextInput
-                style={[s.textInput, { flex: 1, borderWidth: 0, padding: 0 }]}
-                placeholder="0.00"
-                placeholderTextColor="#48484A"
-                keyboardType="decimal-pad"
-                value={newAmount}
-                onChangeText={setNewAmount}
-              />
+            {/* Tabs */}
+            <View style={s.tabRow}>
+              <TouchableOpacity
+                style={[s.tab, addTab === 'suggestions' && s.tabActive]}
+                onPress={() => setAddTab('suggestions')}
+              >
+                <Text style={[s.tabText, addTab === 'suggestions' && s.tabTextActive]}>Suggestions</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[s.tab, addTab === 'custom' && s.tabActive]}
+                onPress={() => setAddTab('custom')}
+              >
+                <Text style={[s.tabText, addTab === 'custom' && s.tabTextActive]}>Custom</Text>
+              </TouchableOpacity>
             </View>
 
-            <Text style={s.fieldLabel}>Category</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
-              {CATEGORIES.map(cat => {
-                const meta = CATEGORY_META[cat];
-                return (
-                  <TouchableOpacity
-                    key={cat}
-                    style={[s.catChip, newCategory === cat && { borderColor: meta.color, backgroundColor: meta.color + '22' }]}
-                    onPress={() => setNewCategory(cat)}
-                  >
-                    <Text style={[s.catChipText, newCategory === cat && { color: meta.color }]}>{meta.label}</Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
+            {addTab === 'suggestions' ? (
+              <>
+                {/* Category filter */}
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+                  {CATEGORIES.map(cat => {
+                    const meta = CATEGORY_META[cat];
+                    return (
+                      <TouchableOpacity
+                        key={cat}
+                        style={[s.catChip, suggestionCategory === cat && { borderColor: meta.color, backgroundColor: meta.color + '22' }]}
+                        onPress={() => setSuggestionCategory(cat)}
+                      >
+                        <Text style={[s.catChipText, suggestionCategory === cat && { color: meta.color }]}>{meta.label}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
 
-            <Text style={s.fieldLabel}>Due Date</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
-              {DUE_DAY_OPTIONS.map(opt => (
-                <TouchableOpacity
-                  key={String(opt.value)}
-                  style={[s.dayChip, newDueDay === opt.value && s.dayChipActive]}
-                  onPress={() => setNewDueDay(opt.value)}
-                >
-                  <Text style={[s.dayChipText, newDueDay === opt.value && s.dayChipTextActive]}>{opt.label}</Text>
+                {/* Suggestion rows */}
+                <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 360 }}>
+                  {SUGGESTIONS.filter(sg => sg.category === suggestionCategory).map(suggestion => {
+                    const added = reminders.some(r => r.id === suggestion.id);
+                    return (
+                      <TouchableOpacity
+                        key={suggestion.id}
+                        style={[s.suggestionRow, added && s.suggestionRowAdded]}
+                        onPress={() => handleToggleSuggestion(suggestion)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={s.suggestionIcon}>{suggestion.icon}</Text>
+                        <Text style={[s.suggestionName, added && s.suggestionNameAdded]}>{suggestion.name}</Text>
+                        <View style={[s.suggestionCheck, added && s.suggestionCheckAdded]}>
+                          {added && <Text style={s.suggestionCheckMark}>✓</Text>}
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                  <View style={{ height: 16 }} />
+                </ScrollView>
+              </>
+            ) : (
+              <ScrollView keyboardShouldPersistTaps="handled" bounces={false} style={{ maxHeight: 420 }}>
+                <Text style={s.fieldLabel}>Name</Text>
+                <TextInput
+                  style={s.textInput}
+                  placeholder="e.g. Netflix"
+                  placeholderTextColor="#48484A"
+                  value={newName}
+                  onChangeText={setNewName}
+                />
+
+                <Text style={s.fieldLabel}>Icon (emoji)</Text>
+                <TextInput
+                  style={s.textInput}
+                  placeholder="💳"
+                  placeholderTextColor="#48484A"
+                  value={newIcon}
+                  onChangeText={setNewIcon}
+                  maxLength={4}
+                />
+
+                <Text style={s.fieldLabel}>Amount (optional)</Text>
+                <View style={s.amountWrap}>
+                  <Text style={s.dollarSign}>$</Text>
+                  <TextInput
+                    style={[s.textInput, { flex: 1, borderWidth: 0, padding: 0 }]}
+                    placeholder="0.00"
+                    placeholderTextColor="#48484A"
+                    keyboardType="decimal-pad"
+                    value={newAmount}
+                    onChangeText={setNewAmount}
+                  />
+                </View>
+
+                <Text style={s.fieldLabel}>Category</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+                  {CATEGORIES.map(cat => {
+                    const meta = CATEGORY_META[cat];
+                    return (
+                      <TouchableOpacity
+                        key={cat}
+                        style={[s.catChip, newCategory === cat && { borderColor: meta.color, backgroundColor: meta.color + '22' }]}
+                        onPress={() => setNewCategory(cat)}
+                      >
+                        <Text style={[s.catChipText, newCategory === cat && { color: meta.color }]}>{meta.label}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+
+                <Text style={s.fieldLabel}>Due Date</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
+                  {DUE_DAY_OPTIONS.map(opt => (
+                    <TouchableOpacity
+                      key={String(opt.value)}
+                      style={[s.dayChip, newDueDay === opt.value && s.dayChipActive]}
+                      onPress={() => setNewDueDay(opt.value)}
+                    >
+                      <Text style={[s.dayChipText, newDueDay === opt.value && s.dayChipTextActive]}>{opt.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+
+                <TouchableOpacity style={s.addBtn} onPress={handleAdd}>
+                  <Text style={s.addBtnText}>Add Reminder</Text>
                 </TouchableOpacity>
-              ))}
-            </ScrollView>
-
-            <TouchableOpacity style={s.addBtn} onPress={handleAdd}>
-              <Text style={s.addBtnText}>Add Reminder</Text>
-            </TouchableOpacity>
-            <View style={{ height: 40 }} />
-          </ScrollView>
+                <View style={{ height: 40 }} />
+              </ScrollView>
+            )}
+          </View>
         </TouchableOpacity>
       </Modal>
     </SafeAreaView>
@@ -448,4 +538,28 @@ const s = StyleSheet.create({
   dayChipTextActive: { color: '#000', fontWeight: '700' },
   addBtn: { backgroundColor: '#F59E0B', borderRadius: 14, padding: 16, alignItems: 'center' },
   addBtnText: { color: '#000', fontWeight: '700', fontSize: 16 },
+
+  // Tabs
+  tabRow: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 12, padding: 3, marginBottom: 16 },
+  tab: { flex: 1, paddingVertical: 8, borderRadius: 10, alignItems: 'center' },
+  tabActive: { backgroundColor: '#F59E0B' },
+  tabText: { fontSize: 14, fontWeight: '600', color: '#636366' },
+  tabTextActive: { color: '#000' },
+
+  // Suggestion rows
+  suggestionRow: {
+    flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 4,
+    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)', gap: 12,
+  },
+  suggestionRowAdded: { opacity: 0.6 },
+  suggestionIcon: { fontSize: 22, width: 32, textAlign: 'center' },
+  suggestionName: { flex: 1, fontSize: 15, color: '#EBEBF5', fontWeight: '500' },
+  suggestionNameAdded: { textDecorationLine: 'line-through', color: '#636366' },
+  suggestionCheck: {
+    width: 24, height: 24, borderRadius: 12,
+    borderWidth: 2, borderColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  suggestionCheckAdded: { backgroundColor: '#30D158', borderColor: '#30D158' },
+  suggestionCheckMark: { fontSize: 13, color: '#000', fontWeight: '700' },
 });
