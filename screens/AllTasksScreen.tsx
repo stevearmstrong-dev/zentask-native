@@ -65,7 +65,7 @@ export default function AllTasksScreen({ user }: Props) {
   if (loading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#1877F2" />
+        <ActivityIndicator size="large" color="#14B478" />
       </View>
     );
   }
@@ -126,7 +126,7 @@ export default function AllTasksScreen({ user }: Props) {
           />
         )}
         refreshControl={
-          <RefreshControl refreshing={false} onRefresh={reload} tintColor="#1877F2" />
+          <RefreshControl refreshing={false} onRefresh={reload} tintColor="#14B478" />
         }
         ListEmptyComponent={
           <View style={styles.empty}>
@@ -154,8 +154,8 @@ export default function AllTasksScreen({ user }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
-  loader: { flex: 1, backgroundColor: '#0A0A0F', justifyContent: 'center', alignItems: 'center' },
+  container: { flex: 1, backgroundColor: '#081A15' },
+  loader: { flex: 1, backgroundColor: '#081A15', justifyContent: 'center', alignItems: 'center' },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 28, fontWeight: '700', color: '#FFFFFF' },
   addBtn: {
-    backgroundColor: '#1877F2',
+    backgroundColor: '#14B478',
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -190,11 +190,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(20,180,120,0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(20,180,120,0.18)',
   },
-  filterTabActive: { backgroundColor: '#1877F2', borderColor: '#1877F2' },
+  filterTabActive: { backgroundColor: '#14B478', borderColor: '#14B478' },
   filterTabText: { fontSize: 14, color: '#636366', fontWeight: '500' },
   filterTabTextActive: { color: '#FFFFFF', fontWeight: '600' },
   countText: { fontSize: 13, color: '#48484A', paddingHorizontal: 20, marginBottom: 8 },
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   emptyText: { fontSize: 17, color: '#636366' },
   emptyAddBtn: {
     marginTop: 8,
-    backgroundColor: '#1877F2',
+    backgroundColor: '#14B478',
     borderRadius: 14,
     paddingHorizontal: 24,
     paddingVertical: 12,
