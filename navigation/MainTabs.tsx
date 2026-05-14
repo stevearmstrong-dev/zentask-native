@@ -93,7 +93,7 @@ function MoreStackNavigator({ user, onSignOut }: Props) {
 const TAB_THEMES: Record<string, { bg: string; border: string; active: string; inactive: string }> = {
   Today:    { bg: '#081A15', border: 'rgba(20,180,120,0.15)',  active: '#14B478', inactive: '#1F4A38' },
   Water:    { bg: '#060A10', border: 'rgba(59,130,246,0.15)',  active: '#3B82F6', inactive: '#1A3050' },
-  Upcoming: { bg: '#0A0814', border: 'rgba(124,58,237,0.15)', active: '#7C3AED', inactive: '#2A1A50' },
+  Upcoming: { bg: '#081A15', border: 'rgba(20,180,120,0.15)',  active: '#14B478', inactive: '#1F4A38' },
   Expenses: { bg: '#080E12', border: 'rgba(0,229,204,0.15)',  active: '#00E5CC', inactive: '#1A3A40' },
   Pomodoro: { bg: '#080E12', border: 'rgba(0,229,204,0.15)',  active: '#00E5CC', inactive: '#1A3A40' },
   More:     { bg: '#081A15', border: 'rgba(20,180,120,0.15)',  active: '#14B478', inactive: '#1F4A38' },
