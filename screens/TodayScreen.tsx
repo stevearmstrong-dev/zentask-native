@@ -132,7 +132,7 @@ export default function TodayScreen({ user }: Props) {
   if (loading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#1877F2" />
+        <ActivityIndicator size="large" color="#14B478" />
       </View>
     );
   }
@@ -184,7 +184,7 @@ export default function TodayScreen({ user }: Props) {
         data={[...overdueTasks, ...todayTasks]}
         keyExtractor={item => String(item.id)}
         renderItem={renderTask}
-        refreshControl={<RefreshControl refreshing={false} onRefresh={reload} tintColor="#1877F2" />}
+        refreshControl={<RefreshControl refreshing={false} onRefresh={reload} tintColor="#14B478" />}
         ListHeaderComponent={
           <Text style={styles.sectionTitle}>
             {overdueTasks.length > 0 ? 'Overdue & Today' : "Today's Tasks"}

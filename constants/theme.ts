@@ -10,80 +10,80 @@
 export const Colors = {
   // Background
   background: {
-    primary: '#1C1C1E',      // Main screen background
-    secondary: '#0A0A0F',    // Modal/focus mode background
-    elevated: '#2C2C2E',     // Raised surfaces
-    overlay: 'rgba(0,0,0,0.5)',
+    primary: '#081A15',       // Main screen background — deep forest teal
+    secondary: '#061210',     // Modal/focus mode background
+    elevated: '#0F2A20',      // Raised surfaces
+    overlay: 'rgba(0,0,0,0.6)',
   },
 
   // Surface (cards, containers)
   surface: {
-    base: 'rgba(255,255,255,0.06)',
-    elevated: 'rgba(255,255,255,0.08)',
-    input: 'rgba(255,255,255,0.06)',
-    hover: 'rgba(255,255,255,0.12)',
+    base: 'rgba(10,40,30,0.9)',
+    elevated: 'rgba(15,50,38,0.95)',
+    input: 'rgba(5,25,18,0.8)',
+    hover: 'rgba(20,180,120,0.1)',
   },
 
   // Borders
   border: {
-    subtle: 'rgba(255,255,255,0.08)',
-    default: 'rgba(255,255,255,0.1)',
-    strong: 'rgba(255,255,255,0.15)',
-    focus: 'rgba(24,119,242,0.4)',
+    subtle: 'rgba(20,180,120,0.08)',
+    default: 'rgba(20,180,120,0.12)',
+    strong: 'rgba(20,180,120,0.2)',
+    focus: 'rgba(20,180,120,0.4)',
   },
 
   // Text
   text: {
     primary: '#FFFFFF',
-    secondary: '#EBEBF5',
-    tertiary: '#636366',
-    disabled: '#48484A',
+    secondary: '#E0F0EA',
+    tertiary: '#3D7A62',
+    disabled: '#1F4A38',
     inverse: '#000000',
   },
 
   // Priority colors
   priority: {
-    high: '#FF453A',
-    medium: '#FF9F0A',
-    low: '#30D158',
+    high: '#FF6B6B',
+    medium: '#FFB347',
+    low: '#14B478',
   },
 
   // Semantic colors
   semantic: {
-    success: '#30D158',
-    error: '#FF453A',
-    warning: '#FF9F0A',
-    info: '#1877F2',
+    success: '#14B478',
+    error: '#FF6B6B',
+    warning: '#FFB347',
+    info: '#14B478',
   },
 
   // Interactive
   interactive: {
-    primary: '#1877F2',      // Main action buttons
-    primaryHover: '#0D65D9',
-    secondary: '#007AFF',    // iOS blue
-    secondaryHover: '#0051D5',
-    destructive: '#FF453A',
-    destructiveHover: '#FF2D20',
+    primary: '#14B478',       // Main action buttons — emerald
+    primaryHover: '#0F9A65',
+    secondary: '#0F9A65',
+    secondaryHover: '#0C7A50',
+    destructive: '#FF6B6B',
+    destructiveHover: '#FF4444',
   },
 
   // Status
   status: {
-    online: '#30D158',
-    offline: '#636366',
-    away: '#FF9F0A',
+    online: '#14B478',
+    offline: '#3D7A62',
+    away: '#FFB347',
   },
 
   // Overlays for priority badges
   priorityOverlay: {
-    high: 'rgba(255,69,58,0.2)',
-    medium: 'rgba(255,159,10,0.2)',
-    low: 'rgba(48,209,88,0.2)',
+    high: 'rgba(255,107,107,0.2)',
+    medium: 'rgba(255,179,71,0.2)',
+    low: 'rgba(20,180,120,0.2)',
   },
 
   // Category badge
   category: {
-    background: 'rgba(24,119,242,0.2)',
-    text: '#1877F2',
+    background: 'rgba(20,180,120,0.2)',
+    text: '#14B478',
   },
 };
 

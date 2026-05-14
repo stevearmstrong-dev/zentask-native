@@ -307,58 +307,58 @@ export default function TimeBlocksScreen() {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
+  container: { flex: 1, backgroundColor: '#0A0814' },
   header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 10 },
-  title: { fontSize: 26, fontWeight: '700', color: '#FFFFFF' },
-  subtitle: { fontSize: 13, color: '#636366', marginTop: 3 },
+  title: { fontSize: 26, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.5 },
+  subtitle: { fontSize: 13, color: '#A78BFA', marginTop: 3 },
 
   selectionBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: 'rgba(24,119,242,0.15)', paddingHorizontal: 16, paddingVertical: 10,
-    borderTopWidth: 1, borderBottomWidth: 1, borderColor: 'rgba(24,119,242,0.3)',
+    backgroundColor: 'rgba(124,58,237,0.15)', paddingHorizontal: 16, paddingVertical: 10,
+    borderTopWidth: 1, borderBottomWidth: 1, borderColor: 'rgba(124,58,237,0.3)',
   },
   selectionDot: { width: 10, height: 10, borderRadius: 5 },
-  selectionText: { flex: 1, fontSize: 13, color: '#EBEBF5', fontWeight: '500' },
-  selectionCancel: { backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
-  selectionCancelText: { color: '#636366', fontSize: 12 },
+  selectionText: { flex: 1, fontSize: 13, color: '#E9D5FF', fontWeight: '500' },
+  selectionCancel: { backgroundColor: 'rgba(124,58,237,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
+  selectionCancelText: { color: 'rgba(167,139,250,0.7)', fontSize: 12 },
 
   body: { flex: 1, flexDirection: 'row' },
 
   leftPanel: {
-    width: 120, borderRightWidth: 1, borderRightColor: 'rgba(255,255,255,0.06)',
+    width: 120, borderRightWidth: 1, borderRightColor: 'rgba(124,58,237,0.1)',
     paddingHorizontal: 8, paddingTop: 8,
   },
   rightPanel: { flex: 1, paddingTop: 8 },
   panelTitle: {
-    fontSize: 11, fontWeight: '600', color: '#636366',
+    fontSize: 11, fontWeight: '700', color: '#A78BFA',
     textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8, paddingHorizontal: 4,
   },
 
   unscheduledTask: {
-    flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 10,
-    marginBottom: 6, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+    flexDirection: 'row', backgroundColor: 'rgba(20,10,50,0.8)', borderRadius: 10,
+    marginBottom: 6, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(124,58,237,0.15)',
   },
-  unscheduledTaskSelected: { borderColor: '#1877F2', backgroundColor: 'rgba(24,119,242,0.15)' },
+  unscheduledTaskSelected: { borderColor: '#7C3AED', backgroundColor: 'rgba(124,58,237,0.18)' },
   priorityBar: { width: 3 },
   taskContent: { flex: 1, padding: 7 },
-  taskText: { fontSize: 11, color: '#EBEBF5', fontWeight: '500', lineHeight: 15 },
-  taskCategory: { fontSize: 10, color: '#636366', marginTop: 3 },
-  emptyText: { fontSize: 11, color: '#48484A', textAlign: 'center', paddingTop: 12, lineHeight: 17 },
-  hint: { fontSize: 10, color: '#48484A', textAlign: 'center', marginTop: 10, lineHeight: 15 },
+  taskText: { fontSize: 11, color: '#E9D5FF', fontWeight: '500', lineHeight: 15 },
+  taskCategory: { fontSize: 10, color: '#A78BFA', marginTop: 3 },
+  emptyText: { fontSize: 11, color: '#7C6AAF', textAlign: 'center', paddingTop: 12, lineHeight: 17 },
+  hint: { fontSize: 10, color: '#7C6AAF', textAlign: 'center', marginTop: 10, lineHeight: 15 },
 
   // Slot grid
   slotRow: {
     position: 'absolute', left: 0, right: 0,
     flexDirection: 'row', alignItems: 'flex-start',
   },
-  slotRowSelectable: { backgroundColor: 'rgba(24,119,242,0.03)' },
+  slotRowSelectable: { backgroundColor: 'rgba(124,58,237,0.04)' },
   timeLabel: {
-    width: TIME_LABEL_W, fontSize: 10, color: '#48484A',
+    width: TIME_LABEL_W, fontSize: 10, color: '#C4B5FD',
     paddingTop: 3, textAlign: 'right', paddingRight: 8,
   },
   slotLine: {
     flex: 1, height: 1,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(167,139,250,0.2)',
     marginTop: 6,
   },
 
@@ -369,7 +369,7 @@ const s = StyleSheet.create({
     right: 6,
     borderLeftWidth: 3,
     borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.09)',
+    backgroundColor: 'rgba(30,15,60,0.95)',
     overflow: 'hidden',
   },
   // Pill layout (15-min blocks < 36px tall)
@@ -378,28 +378,28 @@ const s = StyleSheet.create({
     paddingHorizontal: 6, gap: 5,
   },
   pillDot: { width: 6, height: 6, borderRadius: 3, flexShrink: 0 },
-  pillText: { flex: 1, fontSize: 10, color: '#EBEBF5', fontWeight: '600' },
-  pillAction: { fontSize: 11, color: '#636366' },
+  pillText: { flex: 1, fontSize: 10, color: '#E9D5FF', fontWeight: '600' },
+  pillAction: { fontSize: 11, color: '#A78BFA' },
 
   blockInner: { flex: 1, padding: 7, gap: 2 },
   blockTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 4 },
-  blockText: { flex: 1, fontSize: 12, color: '#EBEBF5', fontWeight: '600', lineHeight: 16 },
+  blockText: { flex: 1, fontSize: 12, color: '#E9D5FF', fontWeight: '600', lineHeight: 16 },
   blockActions: { flexDirection: 'row', gap: 10 },
-  blockAction: { fontSize: 14, color: '#636366' },
-  blockTime: { fontSize: 10, color: '#636366' },
-  blockCategory: { fontSize: 10, color: '#1877F2' },
+  blockAction: { fontSize: 14, color: '#A78BFA' },
+  blockTime: { fontSize: 10, color: '#A78BFA' },
+  blockCategory: { fontSize: 10, color: '#A78BFA' },
 
   // Modal
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
-  modalCard: { backgroundColor: '#1C1C1E', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' },
+  modalCard: { backgroundColor: 'rgba(14,8,30,0.98)', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, paddingBottom: 40, borderWidth: 1, borderColor: 'rgba(124,58,237,0.2)' },
   modalTitle: { fontSize: 18, fontWeight: '700', color: '#FFFFFF', marginBottom: 4 },
-  modalSubtitle: { fontSize: 13, color: '#636366', marginBottom: 18 },
+  modalSubtitle: { fontSize: 13, color: '#A78BFA', marginBottom: 18 },
   durationGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   durationChip: {
     paddingHorizontal: 22, paddingVertical: 13, borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(124,58,237,0.08)', borderWidth: 1, borderColor: 'rgba(124,58,237,0.2)',
   },
-  durationChipActive: { backgroundColor: '#1877F2', borderColor: '#1877F2' },
-  durationChipText: { fontSize: 15, fontWeight: '600', color: '#636366' },
+  durationChipActive: { backgroundColor: '#7C3AED', borderColor: '#7C3AED', shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 4 },
+  durationChipText: { fontSize: 15, fontWeight: '600', color: '#C4B5FD' },
   durationChipTextActive: { color: '#fff' },
 });

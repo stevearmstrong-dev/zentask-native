@@ -350,12 +350,12 @@ export default function WaterTrackerScreen({ user }: Props) {
             <Text style={styles.statLabel}>Today's Intake</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color: '#1877F2' }]}>{dailyGoal}</Text>
+            <Text style={[styles.statValue, { color: '#4D9EFF' }]}>{dailyGoal}</Text>
             <Text style={styles.statUnit}>ml</Text>
             <Text style={styles.statLabel}>Daily Goal</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={[styles.statValue, remaining === 0 ? { color: '#30D158' } : { color: '#FF9F0A' }]}>{remaining}</Text>
+            <Text style={[styles.statValue, remaining === 0 ? { color: '#4D9EFF' } : { color: '#FFB347' }]}>{remaining}</Text>
             <Text style={styles.statUnit}>ml</Text>
             <Text style={styles.statLabel}>Remaining</Text>
           </View>
@@ -378,7 +378,7 @@ export default function WaterTrackerScreen({ user }: Props) {
           <TextInput
             style={styles.customInput}
             placeholder="Enter ml…"
-            placeholderTextColor="#48484A"
+            placeholderTextColor="#1A3050"
             keyboardType="number-pad"
             value={customAmount}
             onChangeText={setCustomAmount}
@@ -456,7 +456,7 @@ export default function WaterTrackerScreen({ user }: Props) {
                 <Text style={styles.historyStatLabel}>Avg/Day</Text>
               </View>
               <View style={styles.historyStat}>
-                <Text style={[styles.historyStatValue, { color: '#30D158' }]}>{goalDays}</Text>
+                <Text style={[styles.historyStatValue, { color: '#4D9EFF' }]}>{goalDays}</Text>
                 <Text style={styles.historyStatLabel}>Goal Days</Text>
               </View>
             </View>
@@ -468,7 +468,7 @@ export default function WaterTrackerScreen({ user }: Props) {
           {historyBuckets.map((bucket, i) => {
             const barPct = maxBucketTotal > 0 ? bucket.total / maxBucketTotal : 0;
             const metGoal = bucket.total >= (bucket.goal / bucket.days);
-            const barColor = bucket.total === 0 ? 'rgba(255,255,255,0.06)' : metGoal ? '#30D158' : '#1877F2';
+            const barColor = bucket.total === 0 ? 'rgba(10,25,50,0.8)' : metGoal ? '#4D9EFF' : '#1877F2';
             const isToday = i === 0 && historyPeriod === 'day';
             return (
               <View key={i} style={styles.chartBar}>
@@ -478,7 +478,7 @@ export default function WaterTrackerScreen({ user }: Props) {
                 <View style={styles.chartBarTrack}>
                   <View style={[styles.chartBarFill, { height: `${Math.max(barPct * 100, bucket.total > 0 ? 4 : 0)}%`, backgroundColor: barColor }]} />
                 </View>
-                <Text style={[styles.chartBarLabel, isToday && { color: '#1877F2', fontWeight: '700' }]} numberOfLines={2}>
+                <Text style={[styles.chartBarLabel, isToday && { color: '#4D9EFF', fontWeight: '700' }]} numberOfLines={2}>
                   {historyPeriod === 'day'
                     ? bucket.label.split(',')[0]
                     : historyPeriod === 'year'
@@ -494,7 +494,7 @@ export default function WaterTrackerScreen({ user }: Props) {
         <View style={styles.legendRow}>
           <View style={[styles.legendDot, { backgroundColor: '#1877F2' }]} />
           <Text style={styles.legendText}>Below goal</Text>
-          <View style={[styles.legendDot, { backgroundColor: '#30D158', marginLeft: 12 }]} />
+          <View style={[styles.legendDot, { backgroundColor: '#4D9EFF', marginLeft: 12 }]} />
           <Text style={styles.legendText}>Goal met</Text>
         </View>
 
@@ -535,44 +535,44 @@ const GLASS_HEIGHT = 220;
 const GLASS_WIDTH = 140;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
+  container: { flex: 1, backgroundColor: '#080F1A' },
   scroll: { paddingHorizontal: 20, paddingTop: 8 },
   header: { marginBottom: 24 },
-  title: { fontSize: 28, fontWeight: '700', color: '#FFFFFF' },
-  subtitle: { fontSize: 14, color: '#636366', marginTop: 4 },
+  title: { fontSize: 28, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.5 },
+  subtitle: { fontSize: 14, color: '#2E4A6A', marginTop: 4 },
 
   // Glass
   glassWrapper: { alignItems: 'center', marginBottom: 8 },
   glass: {
     width: GLASS_WIDTH,
     height: GLASS_HEIGHT,
-    borderWidth: 3,
-    borderColor: 'rgba(24,119,242,0.5)',
+    borderWidth: 2,
+    borderColor: 'rgba(24,119,242,0.3)',
     borderRadius: 12,
     borderTopLeftRadius: 4,
     borderTopRightRadius: 4,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    backgroundColor: 'rgba(10,25,50,0.8)',
     justifyContent: 'flex-end',
     position: 'relative',
   },
-  glassOverflow: { borderColor: '#1877F2' },
+  glassOverflow: { borderColor: 'rgba(24,119,242,0.7)' },
   fill: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     backgroundColor: '#1877F2',
-    opacity: 0.75,
+    opacity: 0.8,
   },
-  fillOverflow: { backgroundColor: '#30D158' },
+  fillOverflow: { backgroundColor: '#3B9EFF' },
   wave: {
     position: 'absolute',
     top: -6,
     left: -20,
     right: -20,
     height: 12,
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: 'rgba(255,255,255,0.25)',
     borderRadius: 6,
   },
   glassOverlay: {
@@ -587,12 +587,12 @@ const styles = StyleSheet.create({
     left: 0,
     width: 12,
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
   },
   puddle: {
     width: GLASS_WIDTH + 20,
     height: 10,
-    backgroundColor: 'rgba(24,119,242,0.3)',
+    backgroundColor: 'rgba(24,119,242,0.25)',
     borderRadius: 10,
     marginTop: 4,
   },
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
   motivation: {
     textAlign: 'center',
     fontSize: 15,
-    color: '#EBEBF5',
+    color: '#C0D8F0',
     marginBottom: 20,
     marginTop: 8,
     fontWeight: '500',
@@ -611,48 +611,48 @@ const styles = StyleSheet.create({
   statsRow: { flexDirection: 'row', gap: 10, marginBottom: 24 },
   statCard: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(10,30,60,0.9)',
     borderRadius: 16,
     padding: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(24,119,242,0.12)',
   },
   statValue: { fontSize: 22, fontWeight: '700', color: '#FFFFFF' },
-  statUnit: { fontSize: 11, color: '#636366', marginTop: 1 },
-  statLabel: { fontSize: 11, color: '#636366', marginTop: 4, textAlign: 'center' },
+  statUnit: { fontSize: 11, color: '#2E4A6A', marginTop: 1 },
+  statLabel: { fontSize: 11, color: '#2E4A6A', marginTop: 4, textAlign: 'center' },
 
   // Section titles
-  sectionTitle: { fontSize: 15, fontWeight: '600', color: '#EBEBF5', marginBottom: 12 },
+  sectionTitle: { fontSize: 15, fontWeight: '600', color: '#C0D8F0', marginBottom: 12 },
 
   // Quick add
   quickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 24 },
   quickBtn: {
     flex: 1,
     minWidth: '45%',
-    backgroundColor: 'rgba(24,119,242,0.15)',
+    backgroundColor: 'rgba(24,119,242,0.1)',
     borderRadius: 14,
     paddingVertical: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(24,119,242,0.3)',
+    borderColor: 'rgba(24,119,242,0.2)',
     gap: 4,
   },
   quickBtnIcon: { fontSize: 20 },
-  quickBtnText: { fontSize: 14, color: '#1877F2', fontWeight: '600' },
+  quickBtnText: { fontSize: 14, color: '#4D9EFF', fontWeight: '600' },
 
   // Custom add
   customRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
   customInput: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(10,25,50,0.8)',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 16,
     color: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(24,119,242,0.15)',
   },
   customAddBtn: {
     backgroundColor: '#1877F2',
@@ -660,57 +660,67 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     justifyContent: 'center',
+    shadowColor: '#1877F2',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 6,
   },
-  customAddBtnDisabled: { backgroundColor: 'rgba(24,119,242,0.3)' },
+  customAddBtnDisabled: { backgroundColor: 'rgba(24,119,242,0.25)', shadowOpacity: 0 },
   customAddBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 
   // Goal button
   goalBtn: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(10,25,50,0.8)',
     borderRadius: 14,
     padding: 14,
     alignItems: 'center',
     marginBottom: 28,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(24,119,242,0.12)',
   },
-  goalBtnText: { color: '#636366', fontSize: 14, fontWeight: '500' },
+  goalBtnText: { color: '#2E4A6A', fontSize: 14, fontWeight: '500' },
 
   // History
   historyItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(10,30,60,0.9)',
     borderRadius: 12,
     padding: 14,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(24,119,242,0.1)',
   },
-  historyAmount: { flex: 1, fontSize: 15, color: '#EBEBF5', fontWeight: '500' },
-  historyTime: { fontSize: 13, color: '#636366', marginRight: 12 },
-  historyDelete: { fontSize: 16, color: '#48484A' },
-  emptyText: { fontSize: 14, color: '#48484A', textAlign: 'center', paddingVertical: 20 },
+  historyAmount: { flex: 1, fontSize: 15, color: '#C0D8F0', fontWeight: '500' },
+  historyTime: { fontSize: 13, color: '#2E4A6A', marginRight: 12 },
+  historyDelete: { fontSize: 16, color: '#1A3050' },
+  emptyText: { fontSize: 14, color: '#1A3050', textAlign: 'center', paddingVertical: 20 },
 
   // Goal modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(0,0,0,0.75)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
   },
   modalCard: {
     width: '100%',
-    backgroundColor: '#1C1C1E',
-    borderRadius: 20,
+    backgroundColor: '#0D1E35',
+    borderRadius: 24,
     padding: 24,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(24,119,242,0.2)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.6,
+    shadowRadius: 32,
+    elevation: 20,
   },
   modalTitle: { fontSize: 18, fontWeight: '700', color: '#FFFFFF', marginBottom: 16, textAlign: 'center' },
   modalInput: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(10,25,50,0.8)',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -719,72 +729,79 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     textAlign: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
+    borderColor: 'rgba(24,119,242,0.2)',
     marginBottom: 8,
   },
-  modalUnit: { textAlign: 'center', color: '#636366', fontSize: 14, marginBottom: 20 },
+  modalUnit: { textAlign: 'center', color: '#2E4A6A', fontSize: 14, marginBottom: 20 },
   modalBtns: { flexDirection: 'row', gap: 12 },
   modalCancel: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(10,25,50,0.8)',
     borderRadius: 12,
     padding: 14,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(24,119,242,0.12)',
   },
-  modalCancelText: { color: '#636366', fontWeight: '600', fontSize: 15 },
+  modalCancelText: { color: '#2E4A6A', fontWeight: '600', fontSize: 15 },
   modalSave: {
     flex: 1,
     backgroundColor: '#1877F2',
     borderRadius: 12,
     padding: 14,
     alignItems: 'center',
+    shadowColor: '#1877F2',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 6,
   },
   modalSaveText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 
-  // History
+  // Period tabs
   periodTabs: { flexDirection: 'row', gap: 8, marginBottom: 16 },
   periodTab: {
     flex: 1,
     paddingVertical: 8,
     borderRadius: 10,
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(10,25,50,0.8)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(24,119,242,0.12)',
   },
   periodTabActive: { backgroundColor: '#1877F2', borderColor: '#1877F2' },
-  periodTabText: { fontSize: 13, fontWeight: '600', color: '#636366' },
+  periodTabText: { fontSize: 13, fontWeight: '600', color: '#2E4A6A' },
   periodTabTextActive: { color: '#FFFFFF' },
 
   historySummary: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   historyStat: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(10,30,60,0.9)',
     borderRadius: 12,
     padding: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(24,119,242,0.1)',
   },
   historyStatValue: { fontSize: 20, fontWeight: '700', color: '#FFFFFF' },
-  historyStatLabel: { fontSize: 11, color: '#636366', marginTop: 2 },
+  historyStatLabel: { fontSize: 11, color: '#2E4A6A', marginTop: 2 },
 
   chartScroll: { marginBottom: 8 },
   chartContent: { paddingBottom: 4, gap: 6, alignItems: 'flex-end' },
   chartBar: { width: 52, alignItems: 'center', gap: 4 },
-  chartBarValue: { fontSize: 9, color: '#636366', height: 14, textAlign: 'center' },
+  chartBarValue: { fontSize: 9, color: '#2E4A6A', height: 14, textAlign: 'center' },
   chartBarTrack: {
     width: 36,
     height: 100,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(10,25,50,0.8)',
     borderRadius: 6,
     justifyContent: 'flex-end',
     overflow: 'hidden',
   },
   chartBarFill: { width: '100%', borderRadius: 6 },
-  chartBarLabel: { fontSize: 10, color: '#8E8E93', textAlign: 'center' },
+  chartBarLabel: { fontSize: 10, color: '#2E4A6A', textAlign: 'center' },
 
   legendRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16 },
   legendDot: { width: 8, height: 8, borderRadius: 4 },
-  legendText: { fontSize: 11, color: '#636366' },
+  legendText: { fontSize: 11, color: '#2E4A6A' },
 });

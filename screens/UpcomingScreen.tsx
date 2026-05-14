@@ -172,32 +172,32 @@ function ScheduleModal({ task, dayKey, onSave, onClose }: ScheduleModalProps) {
 }
 
 const sm = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 24 },
-  card: { backgroundColor: '#2C2C2E', borderRadius: 16, padding: 20, width: '100%' },
-  label: { fontSize: 11, fontWeight: '600', color: '#636366', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  card: { backgroundColor: 'rgba(18,10,40,0.98)', borderRadius: 20, padding: 22, width: '100%', borderWidth: 1, borderColor: 'rgba(124,58,237,0.2)' },
+  label: { fontSize: 11, fontWeight: '600', color: 'rgba(167,139,250,0.6)', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 6 },
   taskTitle: { fontSize: 16, fontWeight: '600', color: '#FFFFFF', marginBottom: 20 },
-  sectionLabel: { fontSize: 12, fontWeight: '600', color: '#636366', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 },
+  sectionLabel: { fontSize: 12, fontWeight: '600', color: 'rgba(167,139,250,0.6)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 },
   timeRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, gap: 8 },
   picker: { height: 100, width: 50 },
   pickerItem: { paddingVertical: 8, paddingHorizontal: 6, borderRadius: 8, alignItems: 'center' },
-  pickerItemActive: { backgroundColor: '#1877F2' },
-  pickerText: { fontSize: 18, color: '#EBEBF5' },
+  pickerItemActive: { backgroundColor: '#7C3AED' },
+  pickerText: { fontSize: 18, color: 'rgba(233,213,255,0.8)' },
   pickerTextActive: { color: '#FFFFFF', fontWeight: '700' },
   colon: { fontSize: 22, color: '#FFFFFF', fontWeight: '700' },
   ampmCol: { gap: 6, marginLeft: 8 },
-  ampmBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' },
-  ampmActive: { backgroundColor: '#1877F2', borderColor: '#1877F2' },
-  ampmText: { fontSize: 14, color: '#EBEBF5' },
+  ampmBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(124,58,237,0.25)' },
+  ampmActive: { backgroundColor: '#7C3AED', borderColor: '#7C3AED' },
+  ampmText: { fontSize: 14, color: 'rgba(233,213,255,0.8)' },
   ampmTextActive: { color: '#FFFFFF', fontWeight: '600' },
   durationRow: { flexDirection: 'row', gap: 8, marginBottom: 24 },
-  durationChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.06)' },
-  durationChipActive: { backgroundColor: '#1877F2', borderColor: '#1877F2' },
-  durationChipText: { fontSize: 14, color: '#EBEBF5' },
+  durationChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(124,58,237,0.25)', backgroundColor: 'rgba(124,58,237,0.08)' },
+  durationChipActive: { backgroundColor: '#7C3AED', borderColor: '#7C3AED' },
+  durationChipText: { fontSize: 14, color: 'rgba(233,213,255,0.7)' },
   durationChipTextActive: { color: '#FFFFFF', fontWeight: '600' },
   actions: { flexDirection: 'row', gap: 10 },
-  cancelBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', alignItems: 'center' },
-  cancelText: { fontSize: 15, color: '#EBEBF5' },
-  saveBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: '#1877F2', alignItems: 'center' },
+  cancelBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(124,58,237,0.25)', alignItems: 'center' },
+  cancelText: { fontSize: 15, color: 'rgba(233,213,255,0.7)' },
+  saveBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: '#7C3AED', alignItems: 'center' },
   saveText: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
 });
 
@@ -259,7 +259,7 @@ function EditTaskModal({ task, onSave, onClose }: EditModalProps) {
             value={text}
             onChangeText={setText}
             placeholder="What needs to be done?"
-            placeholderTextColor="#636366"
+            placeholderTextColor="rgba(124,58,237,0.4)"
             autoFocus
             multiline
           />
@@ -314,28 +314,28 @@ function EditTaskModal({ task, onSave, onClose }: EditModalProps) {
 
 const em = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
-  card: { backgroundColor: '#1C1C1E', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
+  card: { backgroundColor: 'rgba(14,8,30,0.98)', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, paddingBottom: 40, borderWidth: 1, borderColor: 'rgba(124,58,237,0.2)' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   title: { fontSize: 20, fontWeight: '700', color: '#FFFFFF' },
   closeBtn: { padding: 4 },
-  closeText: { fontSize: 20, color: '#636366' },
-  label: { fontSize: 12, fontWeight: '600', color: '#8E8E93', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8, marginTop: 16 },
-  input: { backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 12, padding: 14, fontSize: 16, color: '#FFFFFF', borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', minHeight: 80, textAlignVertical: 'top' },
+  closeText: { fontSize: 20, color: 'rgba(167,139,250,0.5)' },
+  label: { fontSize: 12, fontWeight: '600', color: 'rgba(167,139,250,0.6)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8, marginTop: 16 },
+  input: { backgroundColor: 'rgba(124,58,237,0.08)', borderRadius: 12, padding: 14, fontSize: 16, color: '#FFFFFF', borderWidth: 1, borderColor: 'rgba(124,58,237,0.2)', minHeight: 80, textAlignVertical: 'top' },
   priorityRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
-  priorityBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.06)' },
-  priorityText: { fontSize: 14, color: '#EBEBF5', fontWeight: '500' },
+  priorityBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(124,58,237,0.2)', alignItems: 'center', backgroundColor: 'rgba(124,58,237,0.06)' },
+  priorityText: { fontSize: 14, color: 'rgba(233,213,255,0.8)', fontWeight: '500' },
   priorityTextActive: { color: '#FFFFFF', fontWeight: '700' },
   categoryScroll: { maxHeight: 50 },
   categoryRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
-  categoryChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.06)' },
-  categoryChipActive: { backgroundColor: '#1877F2', borderColor: '#1877F2' },
-  categoryText: { fontSize: 14, color: '#EBEBF5' },
+  categoryChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(124,58,237,0.2)', backgroundColor: 'rgba(124,58,237,0.06)' },
+  categoryChipActive: { backgroundColor: '#7C3AED', borderColor: '#7C3AED' },
+  categoryText: { fontSize: 14, color: 'rgba(233,213,255,0.8)' },
   categoryTextActive: { color: '#FFFFFF', fontWeight: '600' },
   actions: { flexDirection: 'row', gap: 10, marginTop: 24 },
-  cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', alignItems: 'center' },
-  cancelText: { fontSize: 16, color: '#EBEBF5', fontWeight: '500' },
-  saveBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, backgroundColor: '#1877F2', alignItems: 'center' },
-  saveBtnDisabled: { backgroundColor: '#2C2C2E', opacity: 0.5 },
+  cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(124,58,237,0.25)', alignItems: 'center' },
+  cancelText: { fontSize: 16, color: 'rgba(233,213,255,0.7)', fontWeight: '500' },
+  saveBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, backgroundColor: '#7C3AED', alignItems: 'center', shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 6 },
+  saveBtnDisabled: { backgroundColor: 'rgba(124,58,237,0.2)', opacity: 0.5, shadowOpacity: 0 },
   saveText: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
 });
 
@@ -353,7 +353,7 @@ interface TaskRowProps {
 }
 
 function TaskRow({ task, onToggle, onDelete, onSchedule, onUnschedule, onFocus, onEdit, isScheduled }: TaskRowProps) {
-  const priorityColor = PRIORITY_COLORS[task.priority] || '#636366';
+  const priorityColor = PRIORITY_COLORS[task.priority] || '#A78BFA';
 
   const timeLabel = useMemo(() => {
     if (task.scheduledStart && task.scheduledDuration) {
@@ -417,18 +417,18 @@ function TaskRow({ task, onToggle, onDelete, onSchedule, onUnschedule, onFocus, 
 }
 
 const tr = StyleSheet.create({
-  row: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, marginBottom: 10, overflow: 'hidden' },
+  row: { flexDirection: 'row', backgroundColor: 'rgba(20,10,50,0.9)', borderRadius: 14, marginBottom: 10, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(124,58,237,0.15)' },
   priorityBar: { width: 4 },
   content: { flex: 1, padding: 12 },
-  timeLabel: { fontSize: 11, fontWeight: '600', color: '#8E8E93', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
-  text: { fontSize: 15, color: '#FFFFFF', fontWeight: '500', marginBottom: 8 },
-  textDone: { textDecorationLine: 'line-through', color: '#636366' },
+  timeLabel: { fontSize: 11, fontWeight: '600', color: '#A78BFA', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
+  text: { fontSize: 15, color: '#F3F0FF', fontWeight: '500', marginBottom: 8 },
+  textDone: { textDecorationLine: 'line-through', color: 'rgba(167,139,250,0.35)' },
   meta: { flexDirection: 'row', gap: 6, marginBottom: 10, flexWrap: 'wrap' },
-  chip: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.06)' },
-  chipText: { fontSize: 11, color: '#EBEBF5', fontWeight: '500' },
+  chip: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(124,58,237,0.25)', backgroundColor: 'rgba(124,58,237,0.1)' },
+  chipText: { fontSize: 11, color: 'rgba(233,213,255,0.8)', fontWeight: '500' },
   actions: { flexDirection: 'row', gap: 4 },
-  actionBtn: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.08)' },
-  actionIcon: { fontSize: 14, color: '#EBEBF5' },
+  actionBtn: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, backgroundColor: 'rgba(124,58,237,0.12)' },
+  actionIcon: { fontSize: 14, color: 'rgba(233,213,255,0.75)' },
 });
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
@@ -626,7 +626,7 @@ export default function UpcomingScreen() {
           <TextInput
             style={styles.addInput}
             placeholder={`Add task for ${formatDayLabel(selectedDay).weekday}…`}
-            placeholderTextColor="#636366"
+            placeholderTextColor="rgba(124,58,237,0.4)"
             value={newTaskText}
             onChangeText={setNewTaskText}
             onSubmitEditing={handleAddTask}
@@ -675,10 +675,10 @@ export default function UpcomingScreen() {
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
+  container: { flex: 1, backgroundColor: '#0A0814' },
   header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 4 },
-  title: { fontSize: 28, fontWeight: '700', color: '#FFFFFF' },
-  subtitle: { fontSize: 13, color: '#636366', marginTop: 2 },
+  title: { fontSize: 28, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.5 },
+  subtitle: { fontSize: 13, color: '#A78BFA', marginTop: 2 },
 
   dayNav: { flexGrow: 0, marginTop: 12 },
   dayNavContent: { paddingHorizontal: 16, gap: 8, paddingBottom: 4 },
@@ -688,58 +688,63 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderColor: 'rgba(124,58,237,0.2)',
+    backgroundColor: 'rgba(20,10,50,0.7)',
     minWidth: 56,
   },
   dayPillActive: {
-    backgroundColor: '#1877F2',
-    borderColor: '#1877F2',
+    backgroundColor: '#7C3AED',
+    borderColor: '#7C3AED',
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.45,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  dayWeekday: { fontSize: 11, fontWeight: '600', color: '#8E8E93', textTransform: 'uppercase', letterSpacing: 0.5 },
-  dayDate: { fontSize: 20, fontWeight: '700', color: '#FFFFFF', marginTop: 2 },
+  dayWeekday: { fontSize: 11, fontWeight: '600', color: '#A78BFA', textTransform: 'uppercase', letterSpacing: 0.5 },
+  dayDate: { fontSize: 20, fontWeight: '700', color: '#E9D5FF', marginTop: 2 },
   dayTextActive: { color: '#FFFFFF' },
-  dayBadge: { marginTop: 4, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8, paddingHorizontal: 6, paddingVertical: 1 },
-  dayBadgeActive: { backgroundColor: 'rgba(255,255,255,0.3)' },
-  dayBadgeText: { fontSize: 10, fontWeight: '700', color: '#EBEBF5' },
+  dayBadge: { marginTop: 4, backgroundColor: 'rgba(124,58,237,0.3)', borderRadius: 8, paddingHorizontal: 6, paddingVertical: 1 },
+  dayBadgeActive: { backgroundColor: 'rgba(255,255,255,0.25)' },
+  dayBadgeText: { fontSize: 10, fontWeight: '700', color: 'rgba(233,213,255,0.8)' },
   dayBadgeTextActive: { color: '#FFFFFF' },
 
   dayHeading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
-  dayHeadingText: { fontSize: 15, fontWeight: '600', color: '#EBEBF5' },
-  dayHeadingCount: { fontSize: 13, color: '#636366' },
+  dayHeadingText: { fontSize: 15, fontWeight: '600', color: '#E9D5FF' },
+  dayHeadingCount: { fontSize: 13, color: '#A78BFA' },
 
   body: { flex: 1 },
   bodyContent: { paddingHorizontal: 16, paddingBottom: 40 },
 
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
-  sectionTitle: { fontSize: 13, fontWeight: '600', color: '#636366', textTransform: 'uppercase', letterSpacing: 0.5 },
-  sectionBadge: { backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 8, paddingHorizontal: 7, paddingVertical: 2 },
-  sectionBadgeText: { fontSize: 11, fontWeight: '700', color: '#EBEBF5' },
+  sectionTitle: { fontSize: 13, fontWeight: '600', color: '#A78BFA', textTransform: 'uppercase', letterSpacing: 0.5 },
+  sectionBadge: { backgroundColor: 'rgba(124,58,237,0.2)', borderRadius: 8, paddingHorizontal: 7, paddingVertical: 2 },
+  sectionBadgeText: { fontSize: 11, fontWeight: '700', color: 'rgba(233,213,255,0.8)' },
 
   emptyBox: {
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(124,58,237,0.15)',
     borderStyle: 'dashed',
     borderRadius: 12,
     paddingVertical: 20,
     alignItems: 'center',
     marginBottom: 10,
   },
-  emptyText: { fontSize: 13, color: '#48484A', textAlign: 'center' },
+  emptyText: { fontSize: 13, color: '#7C6AAF', textAlign: 'center' },
 
   addRow: { flexDirection: 'row', gap: 10, marginTop: 24, alignItems: 'center' },
   addInput: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.07)',
+    backgroundColor: 'rgba(124,58,237,0.07)',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
-    color: '#FFFFFF',
+    borderColor: 'rgba(124,58,237,0.2)',
+    color: '#F3F0FF',
     fontSize: 15,
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
-  addBtn: { backgroundColor: '#1877F2', paddingHorizontal: 18, paddingVertical: 12, borderRadius: 12 },
-  addBtnDisabled: { backgroundColor: '#2C2C2E' },
+  addBtn: { backgroundColor: '#7C3AED', paddingHorizontal: 18, paddingVertical: 12, borderRadius: 12, shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 4 },
+  addBtnDisabled: { backgroundColor: 'rgba(124,58,237,0.2)', shadowOpacity: 0 },
   addBtnText: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
 });
