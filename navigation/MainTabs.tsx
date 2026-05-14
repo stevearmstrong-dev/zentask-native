@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -90,19 +90,38 @@ function MoreStackNavigator({ user, onSignOut }: Props) {
   );
 }
 
+const TAB_THEMES: Record<string, { bg: string; border: string; active: string; inactive: string }> = {
+  Today:    { bg: '#081A15', border: 'rgba(20,180,120,0.15)',  active: '#14B478', inactive: '#1F4A38' },
+  Water:    { bg: '#060A10', border: 'rgba(59,130,246,0.15)',  active: '#3B82F6', inactive: '#1A3050' },
+  Upcoming: { bg: '#0A0814', border: 'rgba(124,58,237,0.15)', active: '#7C3AED', inactive: '#2A1A50' },
+  Expenses: { bg: '#080E12', border: 'rgba(0,229,204,0.15)',  active: '#00E5CC', inactive: '#1A3A40' },
+  Pomodoro: { bg: '#080E12', border: 'rgba(0,229,204,0.15)',  active: '#00E5CC', inactive: '#1A3A40' },
+  More:     { bg: '#081A15', border: 'rgba(20,180,120,0.15)',  active: '#14B478', inactive: '#1F4A38' },
+};
+
 export default function MainTabs({ user, onSignOut }: Props) {
+  const [activeTab, setActiveTab] = useState('Today');
+  const theme = TAB_THEMES[activeTab] ?? TAB_THEMES.Today;
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#081A15',
-          borderTopColor: 'rgba(20,180,120,0.15)',
+          backgroundColor: theme.bg,
+          borderTopColor: theme.border,
           borderTopWidth: 1,
         },
-        tabBarActiveTintColor: '#14B478',
-        tabBarInactiveTintColor: '#1F4A38',
+        tabBarActiveTintColor: theme.active,
+        tabBarInactiveTintColor: theme.inactive,
         tabBarLabelStyle: { fontSize: 11, fontWeight: '500' },
+      }}
+      screenListeners={{
+        state: (e) => {
+          const routes = (e.data as any)?.state?.routes;
+          const idx = (e.data as any)?.state?.index;
+          if (routes && idx != null) setActiveTab(routes[idx].name);
+        },
       }}
     >
       <Tab.Screen
