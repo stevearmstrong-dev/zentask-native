@@ -75,10 +75,10 @@ export function useStreaks(userEmail: string): Streaks {
       }
     }
 
-    // NoFap streak — days since start date
+    // NoFap streak — days since start (day 0 = Day 1, so add 1)
     let nofapStreak = 0;
     if (rawNofapStart) {
-      nofapStreak = calcDaysSince(rawNofapStart);
+      nofapStreak = calcDaysSince(rawNofapStart) + 1;
     }
 
     // Meal streak — consecutive days with at least one meal logged
