@@ -21,16 +21,16 @@ function getKeys(userEmail: string) {
 
 interface StreakLog {
   id: number;
-  startDate: string; // ISO
-  endDate: string;   // ISO
-  duration: number;  // days
+  startDate: string;
+  endDate: string;
+  duration: number;
 }
 
 const MILESTONES = [
-  { days: 7,   icon: '⭐', label: '7 Days'  },
-  { days: 30,  icon: '🏆', label: '30 Days' },
-  { days: 90,  icon: '🎖️', label: '90 Days' },
-  { days: 365, icon: '🏅', label: '365 Days'},
+  { days: 7,   icon: '⭐', label: '7 Days'   },
+  { days: 30,  icon: '🏆', label: '30 Days'  },
+  { days: 90,  icon: '🎖️', label: '90 Days'  },
+  { days: 365, icon: '🏅', label: '365 Days' },
 ];
 
 function calcDays(isoStart: string): number {
@@ -45,16 +45,16 @@ function formatDate(iso: string): string {
 }
 
 function getMotivation(days: number): string {
-  if (days === 0)   return '💪 Start your journey today!';
-  if (days === 1)   return '🌱 Day 1! The journey begins!';
-  if (days < 7)     return '🔥 Building momentum! Keep going!';
-  if (days === 7)   return '⭐ One week strong! Amazing!';
-  if (days < 30)    return '💎 You\'re crushing it! Stay focused!';
-  if (days === 30)  return '🏆 30 days! Incredible achievement!';
-  if (days < 90)    return '👑 You\'re unstoppable! Keep it up!';
-  if (days === 90)  return '🎖️ 90 days! Life-changing milestone!';
-  if (days < 365)   return '🌟 Legendary streak! You\'re an inspiration!';
-  return '🏅 365+ days! Absolute legend!';
+  if (days === 0)  return 'Start your journey today';
+  if (days === 1)  return 'Day 1 — the journey begins';
+  if (days < 7)   return 'Building momentum — keep going';
+  if (days === 7)  return 'One week strong — amazing';
+  if (days < 30)  return "You're crushing it — stay focused";
+  if (days === 30) return '30 days — incredible achievement';
+  if (days < 90)  return "You're unstoppable — keep it up";
+  if (days === 90) return '90 days — life-changing milestone';
+  if (days < 365) return "Legendary streak — you're an inspiration";
+  return '365+ days — absolute legend';
 }
 
 function getMilestoneProgress(days: number) {
@@ -75,13 +75,11 @@ export default function NoFapTrackerScreen({ user }: Props) {
   const [loaded, setLoaded] = useState(false);
   const [now, setNow] = useState(new Date());
 
-  // Tick every minute to keep streak count live
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(t);
   }, []);
 
-  // Load
   useEffect(() => {
     setLoaded(false);
     setStartDate(null);
@@ -96,7 +94,6 @@ export default function NoFapTrackerScreen({ user }: Props) {
     }).catch(console.error);
   }, [START_DATE_KEY, STREAKS_KEY]);
 
-  // Persist
   useEffect(() => {
     if (!loaded) return;
     if (startDate) AsyncStorage.setItem(START_DATE_KEY, startDate).catch(console.error);
@@ -146,54 +143,98 @@ export default function NoFapTrackerScreen({ user }: Props) {
     ]);
   }, []);
 
+  const accent = startDate ? '#FF9F0A' : '#8E8E93';
+  const accentDim = startDate ? 'rgba(255,159,10,0.12)' : 'rgba(142,142,147,0.08)';
+  const accentBorder = startDate ? 'rgba(255,159,10,0.3)' : 'rgba(142,142,147,0.15)';
+
   return (
     <SafeAreaView style={s.container} edges={['top']}>
+      {/* Ambient glow */}
+      <View style={[s.glowBlob, { backgroundColor: accent }]} />
+
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.scroll}>
 
         {/* Header */}
         <View style={s.header}>
-          <Text style={s.title}>💪 NoFap Tracker</Text>
-          <Text style={s.subtitle}>Build discipline, one day at a time</Text>
+          <View>
+            <Text style={s.title}>Discipline</Text>
+            <Text style={s.subtitle}>Build discipline, one day at a time</Text>
+          </View>
         </View>
 
-        {/* Streak circle */}
-        <View style={s.circleWrapper}>
-          <View style={[s.circle, startDate && s.circleActive]}>
-            <Text style={s.circleNumber}>{currentStreak}</Text>
-            <Text style={s.circleLabel}>{currentStreak === 1 ? 'Day' : 'Days'}</Text>
+        {/* Hero ring card */}
+        <View style={s.ringCard}>
+          <Text style={[s.modeLabel, { color: accent }]}>
+            {startDate ? 'ACTIVE STREAK' : 'NO ACTIVE STREAK'}
+          </Text>
+
+          <View style={s.ringOuter}>
+            {/* Halo */}
+            <View style={[s.ringHalo, { backgroundColor: accent }]} />
+            {/* Track ring */}
+            <View style={[s.ringTrack, {
+              width: 200, height: 200, borderRadius: 100,
+              borderColor: 'rgba(255,255,255,0.06)',
+            }]} />
+            {/* Progress ring — simple border trick for filled look */}
+            <View style={[s.ringProgress, {
+              width: 200, height: 200, borderRadius: 100,
+              borderColor: accent,
+              shadowColor: accent,
+              opacity: startDate ? 1 : 0.2,
+            }]} />
+            {/* Center content */}
+            <View style={s.ringCenter}>
+              <Text style={[s.timerText, { color: startDate ? '#FFFFFF' : '#3A4A50' }]}>
+                {currentStreak}
+              </Text>
+              <Text style={s.timerUnit}>{currentStreak === 1 ? 'DAY' : 'DAYS'}</Text>
+              {startDate && (
+                <Text style={s.timerSince}>since {formatDate(startDate)}</Text>
+              )}
+            </View>
           </View>
-          {startDate && (
-            <Text style={s.startedText}>Started {formatDate(startDate)}</Text>
+
+          <Text style={[s.motivationText, { color: accent }]}>{getMotivation(currentStreak)}</Text>
+
+          {/* Action button inside card */}
+          {!startDate ? (
+            <TouchableOpacity style={[s.mainBtn, { backgroundColor: '#FF9F0A', shadowColor: '#FF9F0A' }]} onPress={handleStart} activeOpacity={0.85}>
+              <Text style={s.mainBtnText}>Start Streak</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={s.resetBtn} onPress={handleReset} activeOpacity={0.85}>
+              <Text style={s.resetBtnText}>Reset Streak</Text>
+            </TouchableOpacity>
           )}
         </View>
 
-        {/* Stats */}
+        {/* Stats row */}
         <View style={s.statsRow}>
-          <View style={s.statCard}>
-            <Text style={[s.statValue, startDate && { color: '#FF9F0A' }]}>{currentStreak}</Text>
-            <Text style={s.statLabel}>Current Streak</Text>
+          <View style={[s.statCard, { borderColor: accentBorder }]}>
+            <Text style={[s.statValue, { color: accent }]}>{currentStreak}</Text>
+            <Text style={s.statLabel}>Current</Text>
           </View>
-          <View style={[s.statCard, s.statCardHighlight]}>
-            <Text style={[s.statValue, { color: '#30D158' }]}>{longestStreak}</Text>
-            <Text style={s.statLabel}>Longest Streak</Text>
+          <View style={[s.statCard, { borderColor: 'rgba(52,199,89,0.3)' }]}>
+            <Text style={[s.statValue, { color: '#34C759' }]}>{longestStreak}</Text>
+            <Text style={s.statLabel}>Longest</Text>
           </View>
           <View style={s.statCard}>
-            <Text style={s.statValue}>{streaks.length}</Text>
-            <Text style={s.statLabel}>Total Attempts</Text>
+            <Text style={[s.statValue, { color: '#8E8E93' }]}>{streaks.length}</Text>
+            <Text style={s.statLabel}>Attempts</Text>
           </View>
         </View>
 
-        {/* Motivation */}
-        <Text style={s.motivation}>{getMotivation(currentStreak)}</Text>
-
         {/* Milestone progress */}
         {startDate && milestone.remaining > 0 && (
-          <View style={s.milestoneCard}>
-            <Text style={s.milestoneTitle}>Next Milestone: {milestone.next} Days</Text>
-            <View style={s.progressBar}>
-              <View style={[s.progressFill, { width: `${milestone.progress}%` as any }]} />
+          <View style={[s.milestoneCard, { borderColor: accentBorder, backgroundColor: accentDim }]}>
+            <View style={s.milestoneHeader}>
+              <Text style={[s.milestoneTitle, { color: accent }]}>Next: {milestone.next} Days</Text>
+              <Text style={[s.milestoneRemaining, { color: accent }]}>{milestone.remaining}d to go</Text>
             </View>
-            <Text style={s.milestoneRemaining}>{milestone.remaining} day{milestone.remaining !== 1 ? 's' : ''} to go</Text>
+            <View style={s.progressBar}>
+              <View style={[s.progressFill, { width: `${milestone.progress}%` as any, backgroundColor: accent }]} />
+            </View>
           </View>
         )}
 
@@ -203,7 +244,7 @@ export default function NoFapTrackerScreen({ user }: Props) {
           {MILESTONES.map(m => {
             const achieved = currentStreak >= m.days;
             return (
-              <View key={m.days} style={[s.badge, achieved && s.badgeAchieved]}>
+              <View key={m.days} style={[s.badge, achieved && { borderColor: 'rgba(255,159,10,0.4)', backgroundColor: 'rgba(255,159,10,0.1)' }]}>
                 <Text style={[s.badgeIcon, !achieved && s.badgeLocked]}>{m.icon}</Text>
                 <Text style={[s.badgeLabel, achieved && { color: '#FF9F0A' }]}>{m.label}</Text>
                 {achieved && <Text style={s.badgeCheck}>✓</Text>}
@@ -212,24 +253,14 @@ export default function NoFapTrackerScreen({ user }: Props) {
           })}
         </View>
 
-        {/* Actions */}
-        {!startDate ? (
-          <TouchableOpacity style={s.startBtn} onPress={handleStart}>
-            <Text style={s.startBtnText}>🚀 Start Streak</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={s.resetBtn} onPress={handleReset}>
-            <Text style={s.resetBtnText}>🔄 Reset Streak</Text>
-          </TouchableOpacity>
-        )}
-
-        {/* History */}
+        {/* Streak History */}
         <Text style={s.sectionTitle}>Streak History</Text>
         {streaks.length === 0 ? (
-          <Text style={s.emptyText}>No previous streaks yet. Stay strong!</Text>
+          <Text style={s.emptyText}>No previous streaks yet — stay strong</Text>
         ) : (
           streaks.map(streak => (
             <View key={streak.id} style={s.historyItem}>
+              <View style={s.historyDot} />
               <View style={s.historyInfo}>
                 <Text style={s.historyDays}>
                   <Text style={s.historyDaysNum}>{streak.duration}</Text>
@@ -251,84 +282,128 @@ export default function NoFapTrackerScreen({ user }: Props) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
-  scroll: { paddingHorizontal: 20, paddingTop: 8 },
+  container: { flex: 1, backgroundColor: '#080E12' },
+  scroll: { paddingBottom: 40 },
 
-  header: { marginBottom: 24 },
-  title: { fontSize: 28, fontWeight: '700', color: '#FFFFFF' },
-  subtitle: { fontSize: 14, color: '#636366', marginTop: 4 },
-
-  // Circle
-  circleWrapper: { alignItems: 'center', marginBottom: 24 },
-  circle: {
-    width: 160, height: 160, borderRadius: 80,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderWidth: 4, borderColor: 'rgba(255,255,255,0.12)',
-    alignItems: 'center', justifyContent: 'center',
+  // Ambient glow
+  glowBlob: {
+    position: 'absolute',
+    width: 320, height: 320, borderRadius: 160,
+    top: -100, alignSelf: 'center',
+    opacity: 0.1,
   },
-  circleActive: { borderColor: '#FF9F0A', backgroundColor: 'rgba(255,159,10,0.1)' },
-  circleNumber: { fontSize: 52, fontWeight: '800', color: '#FFFFFF' },
-  circleLabel: { fontSize: 16, color: '#636366', marginTop: 2 },
-  startedText: { marginTop: 12, fontSize: 13, color: '#636366' },
+
+  // Header
+  header: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingHorizontal: 20, paddingTop: 10, paddingBottom: 16,
+  },
+  title: { fontSize: 28, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.5 },
+  subtitle: { fontSize: 13, color: '#3A5A60', marginTop: 2 },
+
+  // Ring card
+  ringCard: {
+    marginHorizontal: 20, marginBottom: 20,
+    backgroundColor: '#0D1C22',
+    borderRadius: 28, padding: 24,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 24,
+    elevation: 10,
+  },
+  modeLabel: { fontSize: 13, fontWeight: '700', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 20 },
+
+  ringOuter: { alignItems: 'center', justifyContent: 'center', width: 220, height: 220, marginBottom: 20 },
+  ringHalo: {
+    position: 'absolute',
+    width: 260, height: 260, borderRadius: 130,
+    opacity: 0.08,
+  },
+  ringTrack: {
+    position: 'absolute',
+    borderWidth: 10,
+  },
+  ringProgress: {
+    position: 'absolute',
+    borderWidth: 10,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  ringCenter: { position: 'absolute', alignItems: 'center' },
+  timerText: { fontSize: 64, fontWeight: '200', letterSpacing: 2, lineHeight: 72 },
+  timerUnit: { fontSize: 13, color: '#3A5A60', fontWeight: '700', letterSpacing: 2, marginTop: 2 },
+  timerSince: { fontSize: 11, color: '#3A5A60', marginTop: 6 },
+
+  motivationText: { fontSize: 14, fontWeight: '500', textAlign: 'center', marginBottom: 20, letterSpacing: 0.2 },
+
+  mainBtn: {
+    width: '100%', borderRadius: 18, paddingVertical: 16,
+    alignItems: 'center',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.5,
+    shadowRadius: 14,
+    elevation: 8,
+  },
+  mainBtnText: { color: '#000', fontSize: 17, fontWeight: '800', letterSpacing: 0.5 },
+  resetBtn: {
+    width: '100%', borderRadius: 18, paddingVertical: 15,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,69,58,0.1)',
+    borderWidth: 1, borderColor: 'rgba(255,69,58,0.3)',
+  },
+  resetBtnText: { color: '#FF453A', fontWeight: '700', fontSize: 16 },
 
   // Stats
-  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
+  statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 12, marginBottom: 20 },
   statCard: {
-    flex: 1, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 16,
-    padding: 14, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+    flex: 1, backgroundColor: '#0D1C22', borderRadius: 20, padding: 16,
+    alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
   },
-  statCardHighlight: { borderColor: 'rgba(48,209,88,0.3)', backgroundColor: 'rgba(48,209,88,0.08)' },
-  statValue: { fontSize: 24, fontWeight: '700', color: '#FFFFFF' },
-  statLabel: { fontSize: 11, color: '#636366', marginTop: 4, textAlign: 'center' },
-
-  // Motivation
-  motivation: { textAlign: 'center', fontSize: 15, color: '#EBEBF5', fontWeight: '500', marginBottom: 20 },
+  statValue: { fontSize: 28, fontWeight: '800', letterSpacing: -0.5 },
+  statLabel: { fontSize: 11, color: '#3A5A60', textAlign: 'center', marginTop: 4 },
 
   // Milestone progress
   milestoneCard: {
-    backgroundColor: 'rgba(255,159,10,0.08)', borderRadius: 16, padding: 16,
-    marginBottom: 20, borderWidth: 1, borderColor: 'rgba(255,159,10,0.25)', gap: 10,
+    marginHorizontal: 20, borderRadius: 18, padding: 16,
+    marginBottom: 20, borderWidth: 1, gap: 10,
   },
-  milestoneTitle: { fontSize: 15, fontWeight: '600', color: '#FF9F0A' },
-  progressBar: { height: 8, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: '#FF9F0A', borderRadius: 4 },
-  milestoneRemaining: { fontSize: 13, color: '#636366' },
+  milestoneHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  milestoneTitle: { fontSize: 14, fontWeight: '700' },
+  milestoneRemaining: { fontSize: 13, fontWeight: '600' },
+  progressBar: { height: 7, backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 4, overflow: 'hidden' },
+  progressFill: { height: '100%', borderRadius: 4 },
 
   // Badges
-  sectionTitle: { fontSize: 17, fontWeight: '600', color: '#EBEBF5', marginBottom: 12 },
-  badgesRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#3A5A60', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12, paddingHorizontal: 20 },
+  badgesRow: { flexDirection: 'row', gap: 10, marginBottom: 24, paddingHorizontal: 20 },
   badge: {
-    flex: 1, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 14,
-    padding: 12, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', gap: 4,
+    flex: 1, backgroundColor: '#0D1C22', borderRadius: 16,
+    padding: 12, alignItems: 'center',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', gap: 4,
   },
-  badgeAchieved: { borderColor: 'rgba(255,159,10,0.4)', backgroundColor: 'rgba(255,159,10,0.1)' },
   badgeIcon: { fontSize: 24 },
-  badgeLocked: { opacity: 0.3 },
-  badgeLabel: { fontSize: 11, color: '#636366', fontWeight: '500', textAlign: 'center' },
+  badgeLocked: { opacity: 0.25 },
+  badgeLabel: { fontSize: 10, color: '#3A5A60', fontWeight: '600', textAlign: 'center' },
   badgeCheck: { fontSize: 10, color: '#FF9F0A', fontWeight: '700' },
 
-  // Actions
-  startBtn: {
-    backgroundColor: '#FF9F0A', borderRadius: 16, padding: 16,
-    alignItems: 'center', marginBottom: 28,
-  },
-  startBtnText: { color: '#fff', fontWeight: '700', fontSize: 17 },
-  resetBtn: {
-    backgroundColor: 'rgba(255,69,58,0.12)', borderRadius: 16, padding: 16,
-    alignItems: 'center', marginBottom: 28, borderWidth: 1, borderColor: 'rgba(255,69,58,0.3)',
-  },
-  resetBtnText: { color: '#FF453A', fontWeight: '600', fontSize: 16 },
-
   // History
-  emptyText: { fontSize: 14, color: '#48484A', textAlign: 'center', paddingVertical: 16 },
+  emptyText: { fontSize: 14, color: '#3A5A60', textAlign: 'center', paddingVertical: 16, paddingHorizontal: 20 },
   historyItem: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 12, padding: 14,
-    marginBottom: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', gap: 12,
+    backgroundColor: '#0D1C22', borderRadius: 16, padding: 14,
+    marginBottom: 8, marginHorizontal: 20,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', gap: 12,
   },
+  historyDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#FF9F0A' },
   historyInfo: { flex: 1 },
-  historyDays: { fontSize: 15, color: '#EBEBF5' },
+  historyDays: { fontSize: 15, color: 'rgba(255,255,255,0.7)' },
   historyDaysNum: { fontWeight: '700', color: '#FFFFFF' },
-  historyDates: { fontSize: 12, color: '#636366', marginTop: 2 },
-  deleteText: { fontSize: 16, color: '#48484A' },
+  historyDates: { fontSize: 12, color: '#3A5A60', marginTop: 2 },
+  deleteText: { fontSize: 16, color: '#3A5A60' },
 });
