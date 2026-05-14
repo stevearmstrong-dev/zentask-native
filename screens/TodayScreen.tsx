@@ -211,6 +211,13 @@ export default function TodayScreen({ user }: Props) {
               <Text style={[styles.streakText, { color: '#F59E0B' }]}>{streaks.workout}d</Text>
             </TouchableOpacity>
           )}
+          {streaks.meal > 0 && (
+            <TouchableOpacity style={[styles.streakChip, { borderColor: 'rgba(251,146,60,0.3)', backgroundColor: 'rgba(251,146,60,0.08)' }]}
+              onPress={() => navigation.navigate('More', { screen: 'MealTracker' })} activeOpacity={0.75}>
+              <Ionicons name="restaurant" size={13} color="#FB923C" />
+              <Text style={[styles.streakText, { color: '#FB923C' }]}>{streaks.meal}d</Text>
+            </TouchableOpacity>
+          )}
           {streaks.nofap > 0 && (
             <TouchableOpacity style={[styles.streakChip, { borderColor: 'rgba(74,222,128,0.3)', backgroundColor: 'rgba(74,222,128,0.08)' }]}
               onPress={() => navigation.navigate('More', { screen: 'NoFapTracker' })} activeOpacity={0.75}>

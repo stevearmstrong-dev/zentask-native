@@ -6,6 +6,7 @@ interface Streaks {
   water: number;
   workout: number;
   nofap: number;
+  meal: number;
 }
 
 function getDateStr(date: Date) {
@@ -22,7 +23,7 @@ function calcDaysSince(isoDate: string): number {
 
 export function useStreaks(userEmail: string): Streaks {
   const ns = userEmail || 'guest';
-  const [streaks, setStreaks] = useState<Streaks>({ water: 0, workout: 0, nofap: 0 });
+  const [streaks, setStreaks] = useState<Streaks>({ water: 0, workout: 0, nofap: 0, meal: 0 });
   const isFocused = useIsFocused();
 
   const load = useCallback(async () => {
@@ -30,12 +31,14 @@ export function useStreaks(userEmail: string): Streaks {
     const WATER_GOAL_KEY = `zentask:water_goal:${ns}`;
     const WORKOUT_HISTORY_KEY = `zentask:workout_history:${ns}`;
     const NOFAP_START_KEY = `zentask:nofap_start:${ns}`;
+    const MEAL_LOGS_KEY = `zentask:meal_logs:${ns}`;
 
-    const [rawWaterLogs, rawWaterGoal, rawWorkout, rawNofapStart] = await Promise.all([
+    const [rawWaterLogs, rawWaterGoal, rawWorkout, rawNofapStart, rawMeals] = await Promise.all([
       AsyncStorage.getItem(WATER_LOGS_KEY),
       AsyncStorage.getItem(WATER_GOAL_KEY),
       AsyncStorage.getItem(WORKOUT_HISTORY_KEY),
       AsyncStorage.getItem(NOFAP_START_KEY),
+      AsyncStorage.getItem(MEAL_LOGS_KEY),
     ]);
 
     // Water streak — consecutive days meeting goal
@@ -78,7 +81,22 @@ export function useStreaks(userEmail: string): Streaks {
       nofapStreak = calcDaysSince(rawNofapStart);
     }
 
-    setStreaks({ water: waterStreak, workout: workoutStreak, nofap: nofapStreak });
+    // Meal streak — consecutive days with at least one meal logged
+    let mealStreak = 0;
+    if (rawMeals) {
+      const meals: { date: string }[] = JSON.parse(rawMeals);
+      const mealDates = new Set(meals.map(m => m.date));
+      const today = new Date();
+      for (let i = 0; i < 365; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const key = getDateStr(d);
+        if (mealDates.has(key)) mealStreak++;
+        else if (i > 0) break;
+      }
+    }
+
+    setStreaks({ water: waterStreak, workout: workoutStreak, nofap: nofapStreak, meal: mealStreak });
   }, [ns]);
 
   // Re-fetch whenever the Today tab comes back into focus
