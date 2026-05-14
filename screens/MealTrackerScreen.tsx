@@ -184,12 +184,14 @@ export default function MealTrackerScreen({ user }: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Ambient glow */}
+      <View style={styles.glowBlob} />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>🍳 Meal Tracker</Text>
+            <Text style={styles.title}>Meal Tracker</Text>
             <Text style={styles.subtitle}>Cook one meal a day, build a healthy habit</Text>
           </View>
 
@@ -229,7 +231,7 @@ export default function MealTrackerScreen({ user }: Props) {
               <TextInput
                 style={styles.input}
                 placeholder="What did you cook?"
-                placeholderTextColor="#48484A"
+                placeholderTextColor="#3A5A60"
                 value={mealName}
                 onChangeText={setMealName}
                 autoFocus
@@ -238,7 +240,7 @@ export default function MealTrackerScreen({ user }: Props) {
               <TextInput
                 style={[styles.input, styles.notesInput]}
                 placeholder="Notes (optional)"
-                placeholderTextColor="#48484A"
+                placeholderTextColor="#3A5A60"
                 value={notes}
                 onChangeText={setNotes}
                 multiline
@@ -263,16 +265,16 @@ export default function MealTrackerScreen({ user }: Props) {
           {/* Stats */}
           <View style={styles.statsRow}>
             <View style={styles.statCard}>
-              <Text style={[styles.statValue, { color: '#FF9F0A' }]}>{currentStreak}</Text>
-              <Text style={styles.statLabel}>Current Streak</Text>
+              <Text style={[styles.statValue, { color: '#4ADE80' }]}>{currentStreak}</Text>
+              <Text style={styles.statLabel}>Current{'\n'}Streak</Text>
             </View>
             <View style={[styles.statCard, styles.statCardHighlight]}>
-              <Text style={[styles.statValue, { color: '#30D158' }]}>{longestStreak}</Text>
-              <Text style={styles.statLabel}>Longest Streak</Text>
+              <Text style={[styles.statValue, { color: '#00E5CC' }]}>{longestStreak}</Text>
+              <Text style={styles.statLabel}>Longest{'\n'}Streak</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={styles.statValue}>{daysThisMonth}</Text>
-              <Text style={styles.statLabel}>This Month</Text>
+              <Text style={[styles.statValue, { color: '#60A5FA' }]}>{daysThisMonth}</Text>
+              <Text style={styles.statLabel}>This{'\n'}Month</Text>
             </View>
           </View>
 
@@ -310,164 +312,204 @@ export default function MealTrackerScreen({ user }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
+  container: { flex: 1, backgroundColor: '#080E12' },
   scroll: { paddingHorizontal: 20, paddingTop: 8 },
+  glowBlob: {
+    position: 'absolute',
+    width: 300, height: 300, borderRadius: 150,
+    backgroundColor: 'rgba(0,229,204,0.08)',
+    top: -80, alignSelf: 'center',
+  },
 
   header: { marginBottom: 20 },
-  title: { fontSize: 28, fontWeight: '700', color: '#FFFFFF' },
-  subtitle: { fontSize: 14, color: '#636366', marginTop: 4 },
+  title: { fontSize: 28, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.5 },
+  subtitle: { fontSize: 14, color: '#3A5A60', marginTop: 4 },
 
   // Today section
   todaySection: { marginBottom: 16 },
   todaySectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
-  todaySectionTitle: { fontSize: 17, fontWeight: '600', color: '#EBEBF5' },
+  todaySectionTitle: { fontSize: 17, fontWeight: '700', color: '#FFFFFF', textTransform: 'uppercase', letterSpacing: 0.5 },
 
   // Today card (completed)
   todayCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(48,209,88,0.1)',
-    borderRadius: 18,
+    backgroundColor: '#0D1C22',
+    borderRadius: 20,
     padding: 16,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: 'rgba(48,209,88,0.3)',
+    borderColor: 'rgba(0,229,204,0.2)',
     gap: 14,
+    shadowColor: '#00E5CC',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   todayCheck: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#30D158',
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: '#00E5CC',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#00E5CC',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  todayCheckText: { color: '#fff', fontSize: 20, fontWeight: '700' },
+  todayCheckText: { color: '#000', fontSize: 20, fontWeight: '800' },
   todayInfo: { flex: 1 },
   todayMealName: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
-  todayNotes: { fontSize: 13, color: '#636366', marginTop: 3 },
+  todayNotes: { fontSize: 13, color: '#3A5A60', marginTop: 3 },
   editBtn: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(0,229,204,0.1)',
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 7,
+    borderWidth: 1,
+    borderColor: 'rgba(0,229,204,0.2)',
   },
-  editBtnText: { color: '#EBEBF5', fontSize: 13, fontWeight: '600' },
+  editBtnText: { color: '#00E5CC', fontSize: 13, fontWeight: '600' },
 
   // Today empty
   todayEmpty: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 18,
-    padding: 24,
+    backgroundColor: '#0D1C22',
+    borderRadius: 20,
+    padding: 28,
     marginBottom: 16,
     alignItems: 'center',
     gap: 10,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   todayEmptyIcon: { fontSize: 36 },
-  todayEmptyText: { fontSize: 15, color: '#636366' },
+  todayEmptyText: { fontSize: 15, color: '#3A5A60' },
   logBtn: {
-    backgroundColor: '#1877F2',
+    backgroundColor: '#00E5CC',
     borderRadius: 14,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 10,
-    marginTop: 4,
+    shadowColor: '#00E5CC',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 5,
   },
-  logBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  logBtnText: { color: '#000', fontWeight: '800', fontSize: 14 },
 
   // Form
   form: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 18,
-    padding: 16,
+    backgroundColor: '#0D1C22',
+    borderRadius: 20,
+    padding: 18,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    gap: 10,
+    borderColor: 'rgba(0,229,204,0.15)',
+    gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 6,
   },
   input: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(0,229,204,0.06)',
     borderRadius: 12,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 13,
     fontSize: 15,
     color: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(0,229,204,0.15)',
   },
-  notesInput: { minHeight: 80, paddingTop: 12 },
+  notesInput: { minHeight: 80, paddingTop: 13 },
   formBtns: { flexDirection: 'row', gap: 10 },
   cancelBtn: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 12,
     padding: 13,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
-  cancelBtnText: { color: '#636366', fontWeight: '600', fontSize: 15 },
+  cancelBtnText: { color: '#3A5A60', fontWeight: '600', fontSize: 15 },
   saveBtn: {
     flex: 1,
-    backgroundColor: '#1877F2',
+    backgroundColor: '#00E5CC',
     borderRadius: 12,
     padding: 13,
     alignItems: 'center',
+    shadowColor: '#00E5CC',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.45,
+    shadowRadius: 10,
+    elevation: 5,
   },
-  saveBtnDisabled: { backgroundColor: 'rgba(24,119,242,0.3)' },
-  saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  saveBtnDisabled: { backgroundColor: 'rgba(0,229,204,0.2)', shadowOpacity: 0 },
+  saveBtnText: { color: '#000', fontWeight: '800', fontSize: 15 },
 
   // Stats
   statsRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
   statCard: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 16,
+    backgroundColor: '#0D1C22',
+    borderRadius: 20,
     padding: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(255,255,255,0.06)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   statCardHighlight: {
-    borderColor: 'rgba(48,209,88,0.3)',
-    backgroundColor: 'rgba(48,209,88,0.08)',
+    borderColor: 'rgba(0,229,204,0.25)',
+    backgroundColor: '#0D1C22',
   },
-  statValue: { fontSize: 24, fontWeight: '700', color: '#FFFFFF' },
-  statLabel: { fontSize: 11, color: '#636366', marginTop: 4, textAlign: 'center' },
+  statValue: { fontSize: 26, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.5 },
+  statLabel: { fontSize: 11, color: '#3A5A60', marginTop: 4, textAlign: 'center', textTransform: 'uppercase', letterSpacing: 0.3 },
 
   // Motivation
   motivation: {
     textAlign: 'center',
-    fontSize: 15,
-    color: '#EBEBF5',
-    fontWeight: '500',
+    fontSize: 14,
+    color: '#4ADE80',
+    fontWeight: '600',
     marginBottom: 24,
+    paddingHorizontal: 20,
   },
 
   // History
-  sectionTitle: { fontSize: 17, fontWeight: '600', color: '#EBEBF5', marginBottom: 12 },
-  emptyText: { fontSize: 14, color: '#48484A', textAlign: 'center', paddingVertical: 20 },
+  sectionTitle: { fontSize: 14, fontWeight: '700', color: '#FFFFFF', marginBottom: 14, textTransform: 'uppercase', letterSpacing: 0.5 },
+  emptyText: { fontSize: 14, color: '#3A5A60', textAlign: 'center', paddingVertical: 20 },
   dateGroup: { marginBottom: 16 },
   dateHeader: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#636366',
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#00E5CC',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
     marginBottom: 8,
   },
   historyItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 12,
+    backgroundColor: '#0D1C22',
+    borderRadius: 14,
     padding: 14,
     marginBottom: 6,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(255,255,255,0.06)',
     gap: 12,
   },
   historyInfo: { flex: 1 },
-  historyMealName: { fontSize: 15, color: '#EBEBF5', fontWeight: '500' },
-  historyNotes: { fontSize: 12, color: '#636366', marginTop: 3 },
-  deleteText: { fontSize: 16, color: '#48484A' },
+  historyMealName: { fontSize: 15, color: '#CCDDDD', fontWeight: '500' },
+  historyNotes: { fontSize: 12, color: '#3A5A60', marginTop: 3 },
+  deleteText: { fontSize: 16, color: '#3A5A60' },
 });
