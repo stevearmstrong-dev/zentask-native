@@ -246,56 +246,56 @@ export default function PowerSwordHallScreen({ onBack, user }: Props) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
+  container: { flex: 1, backgroundColor: '#081A15' },
   header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
   title: { fontSize: 28, fontWeight: '700', color: '#FFFFFF' },
-  subtitle: { fontSize: 13, color: '#636366', marginTop: 4 },
+  subtitle: { fontSize: 13, color: '#3D7A62', marginTop: 4 },
 
   swordCard: {
     marginHorizontal: 20, marginBottom: 20,
-    backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 20,
+    backgroundColor: 'rgba(20,180,120,0.08)', borderRadius: 20,
     padding: 24, alignItems: 'center', borderWidth: 1, gap: 8,
   },
   swordEmoji: { fontSize: 64 },
   swordName: { fontSize: 22, fontWeight: '800' },
-  swordDesc: { fontSize: 14, color: '#636366' },
+  swordDesc: { fontSize: 14, color: '#3D7A62' },
   streakBadge: { borderRadius: 20, paddingHorizontal: 16, paddingVertical: 6, borderWidth: 1, marginTop: 4 },
   streakBadgeText: { fontSize: 14, fontWeight: '700' },
 
   statsRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 20, marginBottom: 20 },
   statCard: {
-    flex: 1, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 14,
-    padding: 14, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+    flex: 1, backgroundColor: 'rgba(20,180,120,0.08)', borderRadius: 14,
+    padding: 14, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(20,180,120,0.12)',
   },
   statCardHighlight: { borderColor: 'rgba(251,191,36,0.3)', backgroundColor: 'rgba(251,191,36,0.06)' },
   statValue: { fontSize: 26, fontWeight: '800', color: '#FFFFFF' },
-  statLabel: { fontSize: 11, color: '#636366', marginTop: 3, textAlign: 'center' },
+  statLabel: { fontSize: 11, color: '#3D7A62', marginTop: 3, textAlign: 'center' },
 
   section: { paddingHorizontal: 20, marginBottom: 20 },
-  sectionTitle: { fontSize: 17, fontWeight: '600', color: '#EBEBF5', marginBottom: 12 },
+  sectionTitle: { fontSize: 17, fontWeight: '600', color: '#D1FAE5', marginBottom: 12 },
 
   milestonesRow: { flexDirection: 'row', gap: 8 },
   milestone: {
-    flex: 1, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 14,
+    flex: 1, backgroundColor: 'rgba(20,180,120,0.08)', borderRadius: 14,
     padding: 10, alignItems: 'center', borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)', gap: 3,
+    borderColor: 'rgba(20,180,120,0.12)', gap: 3,
   },
   milestoneEmoji: { fontSize: 22 },
   locked: { opacity: 0.3 },
-  milestoneLabel: { fontSize: 10, color: '#636366', fontWeight: '600', textAlign: 'center' },
-  milestoneDays: { fontSize: 11, color: '#48484A' },
+  milestoneLabel: { fontSize: 10, color: '#3D7A62', fontWeight: '600', textAlign: 'center' },
+  milestoneDays: { fontSize: 11, color: '#2D6A54' },
   milestoneCheck: { fontSize: 11, fontWeight: '700' },
 
   calHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  calNav: { fontSize: 28, color: '#636366', fontWeight: '300', paddingHorizontal: 8 },
-  calTitle: { fontSize: 16, fontWeight: '600', color: '#EBEBF5' },
+  calNav: { fontSize: 28, color: '#3D7A62', fontWeight: '300', paddingHorizontal: 8 },
+  calTitle: { fontSize: 16, fontWeight: '600', color: '#D1FAE5' },
   calGrid: { flexDirection: 'row', flexWrap: 'wrap' },
-  calWeekday: { width: '14.28%', textAlign: 'center', fontSize: 11, color: '#48484A', fontWeight: '600', paddingVertical: 6 },
+  calWeekday: { width: '14.28%', textAlign: 'center', fontSize: 11, color: '#2D6A54', fontWeight: '600', paddingVertical: 6 },
   calCell: { width: '14.28%', alignItems: 'center', paddingVertical: 5, borderRadius: 8, minHeight: 44 },
   calCellUnlocked: { backgroundColor: 'rgba(251,191,36,0.12)' },
-  calDay: { fontSize: 13, color: '#636366' },
+  calDay: { fontSize: 13, color: '#3D7A62' },
   calDayUnlocked: { color: '#FBBF24', fontWeight: '700' },
   calSword: { fontSize: 12 },
 
-  emptyText: { fontSize: 14, color: '#48484A', textAlign: 'center', paddingHorizontal: 40, paddingVertical: 20 },
+  emptyText: { fontSize: 14, color: '#2D6A54', textAlign: 'center', paddingHorizontal: 40, paddingVertical: 20 },
 });
