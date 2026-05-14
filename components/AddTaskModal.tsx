@@ -10,10 +10,14 @@ import {
   Platform,
   Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Priority } from '../types';
 import AIAssistButton from './AIAssistButton';
+import VoiceInputButton from './VoiceInputButton';
 import { AIAssistAuthRequiredError, parseNaturalLanguageTask } from '../services/claude';
+import { Colors, Spacing, Typography, BorderRadius, ComponentTokens, getPriorityColor } from '../constants/theme';
 
 interface NewTask {
   text: string;
@@ -30,10 +34,10 @@ interface Props {
   onAdd: (task: NewTask) => void;
 }
 
-const PRIORITIES: { label: string; value: Priority; color: string }[] = [
-  { label: 'High', value: 'high', color: '#FF453A' },
-  { label: 'Medium', value: 'medium', color: '#FF9F0A' },
-  { label: 'Low', value: 'low', color: '#30D158' },
+const PRIORITIES: { label: string; value: Priority; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { label: 'High', value: 'high', icon: 'alert-circle' },
+  { label: 'Medium', value: 'medium', icon: 'remove-circle' },
+  { label: 'Low', value: 'low', icon: 'checkmark-circle' },
 ];
 
 const CATEGORIES = ['Work', 'Personal', 'Health', 'Finance', 'Learning', 'Other'];
@@ -84,6 +88,7 @@ export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
 
   const handleAdd = () => {
     if (!text.trim()) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onAdd({ text: text.trim(), priority, dueDate: dueDate || toLocalDateString(new Date()), dueTime, category, reminderMinutes });
     reset();
     onClose();
@@ -94,15 +99,17 @@ export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
     onClose();
   };
 
-  const handleAIAssist = async () => {
-    if (!text.trim()) {
+  const handleAIAssist = async (inputText?: string) => {
+    const taskText = inputText || text;
+
+    if (!taskText.trim()) {
       Alert.alert('Enter Task First', 'Please type a task description before using AI Assist.');
       return;
     }
 
     setAiLoading(true);
     try {
-      const parsed = await parseNaturalLanguageTask(text);
+      const parsed = await parseNaturalLanguageTask(taskText);
 
       // Update form fields with parsed data
       setText(parsed.text);
@@ -133,15 +140,28 @@ export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
     }
   };
 
+  const handleVoiceTranscript = async (transcript: string) => {
+    // Set the text field with the transcript
+    setText(transcript);
+
+    // Automatically parse with AI
+    await handleAIAssist(transcript);
+  };
+
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={handleClose}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleClose}>
+          <TouchableOpacity onPress={handleClose} activeOpacity={0.7} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
             <Text style={styles.cancel}>Cancel</Text>
           </TouchableOpacity>
           <Text style={styles.title}>New Task</Text>
-          <TouchableOpacity onPress={handleAdd}>
+          <TouchableOpacity
+            onPress={handleAdd}
+            disabled={!text.trim()}
+            activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
             <Text style={[styles.add, !text.trim() && styles.addDisabled]}>Add</Text>
           </TouchableOpacity>
         </View>
@@ -158,44 +178,86 @@ export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
             autoFocus
           />
 
-          {/* AI Assist Button */}
+          {/* AI Assist Buttons */}
           <View style={styles.aiAssistContainer}>
-            <AIAssistButton
-              onPress={handleAIAssist}
-              loading={aiLoading}
-              disabled={!text.trim()}
-              variant="secondary"
-              text="Parse with AI"
-            />
+            <View style={styles.buttonRow}>
+              <View style={styles.buttonHalf}>
+                <VoiceInputButton
+                  onTranscript={handleVoiceTranscript}
+                  disabled={aiLoading}
+                />
+              </View>
+              <View style={styles.buttonHalf}>
+                <AIAssistButton
+                  onPress={() => handleAIAssist()}
+                  loading={aiLoading}
+                  disabled={!text.trim()}
+                  variant="secondary"
+                  text="Parse Text"
+                />
+              </View>
+            </View>
             <Text style={styles.aiHint}>
-              Try: "Dentist tomorrow 2pm" or "Weekly team meeting every Monday at 9am"
+              Use voice or type: "Dentist tomorrow 2pm" or "Weekly team meeting every Monday at 9am"
             </Text>
           </View>
 
           {/* Priority */}
           <Text style={styles.sectionLabel}>Priority</Text>
           <View style={styles.row}>
-            {PRIORITIES.map(p => (
-              <TouchableOpacity
-                key={p.value}
-                style={[styles.chip, priority === p.value && { backgroundColor: p.color, borderColor: p.color }]}
-                onPress={() => setPriority(p.value)}
-              >
-                <Text style={[styles.chipText, priority === p.value && styles.chipTextActive]}>{p.label}</Text>
-              </TouchableOpacity>
-            ))}
+            {PRIORITIES.map(p => {
+              const isActive = priority === p.value;
+              const priorityColor = getPriorityColor(p.value);
+              return (
+                <TouchableOpacity
+                  key={p.value}
+                  style={[
+                    styles.chip,
+                    isActive && { backgroundColor: priorityColor, borderColor: priorityColor }
+                  ]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setPriority(p.value);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name={p.icon}
+                    size={16}
+                    color={isActive ? Colors.text.primary : priorityColor}
+                  />
+                  <Text style={[styles.chipText, isActive && styles.chipTextActive]}>
+                    {p.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
           {/* Due date */}
           <Text style={styles.sectionLabel}>Due Date</Text>
-          <TouchableOpacity style={styles.fieldRow} onPress={() => setShowDatePicker(!showDatePicker)}>
-            <Text style={styles.fieldIcon}>📅</Text>
+          <TouchableOpacity
+            style={styles.fieldRow}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowDatePicker(!showDatePicker);
+            }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="calendar-outline" size={20} color={Colors.text.tertiary} />
             <Text style={[styles.fieldValue, !dueDate && styles.fieldPlaceholder]}>
               {dueDate || 'Select date'}
             </Text>
             {dueDate && (
-              <TouchableOpacity onPress={() => setDueDate('')}>
-                <Text style={styles.clearBtn}>✕</Text>
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setDueDate('');
+                }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons name="close-circle" size={18} color={Colors.text.tertiary} />
               </TouchableOpacity>
             )}
           </TouchableOpacity>
@@ -215,14 +277,28 @@ export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
 
           {/* Due time */}
           <Text style={styles.sectionLabel}>Due Time</Text>
-          <TouchableOpacity style={styles.fieldRow} onPress={() => setShowTimePicker(!showTimePicker)}>
-            <Text style={styles.fieldIcon}>🕒</Text>
+          <TouchableOpacity
+            style={styles.fieldRow}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowTimePicker(!showTimePicker);
+            }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="time-outline" size={20} color={Colors.text.tertiary} />
             <Text style={[styles.fieldValue, !dueTime && styles.fieldPlaceholder]}>
               {dueTime || 'Select time'}
             </Text>
             {dueTime && (
-              <TouchableOpacity onPress={() => setDueTime('')}>
-                <Text style={styles.clearBtn}>✕</Text>
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setDueTime('');
+                }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons name="close-circle" size={18} color={Colors.text.tertiary} />
               </TouchableOpacity>
             )}
           </TouchableOpacity>
@@ -246,7 +322,11 @@ export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
               <TouchableOpacity
                 key={String(opt.value)}
                 style={[styles.chip, reminderMinutes === opt.value && styles.chipActive]}
-                onPress={() => setReminderMinutes(opt.value)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setReminderMinutes(opt.value);
+                }}
+                activeOpacity={0.7}
               >
                 <Text style={[styles.chipText, reminderMinutes === opt.value && styles.chipTextActive]}>{opt.label}</Text>
               </TouchableOpacity>
@@ -260,7 +340,11 @@ export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
               <TouchableOpacity
                 key={c}
                 style={[styles.chip, category === c && styles.chipActive]}
-                onPress={() => setCategory(category === c ? '' : c)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setCategory(category === c ? '' : c);
+                }}
+                activeOpacity={0.7}
               >
                 <Text style={[styles.chipText, category === c && styles.chipTextActive]}>{c}</Text>
               </TouchableOpacity>
@@ -273,68 +357,118 @@ export default function AddTaskModal({ visible, onClose, onAdd }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1C1C1E' },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background.primary
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: Spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+    borderBottomColor: Colors.border.default,
   },
-  title: { fontSize: 17, fontWeight: '600', color: '#FFFFFF' },
-  cancel: { fontSize: 17, color: '#636366' },
-  add: { fontSize: 17, fontWeight: '600', color: '#1877F2' },
-  addDisabled: { color: '#48484A' },
-  body: { flex: 1, padding: 20 },
+  title: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary
+  },
+  cancel: {
+    fontSize: Typography.fontSize.xl,
+    color: Colors.text.tertiary
+  },
+  add: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.interactive.primary
+  },
+  addDisabled: { color: Colors.text.disabled },
+  body: {
+    flex: 1,
+    padding: Spacing.xl
+  },
   textInput: {
-    fontSize: 18,
-    color: '#FFFFFF',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 12,
-    padding: 16,
+    fontSize: Typography.fontSize.xxl,
+    color: Colors.text.primary,
+    backgroundColor: Colors.surface.input,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
     minHeight: 80,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    marginBottom: 24,
+    borderColor: Colors.border.default,
+    marginBottom: Spacing.xxl,
   },
-  sectionLabel: { fontSize: 13, fontWeight: '600', color: '#636366', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 },
-  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24 },
+  sectionLabel: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.tertiary,
+    textTransform: 'uppercase',
+    letterSpacing: Typography.letterSpacing.wide,
+    marginBottom: Spacing.md
+  },
+  row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    marginBottom: Spacing.xxl
+  },
   chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: ComponentTokens.chip.borderRadius,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: Colors.border.default,
+    backgroundColor: Colors.surface.base,
   },
-  chipActive: { backgroundColor: '#1877F2', borderColor: '#1877F2' },
-  chipText: { fontSize: 14, color: '#EBEBF5' },
-  chipTextActive: { color: '#FFFFFF', fontWeight: '600' },
+  chipActive: {
+    backgroundColor: Colors.interactive.primary,
+    borderColor: Colors.interactive.primary
+  },
+  chipText: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.text.secondary
+  },
+  chipTextActive: {
+    color: Colors.text.primary,
+    fontWeight: Typography.fontWeight.semibold
+  },
   fieldRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 12,
-    padding: 14,
+    backgroundColor: Colors.surface.base,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    marginBottom: 24,
-    gap: 10,
+    borderColor: Colors.border.default,
+    marginBottom: Spacing.xxl,
+    gap: Spacing.md,
   },
-  fieldIcon: { fontSize: 18 },
-  fieldValue: { flex: 1, fontSize: 16, color: '#FFFFFF' },
-  fieldPlaceholder: { color: '#636366' },
-  clearBtn: { color: '#636366', fontSize: 16, paddingHorizontal: 4 },
+  fieldValue: {
+    flex: 1,
+    fontSize: Typography.fontSize.lg,
+    color: Colors.text.primary
+  },
+  fieldPlaceholder: { color: Colors.text.tertiary },
   aiAssistContainer: {
-    marginBottom: 24,
-    gap: 8,
+    marginBottom: Spacing.xxl,
+    gap: Spacing.sm,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  buttonHalf: {
+    flex: 1,
   },
   aiHint: {
-    fontSize: 12,
-    color: '#636366',
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.tertiary,
     fontStyle: 'italic',
     textAlign: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: Spacing.lg,
   },
 });

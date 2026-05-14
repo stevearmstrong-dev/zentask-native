@@ -10,12 +10,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { User } from '@supabase/supabase-js';
 import { Task } from '../types';
 import { useTasks } from '../context/TasksContext';
 import FocusMode from '../components/FocusMode';
 import AddTaskModal from '../components/AddTaskModal';
 import { toLocalDateString } from '../utils/date';
+import { Colors, Spacing, Typography, BorderRadius, Shadows, TouchTarget, getPriorityColor } from '../constants/theme';
 
 interface Props {
   user: User | null;
@@ -32,9 +34,7 @@ function formatDate(): string {
   return new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 }
 
-const PRIORITY_COLOR: Record<string, string> = {
-  high: '#FF453A', medium: '#FF9F0A', low: '#30D158',
-};
+// Priority colors moved to theme
 
 interface NewTaskInput {
   text: string;
@@ -82,32 +82,52 @@ export default function TodayScreen({ user }: Props) {
     await addTask(task);
   };
 
-  const renderTask = ({ item }: { item: Task }) => (
-    <TouchableOpacity
-      style={styles.taskRow}
-      onPress={() => toggleTask(item.id as number)}
-      onLongPress={() => setFocusTask(item)}
-      delayLongPress={400}
-      activeOpacity={0.7}
-    >
-      <View style={[styles.checkbox, item.completed && styles.checkboxDone]}>
-        {item.completed && <Text style={styles.checkmark}>✓</Text>}
-      </View>
-      <View style={styles.taskInfo}>
-        <Text style={[styles.taskText, item.completed && styles.taskTextDone]} numberOfLines={2}>
-          {item.text}
-        </Text>
-        {item.dueTime && <Text style={styles.taskTime}>{item.dueTime}</Text>}
-        {(item.timeSpent ?? 0) > 0 && (
-          <Text style={styles.taskTimeSpent}>⏱ {Math.round((item.timeSpent ?? 0) / 60)}m tracked</Text>
-        )}
-      </View>
-      <View style={styles.taskRight}>
-        <View style={[styles.priorityDot, { backgroundColor: PRIORITY_COLOR[item.priority] }]} />
-        <Text style={styles.focusHint}>hold</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const renderTask = ({ item }: { item: Task }) => {
+    const priorityColor = getPriorityColor(item.priority || 'medium');
+
+    return (
+      <TouchableOpacity
+        style={styles.taskRow}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          toggleTask(item.id as number);
+        }}
+        onLongPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          setFocusTask(item);
+        }}
+        delayLongPress={400}
+        activeOpacity={0.7}
+      >
+        <View style={[styles.checkbox, item.completed && styles.checkboxDone]}>
+          {item.completed && <Ionicons name="checkmark" size={16} color="#fff" />}
+        </View>
+        <View style={styles.taskInfo}>
+          <Text style={[styles.taskText, item.completed && styles.taskTextDone]} numberOfLines={2}>
+            {item.text}
+          </Text>
+          <View style={styles.taskMeta}>
+            {item.dueTime && (
+              <View style={styles.metaItem}>
+                <Ionicons name="time-outline" size={12} color={Colors.text.tertiary} />
+                <Text style={styles.taskTime}>{item.dueTime}</Text>
+              </View>
+            )}
+            {(item.timeSpent ?? 0) > 0 && (
+              <View style={styles.metaItem}>
+                <Ionicons name="timer-outline" size={12} color={Colors.text.tertiary} />
+                <Text style={styles.taskTimeSpent}>{Math.round((item.timeSpent ?? 0) / 60)}m</Text>
+              </View>
+            )}
+          </View>
+        </View>
+        <View style={styles.taskRight}>
+          <View style={[styles.priorityDot, { backgroundColor: priorityColor }]} />
+          <Text style={styles.focusHint}>hold</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   if (loading) {
     return (
@@ -133,12 +153,15 @@ export default function TodayScreen({ user }: Props) {
         </View>
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => setShowAddModal(true)}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            setShowAddModal(true);
+          }}
           accessibilityRole="button"
           accessibilityLabel="Add task for today"
           activeOpacity={0.8}
         >
-          <Ionicons name="add" size={22} color="#FFFFFF" />
+          <Ionicons name="add" size={24} color={Colors.text.primary} />
         </TouchableOpacity>
       </View>
 
@@ -169,8 +192,9 @@ export default function TodayScreen({ user }: Props) {
         }
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>🎉</Text>
+            <Ionicons name="checkmark-done-circle" size={64} color={Colors.semantic.success} />
             <Text style={styles.emptyText}>All clear for today!</Text>
+            <Text style={styles.emptySubtext}>Great work! Time to relax or plan ahead</Text>
           </View>
         }
         contentContainerStyle={styles.list}
@@ -186,65 +210,158 @@ export default function TodayScreen({ user }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
-  loader: { flex: 1, backgroundColor: '#0A0A0F', justifyContent: 'center', alignItems: 'center' },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background.secondary
+  },
+  loader: {
+    flex: 1,
+    backgroundColor: Colors.background.secondary,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 16,
-    gap: 16,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.lg,
+    gap: Spacing.lg,
   },
   headerCopy: { flex: 1 },
-  greeting: { fontSize: 22, fontWeight: '700', color: '#FFFFFF' },
-  date: { fontSize: 14, color: '#636366', marginTop: 2 },
+  greeting: {
+    fontSize: Typography.fontSize.xxxl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.primary
+  },
+  date: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.text.tertiary,
+    marginTop: 2
+  },
   addButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: TouchTarget.min,
+    height: TouchTarget.min,
+    borderRadius: TouchTarget.min / 2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1877F2',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
-    shadowColor: '#1877F2',
-    shadowOpacity: 0.28,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 6,
+    backgroundColor: Colors.interactive.primary,
+    ...Shadows.lg,
   },
-  statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginBottom: 8 },
+  statsRow: {
+    flexDirection: 'row',
+    paddingHorizontal: Spacing.xl,
+    gap: Spacing.md,
+    marginBottom: Spacing.sm
+  },
   statCard: {
-    flex: 1, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, alignItems: 'center',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+    flex: 1,
+    backgroundColor: Colors.surface.base,
+    borderRadius: BorderRadius.xxl,
+    padding: Spacing.lg,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
   },
-  statNum: { fontSize: 24, fontWeight: '700', color: '#FFFFFF' },
-  statRed: { color: '#FF453A' },
-  statGreen: { color: '#30D158' },
-  statLabel: { fontSize: 12, color: '#636366', marginTop: 2 },
-  sectionTitle: { fontSize: 17, fontWeight: '600', color: '#EBEBF5', marginBottom: 12 },
-  list: { padding: 20, paddingTop: 8 },
+  statNum: {
+    fontSize: Typography.fontSize.xxxl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.primary
+  },
+  statRed: { color: Colors.semantic.error },
+  statGreen: { color: Colors.semantic.success },
+  statLabel: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.tertiary,
+    marginTop: 2
+  },
+  sectionTitle: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.secondary,
+    marginBottom: Spacing.md
+  },
+  list: {
+    padding: Spacing.xl,
+    paddingTop: Spacing.sm
+  },
   taskRow: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', gap: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.surface.base,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.lg,
+    marginBottom: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border.subtle,
+    gap: Spacing.md,
   },
   checkbox: {
-    width: 24, height: 24, borderRadius: 12, borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: Colors.border.strong,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  checkboxDone: { backgroundColor: '#30D158', borderColor: '#30D158' },
-  checkmark: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  checkboxDone: {
+    backgroundColor: Colors.semantic.success,
+    borderColor: Colors.semantic.success
+  },
   taskInfo: { flex: 1 },
-  taskText: { fontSize: 15, color: '#EBEBF5' },
-  taskTextDone: { color: '#48484A', textDecorationLine: 'line-through' },
-  taskTime: { fontSize: 12, color: '#636366', marginTop: 2 },
-  taskRight: { alignItems: 'center', gap: 4 },
-  priorityDot: { width: 8, height: 8, borderRadius: 4 },
-  focusHint: { fontSize: 9, color: '#48484A' },
-  taskTimeSpent: { fontSize: 11, color: '#636366', marginTop: 2 },
-  empty: { alignItems: 'center', paddingTop: 60 },
-  emptyIcon: { fontSize: 48, marginBottom: 12 },
-  emptyText: { fontSize: 17, color: '#636366' },
+  taskText: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.secondary,
+    marginBottom: 4,
+  },
+  taskTextDone: {
+    color: Colors.text.disabled,
+    textDecorationLine: 'line-through'
+  },
+  taskMeta: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  taskTime: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.tertiary
+  },
+  taskTimeSpent: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.tertiary
+  },
+  taskRight: {
+    alignItems: 'center',
+    gap: 4
+  },
+  priorityDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4
+  },
+  focusHint: {
+    fontSize: 9,
+    color: Colors.text.disabled
+  },
+  empty: {
+    alignItems: 'center',
+    paddingTop: 60,
+    gap: Spacing.md,
+  },
+  emptyText: {
+    fontSize: Typography.fontSize.xl,
+    color: Colors.text.secondary,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  emptySubtext: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.text.tertiary,
+  },
 });

@@ -48,7 +48,9 @@
           "iosUrlScheme": "com.googleusercontent.apps.746695542469-uiivr684mi6athshaeac6grb3hj2l3u7"
         }
       ],
-      "expo-speech-recognition"
+      "expo-speech-recognition",
+      "@react-native-community/datetimepicker",
+      "expo-web-browser"
     ]
   }
 }

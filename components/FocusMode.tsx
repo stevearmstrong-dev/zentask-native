@@ -9,12 +9,11 @@ import {
   StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { Task } from '../types';
 import { incrementSessions } from '../utils/pomodoroSessions';
-
-const PRIORITY_COLOR: Record<string, string> = {
-  high: '#FF453A', medium: '#FF9F0A', low: '#30D158',
-};
+import { Colors, Spacing, Typography, BorderRadius, getPriorityColor } from '../constants/theme';
 
 const WORK_SECS  = 25 * 60;
 const BREAK_SECS = 5  * 60;
@@ -129,11 +128,13 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
   }, [save]);
 
   const toggleTracking = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (isTracking) stopTimer();
     else startTimer();
   }, [isTracking, startTimer, stopTimer]);
 
   const resetTimer = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     timerRef.current && clearInterval(timerRef.current);
     setIsTracking(false);
     setTimeSpent(0);
@@ -171,11 +172,13 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
   }, [save, pomodoroTime, pomodoroMode]);
 
   const togglePomodoro = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (pomodoroRunning) stopPomodoro();
     else startPomodoro();
   }, [pomodoroRunning, startPomodoro, stopPomodoro]);
 
   const resetPomodoro = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     pomodoroRef.current && clearInterval(pomodoroRef.current);
     setPomodoroRunning(false);
     setPomodoroTime(WORK_SECS);
@@ -185,6 +188,7 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
 
   // --- Switch mode ---
   const switchMode = useCallback((next: 'timer' | 'pomodoro') => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     // Stop whatever is running
     timerRef.current && clearInterval(timerRef.current);
     pomodoroRef.current && clearInterval(pomodoroRef.current);
@@ -204,6 +208,7 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
 
   // --- Close / complete ---
   const handleClose = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     timerRef.current && clearInterval(timerRef.current);
     pomodoroRef.current && clearInterval(pomodoroRef.current);
     save({ pomodoroTime, pomodoroMode });
@@ -211,6 +216,7 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
   }, [save, pomodoroTime, pomodoroMode, onClose]);
 
   const handleComplete = useCallback(() => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     timerRef.current && clearInterval(timerRef.current);
     pomodoroRef.current && clearInterval(pomodoroRef.current);
     save({ pomodoroTime, pomodoroMode });
@@ -220,7 +226,7 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
 
   if (!task) return null;
 
-  const priorityColor = PRIORITY_COLOR[task.priority] ?? '#636366';
+  const priorityColor = getPriorityColor(task.priority || 'medium');
   const pomodoroProgress = mode === 'pomodoro'
     ? 1 - pomodoroTime / (pomodoroMode === 'work' ? WORK_SECS : BREAK_SECS)
     : 0;
@@ -232,8 +238,8 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
 
         {/* Top bar */}
         <View style={s.topBar}>
-          <TouchableOpacity onPress={handleClose} style={s.closeBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-            <Text style={s.closeBtnText}>✕</Text>
+          <TouchableOpacity onPress={handleClose} style={s.closeBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} activeOpacity={0.7}>
+            <Ionicons name="close" size={20} color={Colors.text.tertiary} />
           </TouchableOpacity>
           <Text style={s.focusLabel}>FOCUS MODE</Text>
           <View style={{ width: 40 }} />
@@ -256,12 +262,15 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
 
         {/* Due date */}
         {task.dueDate && (
-          <Text style={s.dueDate}>
-            📅 {new Date(task.dueDate + 'T12:00:00').toLocaleDateString('en-US', {
-              weekday: 'long', month: 'long', day: 'numeric',
-            })}
-            {task.dueTime ? ` at ${task.dueTime}` : ''}
-          </Text>
+          <View style={s.dueDateRow}>
+            <Ionicons name="calendar-outline" size={14} color={Colors.text.tertiary} />
+            <Text style={s.dueDate}>
+              {new Date(task.dueDate + 'T12:00:00').toLocaleDateString('en-US', {
+                weekday: 'long', month: 'long', day: 'numeric',
+              })}
+              {task.dueTime ? ` at ${task.dueTime}` : ''}
+            </Text>
+          </View>
         )}
 
         {/* Mode toggle */}
@@ -269,14 +278,18 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
           <TouchableOpacity
             style={[s.modeBtn, mode === 'timer' && s.modeBtnActive]}
             onPress={() => switchMode('timer')}
+            activeOpacity={0.7}
           >
-            <Text style={[s.modeBtnText, mode === 'timer' && s.modeBtnTextActive]}>⏱️ Timer</Text>
+            <Ionicons name="timer-outline" size={18} color={mode === 'timer' ? Colors.text.primary : Colors.text.tertiary} />
+            <Text style={[s.modeBtnText, mode === 'timer' && s.modeBtnTextActive]}>Timer</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[s.modeBtn, mode === 'pomodoro' && s.modeBtnActive]}
             onPress={() => switchMode('pomodoro')}
+            activeOpacity={0.7}
           >
-            <Text style={[s.modeBtnText, mode === 'pomodoro' && s.modeBtnTextActive]}>🍅 Pomodoro</Text>
+            <Ionicons name="alarm-outline" size={18} color={mode === 'pomodoro' ? Colors.text.primary : Colors.text.tertiary} />
+            <Text style={[s.modeBtnText, mode === 'pomodoro' && s.modeBtnTextActive]}>Pomodoro</Text>
           </TouchableOpacity>
         </View>
 
@@ -292,12 +305,19 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
                 <TouchableOpacity
                   style={[s.timerBtn, isTracking && s.timerBtnPause]}
                   onPress={toggleTracking}
+                  activeOpacity={0.8}
                 >
-                  <Text style={s.timerBtnText}>{isTracking ? '⏸ Pause' : timeSpent > 0 ? '▶ Resume' : '▶ Start'}</Text>
+                  <Ionicons
+                    name={isTracking ? "pause" : "play"}
+                    size={20}
+                    color={Colors.text.primary}
+                  />
+                  <Text style={s.timerBtnText}>{isTracking ? 'Pause' : timeSpent > 0 ? 'Resume' : 'Start'}</Text>
                 </TouchableOpacity>
                 {timeSpent > 0 && !isTracking && (
-                  <TouchableOpacity style={s.resetBtn} onPress={resetTimer}>
-                    <Text style={s.resetBtnText}>↺ Reset</Text>
+                  <TouchableOpacity style={s.resetBtn} onPress={resetTimer} activeOpacity={0.8}>
+                    <Ionicons name="refresh" size={18} color={Colors.text.tertiary} />
+                    <Text style={s.resetBtnText}>Reset</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -326,11 +346,18 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
                 <TouchableOpacity
                   style={[s.timerBtn, pomodoroRunning && s.timerBtnPause]}
                   onPress={togglePomodoro}
+                  activeOpacity={0.8}
                 >
-                  <Text style={s.timerBtnText}>{pomodoroRunning ? '⏸ Pause' : pomodoroTime < WORK_SECS || pomodoroMode === 'break' ? '▶ Resume' : '▶ Start'}</Text>
+                  <Ionicons
+                    name={pomodoroRunning ? "pause" : "play"}
+                    size={20}
+                    color={Colors.text.primary}
+                  />
+                  <Text style={s.timerBtnText}>{pomodoroRunning ? 'Pause' : pomodoroTime < WORK_SECS || pomodoroMode === 'break' ? 'Resume' : 'Start'}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={s.resetBtn} onPress={resetPomodoro}>
-                  <Text style={s.resetBtnText}>↺ Reset</Text>
+                <TouchableOpacity style={s.resetBtn} onPress={resetPomodoro} activeOpacity={0.8}>
+                  <Ionicons name="refresh" size={18} color={Colors.text.tertiary} />
+                  <Text style={s.resetBtnText}>Reset</Text>
                 </TouchableOpacity>
               </View>
             </>
@@ -338,12 +365,16 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
         </View>
 
         {/* Complete button */}
-        <TouchableOpacity style={s.completeBtn} onPress={handleComplete}>
-          <Text style={s.completeBtnText}>✓ Mark Complete</Text>
+        <TouchableOpacity style={s.completeBtn} onPress={handleComplete} activeOpacity={0.8}>
+          <Ionicons name="checkmark-circle" size={24} color={Colors.text.inverse} />
+          <Text style={s.completeBtnText}>Mark Complete</Text>
         </TouchableOpacity>
 
         {/* Hint */}
-        <Text style={s.hint}>Tap × to save and exit</Text>
+        <View style={s.hintRow}>
+          <Ionicons name="information-circle-outline" size={14} color={Colors.text.disabled} />
+          <Text style={s.hint}>Tap close button to save and exit</Text>
+        </View>
 
       </SafeAreaView>
     </Modal>
@@ -351,55 +382,206 @@ export default function FocusMode({ visible, task, onClose, onComplete, onUpdate
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F', paddingHorizontal: 24 },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background.secondary,
+    paddingHorizontal: Spacing.xxl
+  },
 
-  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 8, marginBottom: 24 },
-  closeBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center' },
-  closeBtnText: { fontSize: 18, color: '#636366' },
-  focusLabel: { fontSize: 12, fontWeight: '700', color: '#636366', letterSpacing: 2 },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: Spacing.sm,
+    marginBottom: Spacing.xxl
+  },
+  closeBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.surface.elevated,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  focusLabel: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.tertiary,
+    letterSpacing: Typography.letterSpacing.wider
+  },
 
-  tagsRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  priorityBadge: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1 },
-  priorityText: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
-  categoryBadge: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: 'rgba(255,255,255,0.08)' },
-  categoryText: { fontSize: 11, color: '#636366', fontWeight: '500' },
+  tagsRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg
+  },
+  priorityBadge: {
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 4,
+    borderWidth: 1
+  },
+  priorityText: {
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.bold,
+    letterSpacing: Typography.letterSpacing.wide
+  },
+  categoryBadge: {
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 4,
+    backgroundColor: Colors.surface.elevated
+  },
+  categoryText: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.tertiary,
+    fontWeight: Typography.fontWeight.medium
+  },
 
-  taskTitle: { fontSize: 26, fontWeight: '800', color: '#FFFFFF', lineHeight: 34, marginBottom: 12 },
-  dueDate: { fontSize: 13, color: '#636366', marginBottom: 28 },
+  taskTitle: {
+    fontSize: Typography.fontSize.huge,
+    fontWeight: Typography.fontWeight.extrabold,
+    color: Colors.text.primary,
+    lineHeight: 34,
+    marginBottom: Spacing.md
+  },
+  dueDateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginBottom: 28
+  },
+  dueDate: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.tertiary
+  },
 
-  modeToggle: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 14, padding: 4, marginBottom: 40 },
-  modeBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
-  modeBtnActive: { backgroundColor: 'rgba(255,255,255,0.12)' },
-  modeBtnText: { fontSize: 15, color: '#636366', fontWeight: '600' },
-  modeBtnTextActive: { color: '#FFFFFF' },
+  modeToggle: {
+    flexDirection: 'row',
+    backgroundColor: Colors.surface.base,
+    borderRadius: BorderRadius.xl,
+    padding: 4,
+    marginBottom: Spacing.huge
+  },
+  modeBtn: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: Spacing.xs,
+  },
+  modeBtnActive: { backgroundColor: Colors.surface.hover },
+  modeBtnText: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.tertiary,
+    fontWeight: Typography.fontWeight.semibold
+  },
+  modeBtnTextActive: { color: Colors.text.primary },
 
-  timerSection: { flex: 1, alignItems: 'center', gap: 12 },
-  timerDisplay: { fontSize: 72, fontWeight: '800', color: '#FFFFFF', fontVariant: ['tabular-nums'] },
-  timerSubLabel: { fontSize: 13, color: '#48484A' },
+  timerSection: {
+    flex: 1,
+    alignItems: 'center',
+    gap: Spacing.md
+  },
+  timerDisplay: {
+    fontSize: Typography.fontSize.display,
+    fontWeight: Typography.fontWeight.extrabold,
+    color: Colors.text.primary,
+    fontVariant: ['tabular-nums']
+  },
+  timerSubLabel: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.disabled
+  },
 
-  pomodoroLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  pomodoroDot: { width: 8, height: 8, borderRadius: 4 },
-  pomodoroModeLabel: { fontSize: 15, fontWeight: '600', color: '#EBEBF5' },
-  pomodoroBar: { width: '100%', height: 6, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden' },
-  pomodoroBarFill: { height: '100%', borderRadius: 3 },
+  pomodoroLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm
+  },
+  pomodoroDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4
+  },
+  pomodoroModeLabel: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.secondary
+  },
+  pomodoroBar: {
+    width: '100%',
+    height: 6,
+    backgroundColor: Colors.surface.elevated,
+    borderRadius: 3,
+    overflow: 'hidden'
+  },
+  pomodoroBarFill: {
+    height: '100%',
+    borderRadius: 3
+  },
 
-  timerActions: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  timerActions: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    marginTop: Spacing.sm
+  },
   timerBtn: {
-    backgroundColor: '#1877F2', borderRadius: 16,
-    paddingHorizontal: 32, paddingVertical: 16,
+    backgroundColor: Colors.interactive.primary,
+    borderRadius: BorderRadius.xxl,
+    paddingHorizontal: Spacing.xxxl,
+    paddingVertical: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
   },
-  timerBtnPause: { backgroundColor: 'rgba(255,255,255,0.12)' },
-  timerBtnText: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
+  timerBtnPause: { backgroundColor: Colors.surface.hover },
+  timerBtnText: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.primary
+  },
   resetBtn: {
-    backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 16,
-    paddingHorizontal: 20, paddingVertical: 16,
+    backgroundColor: Colors.surface.elevated,
+    borderRadius: BorderRadius.xxl,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
   },
-  resetBtnText: { fontSize: 17, color: '#636366' },
+  resetBtnText: {
+    fontSize: Typography.fontSize.xl,
+    color: Colors.text.tertiary
+  },
 
   completeBtn: {
-    backgroundColor: '#30D158', borderRadius: 18,
-    padding: 18, alignItems: 'center', marginBottom: 12,
+    backgroundColor: Colors.semantic.success,
+    borderRadius: BorderRadius.xxxl,
+    padding: Spacing.xxl,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
+    flexDirection: 'row',
+    gap: Spacing.sm,
   },
-  completeBtnText: { fontSize: 17, fontWeight: '800', color: '#000' },
-  hint: { fontSize: 12, color: '#48484A', textAlign: 'center', marginBottom: 8 },
+  completeBtnText: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.extrabold,
+    color: Colors.text.inverse
+  },
+  hintRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    marginBottom: Spacing.sm,
+  },
+  hint: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.disabled,
+    textAlign: 'center'
+  },
 });
