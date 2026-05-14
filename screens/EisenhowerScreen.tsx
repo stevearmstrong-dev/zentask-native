@@ -15,10 +15,10 @@ import { Task } from '../types';
 import { useTasks } from '../context/TasksContext';
 
 const QUADRANTS = [
-  { key: 'q1', label: 'Do First',  subtitle: 'Urgent & Important',        icon: '🔥', color: '#FF453A', bg: 'rgba(255,69,58,0.1)',  border: 'rgba(255,69,58,0.25)'  },
-  { key: 'q2', label: 'Schedule',  subtitle: 'Not Urgent & Important',    icon: '📅', color: '#1877F2', bg: 'rgba(24,119,242,0.1)', border: 'rgba(24,119,242,0.25)' },
-  { key: 'q3', label: 'Delegate',  subtitle: 'Urgent & Not Important',    icon: '⚡', color: '#FF9F0A', bg: 'rgba(255,159,10,0.1)', border: 'rgba(255,159,10,0.25)' },
-  { key: 'q4', label: 'Eliminate', subtitle: 'Not Urgent & Not Important', icon: '🗑️', color: '#636366', bg: 'rgba(99,99,102,0.1)',  border: 'rgba(99,99,102,0.25)'  },
+  { key: 'q1', label: 'Do First',  subtitle: 'Urgent & Important',         icon: '🔥', color: '#FF453A', cardBg: '#1A0806', blobColor: 'rgba(255,69,58,0.22)',  border: 'rgba(255,69,58,0.2)'  },
+  { key: 'q2', label: 'Schedule',  subtitle: 'Not Urgent & Important',     icon: '📅', color: '#14B478', cardBg: '#061A10', blobColor: 'rgba(20,180,120,0.22)', border: 'rgba(20,180,120,0.2)' },
+  { key: 'q3', label: 'Delegate',  subtitle: 'Urgent & Not Important',     icon: '⚡', color: '#FF9F0A', cardBg: '#1A0F00', blobColor: 'rgba(255,159,10,0.22)', border: 'rgba(255,159,10,0.2)' },
+  { key: 'q4', label: 'Eliminate', subtitle: 'Not Urgent & Not Important', icon: '🗑️', color: '#8E8E93', cardBg: '#0E0E10', blobColor: 'rgba(142,142,147,0.18)', border: 'rgba(142,142,147,0.15)' },
 ];
 
 function isUrgent(task: Task): boolean {
@@ -54,22 +54,73 @@ export default function EisenhowerScreen({ user }: Props) {
   const activeTasks = tasks.filter(t => !t.completed);
   const quadrantTasks = (key: string) => activeTasks.filter(t => getQuadrant(t) === key);
 
-  if (loading) return <View style={s.loader}><ActivityIndicator size="large" color="#1877F2" /></View>;
+  const totalActive = activeTasks.length;
+  const q1Count = quadrantTasks('q1').length;
+  const q2Count = quadrantTasks('q2').length;
+
+  if (loading) return <View style={s.loader}><ActivityIndicator size="large" color="#14B478" /></View>;
 
   return (
     <SafeAreaView style={s.container} edges={['top']}>
-      <View style={s.header}>
-        <Text style={s.title}>Matrix</Text>
-        <Text style={s.subtitle}>Organised by urgency & importance</Text>
-      </View>
+      {/* Ambient blobs */}
+      <View style={s.blobGreen} />
+      <View style={s.blobTeal} />
 
       <ScrollView
-        contentContainerStyle={s.grid}
-        refreshControl={<RefreshControl refreshing={false} onRefresh={reload} tintColor="#1877F2" />}
+        contentContainerStyle={s.scroll}
+        refreshControl={<RefreshControl refreshing={false} onRefresh={reload} tintColor="#14B478" />}
+        showsVerticalScrollIndicator={false}
       >
+        {/* Header */}
+        <View style={s.header}>
+          <Text style={s.title}>Matrix</Text>
+          <Text style={s.subtitle}>Organised by urgency & importance</Text>
+        </View>
+
+        {/* Hero card */}
+        <View style={s.heroCard}>
+          <View style={s.heroBlob} />
+          <View style={s.heroTop}>
+            <View>
+              <Text style={s.heroLabel}>Active Tasks</Text>
+              <View style={s.heroValueRow}>
+                <Text style={s.heroValue}>{totalActive}</Text>
+                <Text style={s.heroUnit}> tasks</Text>
+              </View>
+            </View>
+            <View style={s.heroCircle}>
+              <Text style={s.heroCircleNum}>{q1Count}</Text>
+              <Text style={s.heroCircleLabel}>urgent</Text>
+            </View>
+          </View>
+          <Text style={s.heroMotivation}>
+            {q1Count === 0
+              ? 'No urgent tasks — great position'
+              : q1Count === 1
+              ? '1 urgent task needs your attention'
+              : `${q1Count} urgent tasks need your attention`}
+          </Text>
+        </View>
+
+        {/* Stat row */}
+        <View style={s.statRow}>
+          <View style={s.statCard}>
+            <Text style={s.statValue}>{q2Count}</Text>
+            <Text style={s.statLabel}>Schedule</Text>
+          </View>
+          <View style={s.statCard}>
+            <Text style={s.statValue}>{quadrantTasks('q3').length}</Text>
+            <Text style={s.statLabel}>Delegate</Text>
+          </View>
+          <View style={s.statCard}>
+            <Text style={s.statValue}>{quadrantTasks('q4').length}</Text>
+            <Text style={s.statLabel}>Eliminate</Text>
+          </View>
+        </View>
+
         {/* Axis labels */}
         <View style={s.axisRow}>
-          <Text style={s.axisLabel}>          </Text>
+          <Text style={s.axisSpace} />
           <Text style={[s.axisLabel, { flex: 1, textAlign: 'center' }]}>🔴 Urgent</Text>
           <Text style={[s.axisLabel, { flex: 1, textAlign: 'center' }]}>🟢 Not Urgent</Text>
         </View>
@@ -93,9 +144,9 @@ export default function EisenhowerScreen({ user }: Props) {
           <Text style={s.legendTitle}>How tasks are classified</Text>
           {[
             { dot: '#FF453A', text: 'High priority + Due today/overdue → Do First' },
-            { dot: '#1877F2', text: 'High priority + Due later → Schedule' },
+            { dot: '#14B478', text: 'High priority + Due later → Schedule' },
             { dot: '#FF9F0A', text: 'Med/Low priority + Due today/overdue → Delegate' },
-            { dot: '#636366', text: 'Med/Low priority + Due later → Eliminate' },
+            { dot: '#8E8E93', text: 'Med/Low priority + Due later → Eliminate' },
           ].map(l => (
             <View key={l.text} style={s.legendRow}>
               <View style={[s.legendDot, { backgroundColor: l.dot }]} />
@@ -103,6 +154,8 @@ export default function EisenhowerScreen({ user }: Props) {
             </View>
           ))}
         </View>
+
+        <View style={{ height: 32 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -115,15 +168,18 @@ function Quadrant({ q, tasks, onToggle, onDelete }: {
   onDelete: (t: Task) => void;
 }) {
   return (
-    <View style={[qs.quadrant, { backgroundColor: q.bg, borderColor: q.border }]}>
+    <View style={[qs.quadrant, { backgroundColor: q.cardBg, borderColor: q.border }]}>
+      {/* blob in corner */}
+      <View style={[qs.blob, { backgroundColor: q.blobColor }]} />
+
       <View style={qs.qHeader}>
         <Text style={qs.qIcon}>{q.icon}</Text>
         <View style={qs.qTitles}>
           <Text style={[qs.qLabel, { color: q.color }]}>{q.label}</Text>
           <Text style={qs.qSub}>{q.subtitle}</Text>
         </View>
-        <View style={[qs.qBadge, { backgroundColor: q.color }]}>
-          <Text style={qs.qBadgeText}>{tasks.length}</Text>
+        <View style={[qs.qBadge, { backgroundColor: q.color + '33' }]}>
+          <Text style={[qs.qBadgeText, { color: q.color }]}>{tasks.length}</Text>
         </View>
       </View>
 
@@ -132,7 +188,10 @@ function Quadrant({ q, tasks, onToggle, onDelete }: {
       ) : (
         tasks.map(task => (
           <View key={String(task.id)} style={qs.card}>
-            <TouchableOpacity style={[qs.checkbox, task.completed && { backgroundColor: '#30D158', borderColor: '#30D158' }]} onPress={() => onToggle(task.id as number)}>
+            <TouchableOpacity
+              style={[qs.checkbox, task.completed && { backgroundColor: '#14B478', borderColor: '#14B478' }]}
+              onPress={() => onToggle(task.id as number)}
+            >
               {task.completed && <Text style={qs.check}>✓</Text>}
             </TouchableOpacity>
             <Text style={qs.cardText} numberOfLines={2}>{task.text}</Text>
@@ -147,36 +206,107 @@ function Quadrant({ q, tasks, onToggle, onDelete }: {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
-  loader: { flex: 1, backgroundColor: '#0A0A0F', justifyContent: 'center', alignItems: 'center' },
-  header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8 },
-  title: { fontSize: 28, fontWeight: '700', color: '#FFFFFF' },
-  subtitle: { fontSize: 13, color: '#636366', marginTop: 2 },
-  grid: { padding: 12, gap: 8 },
-  axisRow: { flexDirection: 'row', alignItems: 'center', paddingLeft: 36, marginBottom: 2 },
-  axisLabel: { fontSize: 11, color: '#636366', fontWeight: '500' },
-  row: { flexDirection: 'row', gap: 8, alignItems: 'flex-start' },
-  importantLabel: { width: 36, fontSize: 10, color: '#636366', textAlign: 'center', paddingTop: 12, lineHeight: 14 },
-  legend: { marginTop: 16, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 14, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
-  legendTitle: { fontSize: 12, color: '#636366', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 },
-  legendRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
+  container: { flex: 1, backgroundColor: '#060A10' },
+  loader: { flex: 1, backgroundColor: '#060A10', justifyContent: 'center', alignItems: 'center' },
+  scroll: { paddingHorizontal: 14, paddingTop: 8 },
+
+  // Ambient blobs
+  blobGreen: {
+    position: 'absolute', top: -60, left: -60,
+    width: 280, height: 280, borderRadius: 140,
+    backgroundColor: 'rgba(20,180,120,0.07)',
+  },
+  blobTeal: {
+    position: 'absolute', top: 200, right: -80,
+    width: 240, height: 240, borderRadius: 120,
+    backgroundColor: 'rgba(20,180,120,0.05)',
+  },
+
+  // Header
+  header: { paddingHorizontal: 6, marginBottom: 18, marginTop: 4 },
+  title: { fontSize: 30, fontWeight: '800', color: '#FFFFFF', letterSpacing: -1 },
+  subtitle: { fontSize: 13, color: 'rgba(255,255,255,0.3)', marginTop: 2 },
+
+  // Hero card
+  heroCard: {
+    backgroundColor: '#081A10',
+    borderRadius: 24,
+    padding: 22,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(20,180,120,0.18)',
+    overflow: 'hidden',
+    marginHorizontal: 0,
+  },
+  heroBlob: {
+    position: 'absolute', bottom: -40, right: -40,
+    width: 200, height: 200, borderRadius: 100,
+    backgroundColor: 'rgba(20,180,120,0.15)',
+  },
+  heroTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 },
+  heroLabel: { fontSize: 12, color: '#1F6A48', fontWeight: '500', marginBottom: 6, letterSpacing: 0.5, textTransform: 'uppercase' },
+  heroValueRow: { flexDirection: 'row', alignItems: 'flex-end' },
+  heroValue: { fontSize: 52, fontWeight: '800', color: '#FFFFFF', letterSpacing: -2, lineHeight: 56 },
+  heroUnit: { fontSize: 18, fontWeight: '600', color: '#1F6A48', marginBottom: 8 },
+  heroCircle: {
+    width: 72, height: 72, borderRadius: 36,
+    borderWidth: 2, borderColor: 'rgba(20,180,120,0.4)',
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(20,180,120,0.08)',
+  },
+  heroCircleNum: { fontSize: 22, fontWeight: '800', color: '#14B478', lineHeight: 26 },
+  heroCircleLabel: { fontSize: 10, color: '#1F6A48', fontWeight: '500' },
+  heroMotivation: { fontSize: 13, color: '#1F6A48', fontWeight: '500' },
+
+  // Stat row
+  statRow: { flexDirection: 'row', gap: 10, marginBottom: 16, marginHorizontal: 0 },
+  statCard: {
+    flex: 1, backgroundColor: '#081A10', borderRadius: 18,
+    padding: 14, alignItems: 'center',
+    borderWidth: 1, borderColor: 'rgba(20,180,120,0.12)',
+  },
+  statValue: { fontSize: 26, fontWeight: '800', color: '#14B478', letterSpacing: -0.5 },
+  statLabel: { fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2, fontWeight: '500' },
+
+  // Matrix grid
+  axisRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4, paddingLeft: 2 },
+  axisSpace: { width: 38 },
+  axisLabel: { fontSize: 11, color: 'rgba(255,255,255,0.3)', fontWeight: '500' },
+  row: { flexDirection: 'row', gap: 8, alignItems: 'flex-start', marginBottom: 8 },
+  importantLabel: { width: 38, fontSize: 10, color: 'rgba(255,255,255,0.25)', textAlign: 'center', paddingTop: 14, lineHeight: 14 },
+
+  // Legend
+  legend: {
+    marginTop: 8, backgroundColor: 'rgba(20,180,120,0.06)', borderRadius: 18,
+    padding: 16, borderWidth: 1, borderColor: 'rgba(20,180,120,0.14)', marginHorizontal: 0,
+  },
+  legendTitle: { fontSize: 11, color: 'rgba(255,255,255,0.3)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 },
+  legendRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 7 },
   legendDot: { width: 8, height: 8, borderRadius: 4 },
-  legendText: { fontSize: 12, color: '#636366', flex: 1, lineHeight: 16 },
+  legendText: { fontSize: 12, color: 'rgba(255,255,255,0.3)', flex: 1, lineHeight: 16 },
 });
 
 const qs = StyleSheet.create({
-  quadrant: { flex: 1, borderRadius: 14, borderWidth: 1, padding: 10, minHeight: 120 },
+  quadrant: { flex: 1, borderRadius: 18, borderWidth: 1, padding: 12, minHeight: 130, overflow: 'hidden' },
+  blob: { position: 'absolute', top: -28, right: -28, width: 90, height: 90, borderRadius: 45 },
   qHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
-  qIcon: { fontSize: 16 },
+  qIcon: { fontSize: 15 },
   qTitles: { flex: 1 },
   qLabel: { fontSize: 13, fontWeight: '700' },
-  qSub: { fontSize: 10, color: '#636366', marginTop: 1 },
-  qBadge: { borderRadius: 8, minWidth: 20, paddingHorizontal: 6, paddingVertical: 1, alignItems: 'center' },
-  qBadgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
-  empty: { fontSize: 12, color: '#48484A', textAlign: 'center', paddingVertical: 12 },
-  card: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 8, padding: 8, marginBottom: 6, gap: 8 },
-  checkbox: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center' },
+  qSub: { fontSize: 9, color: 'rgba(255,255,255,0.25)', marginTop: 1 },
+  qBadge: { borderRadius: 8, minWidth: 22, paddingHorizontal: 6, paddingVertical: 2, alignItems: 'center' },
+  qBadgeText: { fontSize: 11, fontWeight: '700' },
+  empty: { fontSize: 11, color: 'rgba(255,255,255,0.2)', textAlign: 'center', paddingVertical: 14 },
+  card: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.25)', borderRadius: 10,
+    padding: 8, marginBottom: 6, gap: 8,
+  },
+  checkbox: {
+    width: 18, height: 18, borderRadius: 9, borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center',
+  },
   check: { color: '#fff', fontSize: 10, fontWeight: '700' },
-  cardText: { flex: 1, fontSize: 12, color: '#EBEBF5', lineHeight: 16 },
-  deleteText: { color: '#48484A', fontSize: 13 },
+  cardText: { flex: 1, fontSize: 12, color: 'rgba(255,255,255,0.8)', lineHeight: 16 },
+  deleteText: { color: 'rgba(255,255,255,0.15)', fontSize: 13 },
 });
