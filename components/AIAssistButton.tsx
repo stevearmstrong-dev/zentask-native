@@ -1,5 +1,8 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { Colors, Spacing, Typography, BorderRadius, ComponentTokens, Opacity } from '../constants/theme';
 
 interface AIAssistButtonProps {
   onPress: () => void;
@@ -20,9 +23,14 @@ export default function AIAssistButton({
 }: AIAssistButtonProps) {
   const isPrimary = variant === 'primary';
 
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    onPress();
+  };
+
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={handlePress}
       disabled={disabled || loading}
       style={[
         styles.button,
@@ -33,14 +41,18 @@ export default function AIAssistButton({
     >
       {loading ? (
         <View style={styles.content}>
-          <ActivityIndicator size="small" color={isPrimary ? '#fff' : '#007AFF'} />
+          <ActivityIndicator size="small" color={isPrimary ? Colors.text.primary : Colors.interactive.secondary} />
           <Text style={[styles.text, isPrimary ? styles.primaryText : styles.secondaryText]}>
             Thinking...
           </Text>
         </View>
       ) : (
         <View style={styles.content}>
-          <Text style={styles.icon}>{icon}</Text>
+          <Ionicons
+            name="sparkles"
+            size={16}
+            color={isPrimary ? Colors.text.primary : Colors.interactive.secondary}
+          />
           <Text style={[styles.text, isPrimary ? styles.primaryText : styles.secondaryText]}>
             {text}
           </Text>
@@ -52,41 +64,39 @@ export default function AIAssistButton({
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: ComponentTokens.button.paddingVertical,
+    paddingHorizontal: ComponentTokens.button.paddingHorizontal,
+    borderRadius: ComponentTokens.button.borderRadius,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: 120,
+    minHeight: ComponentTokens.button.minHeight,
+    flex: 1,
   },
   primaryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: Colors.interactive.secondary,
   },
   secondaryButton: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: Colors.interactive.secondary,
   },
   disabled: {
-    opacity: 0.5,
+    opacity: Opacity.disabled,
   },
   content: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-  },
-  icon: {
-    fontSize: 16,
+    gap: Spacing.xs,
   },
   text: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
   },
   primaryText: {
-    color: '#fff',
+    color: Colors.text.primary,
   },
   secondaryText: {
-    color: '#007AFF',
+    color: Colors.interactive.secondary,
   },
 });

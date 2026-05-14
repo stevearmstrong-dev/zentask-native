@@ -230,15 +230,26 @@ Extract and return ONLY a JSON object with these fields (use null if not mention
   "dueDate": "YYYY-MM-DD or null",
   "dueTime": "HH:MM in 24-hour format or null",
   "priority": "high/medium/low or null",
-  "category": "category name or null",
+  "category": "category name or null (must be one of: Work, Personal, Health, Finance, Learning, Other)",
   "reminderMinutes": "number (5, 15, 30, 60, 1440) or null",
   "recurrence": "daily/weekly/biweekly/monthly/yearly or null"
 }
 
+Category detection guidelines:
+- Work: meetings, projects, calls with colleagues, professional tasks, work-related deadlines
+- Personal: social events, personal errands, family activities, friends
+- Health: medical appointments, exercise, workouts, doctor visits, fitness activities
+- Finance: bills, budget tasks, financial planning, payments
+- Learning: courses, studying, reading, educational activities
+- Other: tasks that don't fit the above categories
+
 Examples:
-- "Call dentist tomorrow at 2pm" -> {"text":"Call dentist","dueDate":"[tomorrow's date]","dueTime":"14:00","priority":null,"category":null,"reminderMinutes":null,"recurrence":null}
-- "High priority: finish project report by Friday" -> {"text":"Finish project report","dueDate":"[next Friday]","dueTime":null,"priority":"high","category":null,"reminderMinutes":null,"recurrence":null}
+- "Call dentist tomorrow at 2pm" -> {"text":"Call dentist","dueDate":"[tomorrow's date]","dueTime":"14:00","priority":null,"category":"Health","reminderMinutes":null,"recurrence":null}
+- "High priority: finish project report by Friday" -> {"text":"Finish project report","dueDate":"[next Friday]","dueTime":null,"priority":"high","category":"Work","reminderMinutes":null,"recurrence":null}
 - "Daily workout at 7am, remind me 15 min before" -> {"text":"Workout","dueDate":"${todayStr}","dueTime":"07:00","priority":null,"category":"Health","reminderMinutes":15,"recurrence":"daily"}
+- "Catch up with Hessa for work at 5pm tomorrow" -> {"text":"Catch up with Hessa","dueDate":"[tomorrow's date]","dueTime":"17:00","priority":null,"category":"Work","reminderMinutes":null,"recurrence":null}
+- "Team meeting every Monday at 9am" -> {"text":"Team meeting","dueDate":"[next Monday]","dueTime":"09:00","priority":null,"category":"Work","reminderMinutes":null,"recurrence":"weekly"}
+- "Pay electricity bill by end of month" -> {"text":"Pay electricity bill","dueDate":"[last day of current month]","dueTime":null,"priority":null,"category":"Finance","reminderMinutes":null,"recurrence":null}
 
 Return ONLY the JSON object, no other text.`,
       },

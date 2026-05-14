@@ -7,7 +7,10 @@ import {
   Alert,
   TextInput,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { Task, Priority } from '../types';
+import { Colors, Spacing, Typography, BorderRadius, ComponentTokens, getPriorityColor, getPriorityOverlay } from '../constants/theme';
 
 interface Props {
   task: Task;
@@ -17,11 +20,7 @@ interface Props {
   onFocus?: (task: Task) => void;
 }
 
-const PRIORITY_COLOR: Record<string, string> = {
-  high: '#FF453A',
-  medium: '#FF9F0A',
-  low: '#30D158',
-};
+// Priority colors moved to theme file
 
 const PRIORITY_LABELS: Priority[] = ['high', 'medium', 'low'];
 
@@ -47,14 +46,19 @@ export default function TaskItem({ task, onToggle, onDelete, onEdit, onFocus }: 
   const overdue = isOverdue(task);
 
   const handleDelete = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert('Delete Task', `Delete "${task.text}"?`, [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => onDelete(task.id as number) },
+      { text: 'Delete', style: 'destructive', onPress: () => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        onDelete(task.id as number);
+      }},
     ]);
   };
 
   const handleSave = () => {
     if (editText.trim()) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       onEdit(task.id as number, { text: editText.trim(), priority: editPriority });
       setEditing(false);
     }
@@ -80,8 +84,12 @@ export default function TaskItem({ task, onToggle, onDelete, onEdit, onFocus }: 
           {PRIORITY_LABELS.map(p => (
             <TouchableOpacity
               key={p}
-              style={[styles.priorityChip, editPriority === p && { backgroundColor: PRIORITY_COLOR[p] }]}
-              onPress={() => setEditPriority(p)}
+              style={[styles.priorityChip, editPriority === p && { backgroundColor: getPriorityColor(p) }]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setEditPriority(p);
+              }}
+              activeOpacity={0.7}
             >
               <Text style={[styles.priorityChipText, editPriority === p && styles.priorityChipActive]}>
                 {p.charAt(0).toUpperCase() + p.slice(1)}
@@ -90,10 +98,11 @@ export default function TaskItem({ task, onToggle, onDelete, onEdit, onFocus }: 
           ))}
         </View>
         <View style={styles.editActions}>
-          <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+          <TouchableOpacity style={styles.saveBtn} onPress={handleSave} activeOpacity={0.8}>
+            <Ionicons name="checkmark" size={18} color="#fff" />
             <Text style={styles.saveBtnText}>Save</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel}>
+          <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel} activeOpacity={0.8}>
             <Text style={styles.cancelBtnText}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -101,13 +110,20 @@ export default function TaskItem({ task, onToggle, onDelete, onEdit, onFocus }: 
     );
   }
 
+  const priorityColor = getPriorityColor(task.priority || 'medium');
+  const priorityOverlay = getPriorityOverlay(task.priority || 'medium');
+
   return (
     <View style={[styles.container, overdue && styles.overdueContainer]}>
       <TouchableOpacity
         style={[styles.checkbox, task.completed && styles.checkboxDone]}
-        onPress={() => onToggle(task.id as number)}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onToggle(task.id as number);
+        }}
+        activeOpacity={0.7}
       >
-        {task.completed && <Text style={styles.checkmark}>✓</Text>}
+        {task.completed && <Ionicons name="checkmark" size={16} color="#fff" />}
       </TouchableOpacity>
 
       <View style={styles.content}>
@@ -115,8 +131,8 @@ export default function TaskItem({ task, onToggle, onDelete, onEdit, onFocus }: 
           {task.text}
         </Text>
         <View style={styles.meta}>
-          <View style={[styles.priorityBadge, { backgroundColor: PRIORITY_COLOR[task.priority || 'medium'] + '33' }]}>
-            <Text style={[styles.priorityText, { color: PRIORITY_COLOR[task.priority || 'medium'] }]}>
+          <View style={[styles.priorityBadge, { backgroundColor: priorityOverlay }]}>
+            <Text style={[styles.priorityText, { color: priorityColor }]}>
               {(task.priority || 'medium').toUpperCase()}
             </Text>
           </View>
@@ -126,29 +142,57 @@ export default function TaskItem({ task, onToggle, onDelete, onEdit, onFocus }: 
             </View>
           ) : null}
           {task.dueDate ? (
-            <Text style={[styles.dueText, overdue && styles.overdueText]}>
-              {overdue ? '⚠️ ' : '📅 '}{formatDate(task.dueDate)}
-            </Text>
+            <View style={styles.dueBadge}>
+              <Ionicons
+                name={overdue ? "warning" : "calendar-outline"}
+                size={12}
+                color={overdue ? Colors.semantic.error : Colors.text.tertiary}
+              />
+              <Text style={[styles.dueText, overdue && styles.overdueText]}>
+                {formatDate(task.dueDate)}
+              </Text>
+            </View>
           ) : null}
           {(task.timeSpent ?? 0) > 0 && (
-            <Text style={styles.timeSpentText}>⏱ {Math.round((task.timeSpent ?? 0) / 60)}m</Text>
+            <View style={styles.timeBadge}>
+              <Ionicons name="time-outline" size={12} color={Colors.text.tertiary} />
+              <Text style={styles.timeSpentText}>{Math.round((task.timeSpent ?? 0) / 60)}m</Text>
+            </View>
           )}
         </View>
       </View>
 
       <View style={styles.actions}>
         {!task.completed && onFocus && (
-          <TouchableOpacity style={styles.focusBtn} onPress={() => onFocus(task)}>
-            <Text style={styles.focusBtnText}>🎯</Text>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              onFocus(task);
+            }}
+            activeOpacity={0.6}
+          >
+            <Ionicons name="bulb" size={18} color={Colors.text.tertiary} />
           </TouchableOpacity>
         )}
         {!task.completed && (
-          <TouchableOpacity style={styles.editBtn} onPress={() => setEditing(true)}>
-            <Text style={styles.editBtnText}>✏️</Text>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setEditing(true);
+            }}
+            activeOpacity={0.6}
+          >
+            <Ionicons name="pencil" size={18} color={Colors.text.tertiary} />
           </TouchableOpacity>
         )}
-        <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
-          <Text style={styles.deleteBtnText}>🗑️</Text>
+        <TouchableOpacity
+          style={styles.actionBtn}
+          onPress={handleDelete}
+          activeOpacity={0.6}
+        >
+          <Ionicons name="trash-outline" size={18} color={Colors.semantic.error} />
         </TouchableOpacity>
       </View>
     </View>
@@ -159,76 +203,163 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 8,
+    backgroundColor: Colors.surface.base,
+    borderRadius: ComponentTokens.taskItem.borderRadius,
+    padding: ComponentTokens.taskItem.padding,
+    marginBottom: Spacing.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    gap: 12,
+    borderColor: Colors.border.subtle,
+    gap: ComponentTokens.taskItem.gap,
   },
-  overdueContainer: { borderColor: 'rgba(255,69,58,0.3)', backgroundColor: 'rgba(255,69,58,0.06)' },
+  overdueContainer: {
+    borderColor: `${Colors.semantic.error}4D`,
+    backgroundColor: `${Colors.semantic.error}0F`
+  },
   checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: ComponentTokens.taskItem.checkboxSize,
+    height: ComponentTokens.taskItem.checkboxSize,
+    borderRadius: ComponentTokens.taskItem.checkboxRadius,
     borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.3)',
+    borderColor: Colors.border.strong,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  checkboxDone: { backgroundColor: '#30D158', borderColor: '#30D158' },
-  checkmark: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  checkboxDone: {
+    backgroundColor: Colors.semantic.success,
+    borderColor: Colors.semantic.success
+  },
   content: { flex: 1 },
-  text: { fontSize: 15, color: '#EBEBF5', marginBottom: 6 },
-  textDone: { color: '#48484A', textDecorationLine: 'line-through' },
-  meta: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, alignItems: 'center' },
-  priorityBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
-  priorityText: { fontSize: 11, fontWeight: '700' },
-  categoryBadge: { backgroundColor: 'rgba(24,119,242,0.2)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
-  categoryText: { fontSize: 11, color: '#1877F2', fontWeight: '500' },
-  dueText: { fontSize: 12, color: '#636366' },
-  overdueText: { color: '#FF453A' },
-  actions: { flexDirection: 'column', gap: 4 },
-  focusBtn: { padding: 4 },
-  focusBtnText: { fontSize: 16 },
-  editBtn: { padding: 4 },
-  editBtnText: { fontSize: 16 },
-  deleteBtn: { padding: 4 },
-  deleteBtnText: { fontSize: 16 },
-  timeSpentText: { fontSize: 11, color: '#636366' },
+  text: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.secondary,
+    marginBottom: Spacing.xs,
+    lineHeight: Typography.fontSize.md * Typography.lineHeight.normal,
+  },
+  textDone: {
+    color: Colors.text.disabled,
+    textDecorationLine: 'line-through'
+  },
+  meta: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.xs,
+    alignItems: 'center'
+  },
+  priorityBadge: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.xs
+  },
+  priorityText: {
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.bold
+  },
+  categoryBadge: {
+    backgroundColor: Colors.category.background,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.xs
+  },
+  categoryText: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.category.text,
+    fontWeight: Typography.fontWeight.medium
+  },
+  dueBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  dueText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.tertiary
+  },
+  overdueText: { color: Colors.semantic.error },
+  timeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  timeSpentText: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.tertiary
+  },
+  actions: { flexDirection: 'column', gap: Spacing.xs },
+  actionBtn: {
+    padding: Spacing.xs,
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: BorderRadius.sm,
+  },
   editContainer: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 8,
+    backgroundColor: Colors.surface.elevated,
+    borderRadius: ComponentTokens.taskItem.borderRadius,
+    padding: ComponentTokens.taskItem.padding,
+    marginBottom: Spacing.sm,
     borderWidth: 1,
-    borderColor: 'rgba(24,119,242,0.4)',
+    borderColor: Colors.border.focus,
   },
   editInput: {
-    fontSize: 15,
-    color: '#FFFFFF',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 10,
-    padding: 12,
-    minHeight: 60,
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.primary,
+    backgroundColor: Colors.surface.input,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    minHeight: ComponentTokens.input.minHeight,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
-    marginBottom: 12,
+    borderColor: Colors.border.strong,
+    marginBottom: Spacing.md,
   },
-  priorityRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
+  priorityRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginBottom: Spacing.md
+  },
   priorityChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 16,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.xxl,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
+    borderColor: Colors.border.default,
   },
-  priorityChipText: { fontSize: 13, color: '#EBEBF5' },
-  priorityChipActive: { color: '#FFFFFF', fontWeight: '600' },
-  editActions: { flexDirection: 'row', gap: 8 },
-  saveBtn: { flex: 1, backgroundColor: '#1877F2', borderRadius: 10, padding: 10, alignItems: 'center' },
-  saveBtnText: { color: '#fff', fontWeight: '600', fontSize: 15 },
-  cancelBtn: { flex: 1, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: 10, alignItems: 'center' },
-  cancelBtnText: { color: '#EBEBF5', fontSize: 15 },
+  priorityChipText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary
+  },
+  priorityChipActive: {
+    color: Colors.text.primary,
+    fontWeight: Typography.fontWeight.semibold
+  },
+  editActions: {
+    flexDirection: 'row',
+    gap: Spacing.sm
+  },
+  saveBtn: {
+    flex: 1,
+    backgroundColor: Colors.interactive.primary,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: Spacing.xs,
+  },
+  saveBtnText: {
+    color: Colors.text.primary,
+    fontWeight: Typography.fontWeight.semibold,
+    fontSize: Typography.fontSize.md
+  },
+  cancelBtn: {
+    flex: 1,
+    backgroundColor: Colors.surface.elevated,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    alignItems: 'center'
+  },
+  cancelBtnText: {
+    color: Colors.text.secondary,
+    fontSize: Typography.fontSize.md
+  },
 });
