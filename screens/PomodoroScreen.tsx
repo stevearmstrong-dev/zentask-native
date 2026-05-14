@@ -10,6 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
 import { getTodaySessions, incrementSessions } from '../utils/pomodoroSessions';
@@ -221,7 +222,7 @@ export default function PomodoroScreen({ user }: Props) {
           {/* Controls inside card */}
           <View style={styles.controls}>
             <TouchableOpacity style={styles.resetBtn} onPress={reset} activeOpacity={0.8}>
-              <Text style={styles.resetBtnText}>↺</Text>
+              <Ionicons name="refresh" size={18} color="#6B8A90" />
               <Text style={styles.resetBtnLabel}>Reset</Text>
             </TouchableOpacity>
 
@@ -234,7 +235,7 @@ export default function PomodoroScreen({ user }: Props) {
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.resetBtn} onPress={() => switchMode(mode === 'work' ? 'shortBreak' : 'work')} activeOpacity={0.8}>
-              <Text style={styles.resetBtnText}>⏭</Text>
+              <Ionicons name="play-skip-forward" size={18} color="#FFFFFF" />
               <Text style={styles.resetBtnLabel}>Skip</Text>
             </TouchableOpacity>
           </View>
