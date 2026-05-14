@@ -100,7 +100,7 @@ export default function MainTabs({ user, onSignOut }: Props) {
           borderTopColor: 'rgba(255,255,255,0.1)',
           borderTopWidth: 1,
         },
-        tabBarActiveTintColor: '#1877F2',
+        tabBarActiveTintColor: '#14B478',
         tabBarInactiveTintColor: '#636366',
         tabBarLabelStyle: { fontSize: 11, fontWeight: '500' },
       }}
