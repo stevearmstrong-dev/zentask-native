@@ -229,10 +229,7 @@ export default function RecurringExpensesScreen({ user }: Props) {
   }, []);
 
   const handleDelete = useCallback((id: string) => {
-    Alert.alert('Remove', 'Remove this reminder?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Remove', style: 'destructive', onPress: () => setReminders(prev => prev.filter(r => r.id !== id)) },
-    ]);
+    setReminders(prev => prev.filter(r => r.id !== id));
   }, []);
 
   return (

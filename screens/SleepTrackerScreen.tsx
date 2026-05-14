@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Modal,
   Platform,
   Dimensions,
@@ -282,10 +281,7 @@ export default function SleepTrackerScreen({ user }: Props) {
   }, [formBedtime, formWakeTime, formQuality]);
 
   const handleDelete = (id: string) => {
-    Alert.alert('Delete', 'Remove this sleep log?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => setLogs(prev => prev.filter(l => l.id !== id)) },
-    ]);
+    setLogs(prev => prev.filter(l => l.id !== id));
   };
 
   const formDuration = calcDuration(formBedtime, formWakeTime);

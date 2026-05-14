@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Alert,
   Modal,
   ActivityIndicator,
 } from 'react-native';
@@ -51,10 +50,7 @@ export default function KanbanScreen({ user }: Props) {
   };
 
   const handleDelete = (id: number) => {
-    Alert.alert('Delete', 'Delete this task?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => deleteTask(id) },
-    ]);
+    deleteTask(id);
   };
 
   const handleAdd = async (text: string, priority: Priority, status: TaskStatus) => {

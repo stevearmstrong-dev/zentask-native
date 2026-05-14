@@ -148,10 +148,7 @@ export default function ExpenseTrackerScreen({ user }: Props) {
   }, [amount, description, category, today]);
 
   const handleDelete = useCallback((id: number) => {
-    Alert.alert('Delete', 'Remove this expense?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => setExpenses(prev => prev.filter(e => e.id !== id)) },
-    ]);
+    setExpenses(prev => prev.filter(e => e.id !== id));
   }, []);
 
   const startEdit = useCallback((exp: Expense) => {

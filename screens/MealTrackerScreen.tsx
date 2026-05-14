@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -173,10 +172,7 @@ export default function MealTrackerScreen({ user }: Props) {
   }, [mealName, notes, today, editingId]);
 
   const handleDelete = (id: number) => {
-    Alert.alert('Delete Meal', 'Remove this meal entry?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => setMeals(prev => prev.filter(m => m.id !== id)) },
-    ]);
+    setMeals(prev => prev.filter(m => m.id !== id));
   };
 
   // Group by date, sorted newest first
