@@ -27,6 +27,7 @@ interface BreathingTechnique {
   title: string;
   subtitle: string;
   accent: string;
+  dotColor: string;
   cycles: number;
   cycleLabel: string;
   guidance: string;
@@ -79,10 +80,23 @@ const wimHofPattern: PracticePhase[] = [
 
 const TECHNIQUES: BreathingTechnique[] = [
   {
+    id: 'sigh',
+    title: 'Physiological Sigh',
+    subtitle: 'Double inhale',
+    accent: '#C8A882',
+    dotColor: '#C8A882',
+    cycles: 5,
+    cycleLabel: 'Sigh',
+    guidance: 'Use the small top-up inhale, then make the exhale unhurried.',
+    phases: sighPattern,
+    pattern: sighPattern,
+  },
+  {
     id: 'box',
     title: 'Box Breathing',
     subtitle: '4-4-4-4',
-    accent: '#1877F2',
+    accent: '#8BAED4',
+    dotColor: '#8BAED4',
     cycles: 4,
     cycleLabel: 'Box',
     guidance: 'A balanced pattern for slowing down and regaining control.',
@@ -93,7 +107,8 @@ const TECHNIQUES: BreathingTechnique[] = [
     id: '478',
     title: '4-7-8',
     subtitle: 'Long exhale',
-    accent: '#AF52DE',
+    accent: '#C8A882',
+    dotColor: '#C8A882',
     cycles: 4,
     cycleLabel: 'Round',
     guidance: 'Keep the exhale soft and longer than the inhale.',
@@ -102,9 +117,10 @@ const TECHNIQUES: BreathingTechnique[] = [
   },
   {
     id: 'coherent',
-    title: 'Coherent',
+    title: 'Coherent Breathing',
     subtitle: '5 in, 5 out',
-    accent: '#30D158',
+    accent: '#8BAED4',
+    dotColor: '#8BAED4',
     cycles: 6,
     cycleLabel: 'Breath',
     guidance: 'An even rhythm for settling into a steady pace.',
@@ -112,21 +128,11 @@ const TECHNIQUES: BreathingTechnique[] = [
     pattern: coherentPattern,
   },
   {
-    id: 'sigh',
-    title: 'Physiological Sigh',
-    subtitle: 'Double inhale',
-    accent: '#00C7BE',
-    cycles: 5,
-    cycleLabel: 'Sigh',
-    guidance: 'Use the small top-up inhale, then make the exhale unhurried.',
-    phases: sighPattern,
-    pattern: sighPattern,
-  },
-  {
     id: 'wim-hof',
     title: 'Wim Hof',
     subtitle: '30 breaths',
-    accent: '#FF9F0A',
+    accent: '#C8A882',
+    dotColor: '#C8A882',
     cycles: 1,
     cycleLabel: 'Round',
     guidance: 'Active breathing can feel intense. Sit or lie down and stop if dizzy.',
@@ -150,13 +156,110 @@ function sumDurations(phases: PracticePhase[]): number {
   return phases.reduce((sum, phase) => sum + phase.duration, 0);
 }
 
+// Deterministic dot positions for the particle orb on each card
+function getDots(seed: number, count: number): { x: number; y: number; size: number; opacity: number }[] {
+  const dots = [];
+  for (let i = 0; i < count; i++) {
+    // Pseudorandom but stable per technique
+    const angle = (i / count) * Math.PI * 2 + seed;
+    const r = 28 + ((i * seed * 7 + 13) % 22);
+    const jitter = ((i * 17 + seed * 3) % 14) - 7;
+    const x = 50 + Math.cos(angle) * r + jitter;
+    const y = 50 + Math.sin(angle) * r + jitter * 0.7;
+    const size = 1.5 + ((i * seed + 5) % 3) * 0.8;
+    const opacity = 0.35 + ((i * 3 + seed) % 10) * 0.05;
+    dots.push({ x, y, size, opacity });
+  }
+  return dots;
+}
+
+interface ParticleOrbProps {
+  color: string;
+  seed: number;
+  scale: Animated.Value;
+}
+
+function ParticleOrb({ color, seed, scale }: ParticleOrbProps) {
+  const dots = useMemo(() => getDots(seed, 48), [seed]);
+  return (
+    <Animated.View style={[s.orbContainer, { transform: [{ scale }] }]}>
+      {dots.map((dot, i) => (
+        <View
+          key={i}
+          style={{
+            position: 'absolute',
+            left: `${dot.x}%` as any,
+            top: `${dot.y}%` as any,
+            width: dot.size,
+            height: dot.size,
+            borderRadius: dot.size / 2,
+            backgroundColor: color,
+            opacity: dot.opacity,
+          }}
+        />
+      ))}
+    </Animated.View>
+  );
+}
+
+interface TechniqueCardProps {
+  technique: BreathingTechnique;
+  selected: boolean;
+  onPress: () => void;
+  seed: number;
+}
+
+function TechniqueCard({ technique, selected, onPress, seed }: TechniqueCardProps) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.82}
+      style={[s.techniqueCard, selected && s.techniqueCardSelected]}
+      onPress={onPress}
+    >
+      <View style={s.cardBookmark}>
+        <Ionicons name="bookmark-outline" size={14} color="rgba(255,255,255,0.4)" />
+      </View>
+      <View style={s.cardOrbArea}>
+        <View style={s.cardOrbFrame}>
+          {Array.from({ length: 48 }).map((_, i) => {
+            const angle = (i / 48) * Math.PI * 2 + seed;
+            const r = 28 + ((i * seed * 7 + 13) % 22);
+            const jitter = ((i * 17 + seed * 3) % 14) - 7;
+            const x = 50 + Math.cos(angle) * r + jitter;
+            const y = 50 + Math.sin(angle) * r + jitter * 0.7;
+            const size = 1.5 + ((i * seed + 5) % 3) * 0.8;
+            const opacity = 0.3 + ((i * 3 + seed) % 10) * 0.05;
+            return (
+              <View
+                key={i}
+                style={{
+                  position: 'absolute',
+                  left: `${x}%` as any,
+                  top: `${y}%` as any,
+                  width: size,
+                  height: size,
+                  borderRadius: size / 2,
+                  backgroundColor: technique.dotColor,
+                  opacity: selected ? opacity + 0.15 : opacity,
+                }}
+              />
+            );
+          })}
+        </View>
+      </View>
+      <Text style={[s.cardTitle, selected && { color: '#FFFFFF' }]}>{technique.title}</Text>
+    </TouchableOpacity>
+  );
+}
+
 export default function CalmPracticeScreen() {
   const navigation = useNavigation<any>();
-  const [techniqueId, setTechniqueId] = useState('box');
+  const [techniqueId, setTechniqueId] = useState('sigh');
   const technique = useMemo(
     () => TECHNIQUES.find(item => item.id === techniqueId) ?? TECHNIQUES[0],
     [techniqueId]
   );
+  const techniqueIndex = TECHNIQUES.findIndex(t => t.id === techniqueId);
 
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [cycle, setCycle] = useState(1);
@@ -198,19 +301,13 @@ export default function CalmPracticeScreen() {
   const advancePhase = useCallback(() => {
     const isLastPhase = phaseIndex === technique.phases.length - 1;
     const isLastCycle = cycle === technique.cycles;
-
-    if (isLastPhase && isLastCycle) {
-      completeSession();
-      return;
-    }
-
+    if (isLastPhase && isLastCycle) { completeSession(); return; }
     if (isLastPhase) {
       setCycle(prev => prev + 1);
       setPhaseIndex(0);
       setTimeLeft(technique.phases[0].duration);
       return;
     }
-
     const nextIndex = phaseIndex + 1;
     setPhaseIndex(nextIndex);
     setTimeLeft(technique.phases[nextIndex].duration);
@@ -218,15 +315,8 @@ export default function CalmPracticeScreen() {
 
   useEffect(() => {
     if (!isRunning) return;
-    if (timeLeft <= 0) {
-      advancePhase();
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      setTimeLeft(prev => Math.max(prev - 1, 0));
-    }, 1000);
-
+    if (timeLeft <= 0) { advancePhase(); return; }
+    const timeout = setTimeout(() => setTimeLeft(prev => Math.max(prev - 1, 0)), 1000);
     return () => clearTimeout(timeout);
   }, [advancePhase, isRunning, timeLeft]);
 
@@ -241,14 +331,8 @@ export default function CalmPracticeScreen() {
 
   const toggleRunning = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (isRunning) {
-      setIsRunning(false);
-      return;
-    }
-    if (isComplete) {
-      resetSession(true);
-      return;
-    }
+    if (isRunning) { setIsRunning(false); return; }
+    if (isComplete) { resetSession(true); return; }
     setIsRunning(true);
   };
 
@@ -264,233 +348,278 @@ export default function CalmPracticeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color="#EBEBF5" />
+    <SafeAreaView style={s.container} edges={['top']}>
+      {/* Header */}
+      <View style={s.header}>
+        <TouchableOpacity style={s.backButton} onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
         </TouchableOpacity>
-        <View style={styles.headerText}>
-          <Text style={styles.title}>Calm Practice</Text>
-          <Text style={styles.subtitle}>Guided breathing techniques</Text>
-        </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.techniqueRow}
-        >
-          {TECHNIQUES.map(item => {
-            const selected = item.id === technique.id;
-            return (
-              <TouchableOpacity
-                key={item.id}
-                activeOpacity={0.78}
-                style={[
-                  styles.techniqueCard,
-                  selected && { borderColor: item.accent, backgroundColor: `${item.accent}20` },
-                ]}
-                onPress={() => selectTechnique(item.id)}
-              >
-                <Text style={[styles.techniqueTitle, selected && { color: item.accent }]}>{item.title}</Text>
-                <Text style={styles.techniqueSubtitle}>{item.subtitle}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.scroll}>
+        {/* Title block */}
+        <View style={s.titleBlock}>
+          <Text style={s.title}>Breathing</Text>
+          <Text style={s.subtitle}>Exercises to center your mind, improve{'\n'}focus, and reduce stress</Text>
+        </View>
 
-        <View style={styles.visualSection}>
-          <View style={[styles.orbHalo, { borderColor: `${technique.accent}26` }]}>
-            <Animated.View
-              style={[
-                styles.orb,
-                {
-                  backgroundColor: `${technique.accent}30`,
-                  borderColor: `${technique.accent}90`,
-                  transform: [{ scale: orbScale }],
-                },
-              ]}
+        {/* 2-column technique grid */}
+        <View style={s.grid}>
+          {TECHNIQUES.map((item, idx) => (
+            <TechniqueCard
+              key={item.id}
+              technique={item}
+              selected={item.id === techniqueId}
+              onPress={() => selectTechnique(item.id)}
+              seed={idx + 1}
+            />
+          ))}
+        </View>
+
+        {/* Active session panel */}
+        <View style={s.sessionCard}>
+          {/* Particle orb */}
+          <View style={s.sessionOrbWrapper}>
+            <ParticleOrb
+              color={technique.dotColor}
+              seed={techniqueIndex + 1}
+              scale={orbScale}
+            />
+          </View>
+
+          <Text style={[s.phaseLabel, { color: technique.accent }]}>{currentPhase.label}</Text>
+          <Text style={s.instruction}>{isComplete ? 'Practice complete' : currentPhase.instruction}</Text>
+          <Text style={s.countdown}>{formatSeconds(timeLeft)}</Text>
+
+          {/* Progress row */}
+          <View style={s.progressRow}>
+            <Text style={s.progressMeta}>{technique.cycleLabel} {cycle}/{technique.cycles} · Step {currentStep}/{totalSteps}</Text>
+            <Text style={s.remainingText}>{formatSeconds(remainingTotal)}s left</Text>
+          </View>
+          <View style={s.progressTrack}>
+            <View style={[s.progressFill, { width: `${progress * 100}%` as any, backgroundColor: technique.accent }]} />
+          </View>
+
+          {/* Controls */}
+          <View style={s.controls}>
+            <TouchableOpacity style={s.resetButton} onPress={handleReset}>
+              <Ionicons name="refresh" size={16} color="rgba(255,255,255,0.5)" />
+              <Text style={s.resetButtonText}>Reset</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[s.startButton, { backgroundColor: technique.accent }]}
+              onPress={toggleRunning}
             >
-              <View style={[styles.orbCore, { backgroundColor: technique.accent }]} />
-            </Animated.View>
+              <Ionicons name={isRunning ? 'pause' : 'play'} size={18} color="#000000" />
+              <Text style={s.startButtonText}>{isRunning ? 'Pause' : isComplete ? 'Again' : 'Start'}</Text>
+            </TouchableOpacity>
           </View>
 
-          <Text style={[styles.phaseLabel, { color: technique.accent }]}>{currentPhase.label}</Text>
-          <Text style={styles.instruction}>{isComplete ? 'Practice complete' : currentPhase.instruction}</Text>
-          <Text style={styles.countdown}>{formatSeconds(timeLeft)}</Text>
-        </View>
-
-        <View style={styles.progressCard}>
-          <View style={styles.progressHeader}>
-            <Text style={styles.progressLabel}>
-              {technique.cycleLabel} {cycle} of {technique.cycles}
-            </Text>
-            <Text style={styles.progressMeta}>
-              Step {currentStep} of {totalSteps}
-            </Text>
-          </View>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${progress * 100}%` as any, backgroundColor: technique.accent }]} />
-          </View>
-          <Text style={styles.remainingText}>{formatSeconds(remainingTotal)} remaining</Text>
-        </View>
-
-        <View style={styles.controls}>
-          <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
-            <Ionicons name="refresh" size={18} color="#EBEBF5" />
-            <Text style={styles.resetButtonText}>Reset</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.startButton, { backgroundColor: technique.accent }]}
-            onPress={toggleRunning}
-          >
-            <Ionicons name={isRunning ? 'pause' : 'play'} size={20} color="#FFFFFF" />
-            <Text style={styles.startButtonText}>{isRunning ? 'Pause' : isComplete ? 'Again' : 'Start'}</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.patternCard}>
-          <Text style={styles.cardTitle}>Pattern</Text>
-          <View style={styles.phaseGrid}>
+          {/* Pattern pills */}
+          <View style={s.patternRow}>
             {technique.pattern.map((phase, index) => (
-              <View key={`${phase.shortLabel}-${index}`} style={styles.phasePill}>
-                <Text style={styles.phasePillLabel}>{phase.shortLabel}</Text>
-                <Text style={[styles.phasePillTime, { color: technique.accent }]}>{phase.duration}s</Text>
+              <View key={`${phase.shortLabel}-${index}`} style={s.phasePill}>
+                <Text style={s.phasePillLabel}>{phase.shortLabel}</Text>
+                <Text style={[s.phasePillTime, { color: technique.accent }]}>{phase.duration}s</Text>
               </View>
             ))}
           </View>
-          <Text style={styles.guidance}>{technique.guidance}</Text>
+          <Text style={s.guidance}>{technique.guidance}</Text>
         </View>
+
+        <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
+const s = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#000000' },
+  scroll: { paddingBottom: 32 },
+
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 10,
-    gap: 12,
+    paddingHorizontal: 20,
+    paddingTop: 4,
+    paddingBottom: 8,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
   },
-  headerText: { flex: 1 },
-  title: { fontSize: 26, fontWeight: '700', color: '#FFFFFF' },
-  subtitle: { fontSize: 13, color: '#636366', marginTop: 2 },
-  scrollContent: { paddingBottom: 32 },
-  techniqueRow: { paddingHorizontal: 20, paddingTop: 4, paddingBottom: 18, gap: 10 },
+
+  titleBlock: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
+  title: {
+    fontSize: 40,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: -1,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#6E7A8A',
+    lineHeight: 22,
+    fontStyle: 'italic',
+  },
+
+  // 2-col grid
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 12,
+    gap: 8,
+    marginBottom: 16,
+  },
   techniqueCard: {
-    width: 132,
-    minHeight: 72,
-    borderRadius: 16,
-    padding: 13,
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    width: '47.5%',
+    aspectRatio: 0.9,
+    backgroundColor: '#0D2040',
+    borderRadius: 20,
+    overflow: 'hidden',
+    padding: 14,
+    justifyContent: 'flex-end',
   },
-  techniqueTitle: { fontSize: 15, fontWeight: '700', color: '#EBEBF5', marginBottom: 5 },
-  techniqueSubtitle: { fontSize: 12, color: '#8E8E93' },
-  visualSection: { alignItems: 'center', paddingTop: 4, paddingBottom: 18 },
-  orbHalo: {
-    width: 248,
-    height: 248,
-    borderRadius: 124,
+  techniqueCardSelected: {
+    backgroundColor: '#102850',
+    borderWidth: 1,
+    borderColor: 'rgba(200,168,130,0.35)',
+  },
+  cardBookmark: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    marginBottom: 22,
+    zIndex: 2,
   },
-  orb: {
-    width: 168,
-    height: 168,
-    borderRadius: 84,
+  cardOrbArea: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
+    marginBottom: 8,
   },
-  orbCore: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    opacity: 0.9,
+  cardOrbFrame: {
+    width: 110,
+    height: 110,
+    position: 'relative',
   },
-  phaseLabel: { fontSize: 28, fontWeight: '800', marginBottom: 6 },
-  instruction: { fontSize: 15, color: '#EBEBF5', textAlign: 'center', paddingHorizontal: 32, minHeight: 22 },
-  countdown: { fontSize: 68, fontWeight: '200', color: '#FFFFFF', marginTop: 10 },
-  progressCard: {
-    marginHorizontal: 20,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+  cardTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.75)',
+    textAlign: 'center',
+    lineHeight: 21,
   },
-  progressHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  progressLabel: { fontSize: 14, fontWeight: '700', color: '#EBEBF5' },
-  progressMeta: { fontSize: 12, color: '#636366', fontWeight: '600' },
-  progressTrack: { height: 8, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden' },
-  progressFill: { height: '100%', borderRadius: 4 },
-  remainingText: { color: '#8E8E93', fontSize: 12, marginTop: 10 },
-  controls: { flexDirection: 'row', gap: 12, paddingHorizontal: 20, paddingTop: 16 },
+
+  // Active session
+  sessionCard: {
+    marginHorizontal: 12,
+    backgroundColor: '#0D2040',
+    borderRadius: 24,
+    padding: 22,
+    alignItems: 'center',
+  },
+  sessionOrbWrapper: {
+    width: 180,
+    height: 180,
+    marginBottom: 20,
+  },
+  orbContainer: {
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+  },
+
+  phaseLabel: {
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    marginBottom: 6,
+  },
+  instruction: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.55)',
+    textAlign: 'center',
+    paddingHorizontal: 16,
+    marginBottom: 8,
+    minHeight: 20,
+  },
+  countdown: {
+    fontSize: 72,
+    fontWeight: '200',
+    color: '#FFFFFF',
+    letterSpacing: -2,
+    marginBottom: 16,
+  },
+
+  progressRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 8,
+  },
+  progressMeta: { fontSize: 12, color: 'rgba(255,255,255,0.35)', fontWeight: '500' },
+  remainingText: { fontSize: 12, color: 'rgba(255,255,255,0.35)' },
+  progressTrack: {
+    width: '100%',
+    height: 3,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 2,
+    overflow: 'hidden',
+    marginBottom: 20,
+  },
+  progressFill: { height: '100%', borderRadius: 2 },
+
+  controls: { flexDirection: 'row', gap: 10, width: '100%', marginBottom: 20 },
   resetButton: {
-    width: 112,
-    minHeight: 54,
-    borderRadius: 16,
+    width: 90,
+    height: 48,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  resetButtonText: { color: 'rgba(255,255,255,0.5)', fontSize: 14, fontWeight: '600' },
+  startButton: {
+    flex: 1,
+    height: 48,
+    borderRadius: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 7,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
   },
-  resetButtonText: { color: '#EBEBF5', fontSize: 16, fontWeight: '600' },
-  startButton: {
-    flex: 1,
-    minHeight: 54,
-    borderRadius: 16,
+  startButtonText: { color: '#000000', fontSize: 16, fontWeight: '800' },
+
+  patternRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
+    flexWrap: 'wrap',
+    gap: 7,
+    width: '100%',
+    marginBottom: 14,
   },
-  startButtonText: { color: '#FFFFFF', fontSize: 18, fontWeight: '700' },
-  patternCard: {
-    marginHorizontal: 20,
-    marginTop: 16,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-  },
-  cardTitle: { fontSize: 13, color: '#636366', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 },
-  phaseGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
   phasePill: {
-    minWidth: 70,
-    borderRadius: 12,
-    paddingVertical: 9,
+    borderRadius: 10,
+    paddingVertical: 7,
     paddingHorizontal: 10,
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
   },
-  phasePillLabel: { color: '#EBEBF5', fontSize: 12, fontWeight: '700', marginBottom: 3 },
-  phasePillTime: { fontSize: 13, fontWeight: '800' },
-  guidance: { color: '#8E8E93', fontSize: 13, lineHeight: 18 },
+  phasePillLabel: { color: 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: '700', marginBottom: 2 },
+  phasePillTime: { fontSize: 12, fontWeight: '800' },
+  guidance: { color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 18, textAlign: 'center' },
 });
