@@ -163,7 +163,7 @@ export default function TodayScreen({ user }: Props) {
           }}
           activeOpacity={0.8}
         >
-          <Ionicons name="journal-outline" size={20} color="#14B478" />
+          <Ionicons name="book-outline" size={20} color="#14B478" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.addButton}
