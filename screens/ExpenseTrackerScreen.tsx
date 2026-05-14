@@ -183,6 +183,8 @@ export default function ExpenseTrackerScreen({ user }: Props) {
 
   return (
     <SafeAreaView style={s.container} edges={['top']}>
+      {/* Ambient glow */}
+      <View style={s.glowBlob} />
       <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
         {/* Header */}
@@ -213,7 +215,7 @@ export default function ExpenseTrackerScreen({ user }: Props) {
             </TouchableOpacity>
           </View>
 
-          <Text style={[s.heroAmount, overBudget && { color: '#FF453A' }]}>
+          <Text style={[s.heroAmount, overBudget && { color: '#4ADE80' }]}>
             ${todayTotal.toFixed(2)}
           </Text>
 
@@ -221,7 +223,7 @@ export default function ExpenseTrackerScreen({ user }: Props) {
             <View style={s.heroProgressBar}>
               <View style={[s.heroProgressFill, {
                 width: `${budgetPct}%` as any,
-                backgroundColor: overBudget ? '#FF453A' : '#FF6B5B',
+                backgroundColor: overBudget ? '#4ADE80' : '#00E5CC',
               }]} />
             </View>
             <Text style={s.heroProgressPct}>{Math.round(budgetPct)}%</Text>
@@ -255,11 +257,11 @@ export default function ExpenseTrackerScreen({ user }: Props) {
           </View>
           <View style={[s.summaryChip, s.summaryChipDark]}>
             <View style={[s.summaryArrow, s.summaryArrowDown]}>
-              <Text style={s.summaryArrowText}>↓</Text>
+              <Text style={[s.summaryArrowText, { color: '#00E5CC' }]}>↓</Text>
             </View>
             <View>
-              <Text style={s.summaryChipLabel}>Budget Left</Text>
-              <Text style={s.summaryChipValue}>${Math.max(remaining, 0).toFixed(2)}</Text>
+              <Text style={[s.summaryChipLabel, { color: '#3A5A60' }]}>Budget Left</Text>
+              <Text style={[s.summaryChipValue, { color: '#00E5CC' }]}>${Math.max(remaining, 0).toFixed(2)}</Text>
             </View>
           </View>
         </View>
@@ -363,7 +365,7 @@ export default function ExpenseTrackerScreen({ user }: Props) {
                         <Text style={s.txDesc}>{exp.description}</Text>
                         <Text style={s.txMeta}>{meta.label} · {formatTime(exp.timestamp)}</Text>
                       </View>
-                      <Text style={[s.txAmount, { color: '#FF6B5B' }]}>-${exp.amount.toFixed(2)}</Text>
+                      <Text style={[s.txAmount, { color: '#00E5CC' }]}>-${exp.amount.toFixed(2)}</Text>
                       <TouchableOpacity onPress={() => startEdit(exp)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                         <Text style={s.txAction}>✏️</Text>
                       </TouchableOpacity>
@@ -409,7 +411,7 @@ export default function ExpenseTrackerScreen({ user }: Props) {
               <TextInput
                 style={[s.amountInput, { flex: 1, fontSize: 20 }]}
                 placeholder="0.00"
-                placeholderTextColor="#444"
+                placeholderTextColor="#3A5A60"
                 keyboardType="decimal-pad"
                 value={amount}
                 onChangeText={setAmount}
@@ -421,7 +423,7 @@ export default function ExpenseTrackerScreen({ user }: Props) {
             <TextInput
               style={[s.descInput, { width: '100%', marginBottom: 20 }]}
               placeholder="What did you spend on?"
-              placeholderTextColor="#444"
+              placeholderTextColor="#3A5A60"
               value={description}
               onChangeText={setDescription}
             />
@@ -459,7 +461,13 @@ export default function ExpenseTrackerScreen({ user }: Props) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#111318' },
+  container: { flex: 1, backgroundColor: '#080E12' },
+  glowBlob: {
+    position: 'absolute',
+    width: 300, height: 300, borderRadius: 150,
+    backgroundColor: 'rgba(0,229,204,0.07)',
+    top: -80, alignSelf: 'center',
+  },
 
   // Header
   header: {
@@ -467,154 +475,156 @@ const s = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
   },
   title: { fontSize: 28, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.5 },
-  subtitle: { fontSize: 13, color: '#5A5A72', marginTop: 2 },
+  subtitle: { fontSize: 13, color: '#3A5A60', marginTop: 2 },
   addFab: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#FF6B5B',
+    width: 44, height: 44, borderRadius: 14,
+    backgroundColor: '#00E5CC',
     alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#FF6B5B', shadowOffset: { width: 0, height: 4 },
+    shadowColor: '#00E5CC', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.5, shadowRadius: 12, elevation: 8,
   },
-  addFabText: { fontSize: 24, color: '#FFFFFF', fontWeight: '300', lineHeight: 28 },
+  addFabText: { fontSize: 24, color: '#000000', fontWeight: '600', lineHeight: 28 },
 
   // Hero card
   heroCard: {
     marginHorizontal: 20, marginBottom: 16,
-    backgroundColor: '#1E1E2A',
+    backgroundColor: '#0D1C22',
     borderRadius: 24, padding: 22,
-    borderWidth: 1, borderColor: 'rgba(255,107,91,0.15)',
+    borderWidth: 1, borderColor: 'rgba(0,229,204,0.15)',
     overflow: 'hidden',
-    shadowColor: '#FF6B5B', shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15, shadowRadius: 20, elevation: 6,
+    shadowColor: '#00E5CC', shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1, shadowRadius: 20, elevation: 6,
   },
   heroCircle1: {
     position: 'absolute', width: 180, height: 180, borderRadius: 90,
-    backgroundColor: 'rgba(255,107,91,0.07)',
+    backgroundColor: 'rgba(0,229,204,0.06)',
     top: -50, right: -40,
   },
   heroCircle2: {
     position: 'absolute', width: 120, height: 120, borderRadius: 60,
-    backgroundColor: 'rgba(255,107,91,0.05)',
+    backgroundColor: 'rgba(74,222,128,0.04)',
     top: 20, right: 30,
   },
   heroTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  heroLabel: { fontSize: 11, fontWeight: '700', color: '#5A5A72', letterSpacing: 1.5, textTransform: 'uppercase' },
-  heroBudgetLabel: { fontSize: 12, color: '#FF6B5B', fontWeight: '600' },
+  heroLabel: { fontSize: 11, fontWeight: '700', color: '#3A5A60', letterSpacing: 1.5, textTransform: 'uppercase' },
+  heroBudgetLabel: { fontSize: 12, color: '#00E5CC', fontWeight: '600' },
   heroAmount: { fontSize: 44, fontWeight: '800', color: '#FFFFFF', letterSpacing: -1, marginBottom: 14 },
   heroProgressRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 18 },
-  heroProgressBar: { flex: 1, height: 6, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden' },
+  heroProgressBar: { flex: 1, height: 6, backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 3, overflow: 'hidden' },
   heroProgressFill: { height: '100%', borderRadius: 3 },
-  heroProgressPct: { fontSize: 12, fontWeight: '600', color: '#5A5A72', width: 34, textAlign: 'right' },
+  heroProgressPct: { fontSize: 12, fontWeight: '600', color: '#3A5A60', width: 34, textAlign: 'right' },
   heroFooter: { flexDirection: 'row', alignItems: 'center' },
   heroStat: { flex: 1, alignItems: 'center' },
-  heroStatLabel: { fontSize: 11, color: '#5A5A72', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 },
+  heroStatLabel: { fontSize: 11, color: '#3A5A60', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 },
   heroStatValue: { fontSize: 18, fontWeight: '700', color: '#FFFFFF' },
-  heroStatDivider: { width: 1, height: 32, backgroundColor: 'rgba(255,255,255,0.08)' },
+  heroStatDivider: { width: 1, height: 32, backgroundColor: 'rgba(255,255,255,0.07)' },
 
   // Summary chips
   summaryRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 12, marginBottom: 24 },
   summaryChip: {
-    flex: 1, borderRadius: 16, padding: 16,
+    flex: 1, borderRadius: 20, padding: 16,
     flexDirection: 'row', alignItems: 'center', gap: 12,
   },
-  summaryChipRed: { backgroundColor: '#FF6B5B', shadowColor: '#FF6B5B', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 10, elevation: 5 },
-  summaryChipDark: { backgroundColor: '#1E1E2A', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  summaryChipRed: { backgroundColor: '#00E5CC', shadowColor: '#00E5CC', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 10, elevation: 5 },
+  summaryChipDark: { backgroundColor: '#0D1C22', borderWidth: 1, borderColor: 'rgba(0,229,204,0.15)' },
   summaryArrow: {
-    width: 32, height: 32, borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    width: 32, height: 32, borderRadius: 10,
+    backgroundColor: 'rgba(0,0,0,0.2)',
     alignItems: 'center', justifyContent: 'center',
   },
-  summaryArrowDown: { backgroundColor: 'rgba(255,255,255,0.1)' },
-  summaryArrowText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
-  summaryChipLabel: { fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: '500', textTransform: 'uppercase', letterSpacing: 0.5 },
-  summaryChipValue: { fontSize: 18, fontWeight: '800', color: '#FFFFFF' },
+  summaryArrowDown: { backgroundColor: 'rgba(0,229,204,0.15)' },
+  summaryArrowText: { fontSize: 14, fontWeight: '700', color: '#000000' },
+  summaryChipLabel: { fontSize: 11, color: 'rgba(0,0,0,0.6)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
+  summaryChipValue: { fontSize: 18, fontWeight: '800', color: '#000000' },
 
   // Section
   section: { paddingHorizontal: 20, marginBottom: 24 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
-  seeAll: { fontSize: 13, color: '#5A5A72' },
+  sectionTitle: { fontSize: 14, fontWeight: '700', color: '#FFFFFF', textTransform: 'uppercase', letterSpacing: 0.5 },
+  seeAll: { fontSize: 13, color: '#3A5A60' },
 
   // Breakdown
   breakdownCard: {
-    backgroundColor: '#1E1E2A', borderRadius: 18,
-    padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', gap: 14,
+    backgroundColor: '#0D1C22', borderRadius: 20,
+    padding: 16, borderWidth: 1, borderColor: 'rgba(0,229,204,0.1)', gap: 14,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 4,
   },
   breakdownRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   breakdownIconWrap: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   breakdownEmoji: { fontSize: 18 },
   breakdownLabelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  breakdownLabel: { fontSize: 13, color: '#CCCCDD', fontWeight: '500' },
+  breakdownLabel: { fontSize: 13, color: '#CCDDDD', fontWeight: '500' },
   breakdownAmount: { fontSize: 13, fontWeight: '700' },
-  breakdownPct: { fontSize: 12, color: '#5A5A72', width: 34, textAlign: 'right' },
+  breakdownPct: { fontSize: 12, color: '#3A5A60', width: 34, textAlign: 'right' },
   miniBar: { height: 4, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden', marginTop: 2 },
   miniBarFill: { height: '100%', borderRadius: 2 },
 
   // Transaction items
   txItem: {
-    backgroundColor: '#1E1E2A', borderRadius: 16,
-    marginBottom: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: '#0D1C22', borderRadius: 18,
+    marginBottom: 10, borderWidth: 1, borderColor: 'rgba(0,229,204,0.08)',
     overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 6, elevation: 3,
   },
   txInner: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12 },
   txIconWrap: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   txEmoji: { fontSize: 20 },
   txDesc: { fontSize: 15, color: '#FFFFFF', fontWeight: '600' },
-  txMeta: { fontSize: 12, color: '#5A5A72', marginTop: 2 },
+  txMeta: { fontSize: 12, color: '#3A5A60', marginTop: 2 },
   txAmount: { fontSize: 15, fontWeight: '700' },
   txAction: { fontSize: 16, paddingHorizontal: 4 },
-  txActionDel: { fontSize: 14, color: '#5A5A72', paddingHorizontal: 4 },
+  txActionDel: { fontSize: 14, color: '#3A5A60', paddingHorizontal: 4 },
 
   // Edit inline
   editInner: { padding: 14, gap: 10 },
   inputRow: { flexDirection: 'row', gap: 10 },
   amountWrap: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#2A2A38', borderRadius: 12,
-    paddingHorizontal: 12, width: 110, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(0,229,204,0.06)', borderRadius: 12,
+    paddingHorizontal: 12, width: 110, borderWidth: 1, borderColor: 'rgba(0,229,204,0.15)',
   },
-  dollarSign: { fontSize: 16, color: '#5A5A72', marginRight: 2 },
+  dollarSign: { fontSize: 16, color: '#3A5A60', marginRight: 2 },
   amountInput: { fontSize: 16, color: '#FFFFFF', flex: 1, paddingVertical: 12 },
   descInput: {
-    flex: 1, backgroundColor: '#2A2A38', borderRadius: 12,
+    flex: 1, backgroundColor: 'rgba(0,229,204,0.06)', borderRadius: 12,
     paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: '#FFFFFF',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1, borderColor: 'rgba(0,229,204,0.15)',
   },
   editActions: { flexDirection: 'row', gap: 10 },
-  saveBtn: { flex: 1, backgroundColor: '#FF6B5B', borderRadius: 10, padding: 11, alignItems: 'center' },
-  saveBtnText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
-  cancelEditBtn: { flex: 1, backgroundColor: '#2A2A38', borderRadius: 10, padding: 11, alignItems: 'center' },
-  cancelEditBtnText: { color: '#5A5A72', fontSize: 14 },
+  saveBtn: { flex: 1, backgroundColor: '#00E5CC', borderRadius: 10, padding: 11, alignItems: 'center', shadowColor: '#00E5CC', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 4 },
+  saveBtnText: { color: '#000000', fontWeight: '800', fontSize: 14 },
+  cancelEditBtn: { flex: 1, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 10, padding: 11, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  cancelEditBtnText: { color: '#3A5A60', fontSize: 14 },
 
   // Category chips
   catChip: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     paddingHorizontal: 12, paddingVertical: 8,
     borderRadius: 20, borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderColor: 'rgba(0,229,204,0.15)',
+    backgroundColor: 'rgba(0,229,204,0.04)',
   },
   catEmoji: { fontSize: 15 },
-  catLabel: { fontSize: 12, color: '#888', fontWeight: '500' },
+  catLabel: { fontSize: 12, color: '#3A5A60', fontWeight: '500' },
 
   // Empty state
   emptyBox: { alignItems: 'center', paddingVertical: 32 },
-  emptyText: { fontSize: 16, color: '#CCCCDD', fontWeight: '600' },
-  emptySubtext: { fontSize: 13, color: '#5A5A72', marginTop: 4 },
+  emptyText: { fontSize: 16, color: '#CCDDDD', fontWeight: '600' },
+  emptySubtext: { fontSize: 13, color: '#3A5A60', marginTop: 4 },
 
   // Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' },
   modalCard: {
-    backgroundColor: '#1A1A25', borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    backgroundColor: '#0D1C22', borderTopLeftRadius: 28, borderTopRightRadius: 28,
     padding: 24, paddingBottom: 48,
-    borderWidth: 1, borderColor: 'rgba(255,107,91,0.15)',
+    borderWidth: 1, borderColor: 'rgba(0,229,204,0.15)',
   },
   modalTitle: { fontSize: 20, fontWeight: '800', color: '#FFFFFF', marginBottom: 20, letterSpacing: -0.3 },
-  modalLabel: { fontSize: 12, fontWeight: '600', color: '#5A5A72', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 },
+  modalLabel: { fontSize: 12, fontWeight: '600', color: '#3A5A60', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 },
   modalAddBtn: {
-    backgroundColor: '#FF6B5B', borderRadius: 14, padding: 16, alignItems: 'center',
-    shadowColor: '#FF6B5B', shadowOffset: { width: 0, height: 4 },
+    backgroundColor: '#00E5CC', borderRadius: 14, padding: 16, alignItems: 'center',
+    shadowColor: '#00E5CC', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.45, shadowRadius: 12, elevation: 6,
   },
-  modalAddBtnText: { color: '#FFFFFF', fontWeight: '700', fontSize: 16 },
+  modalAddBtnText: { color: '#000000', fontWeight: '800', fontSize: 16 },
 });
