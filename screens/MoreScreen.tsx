@@ -141,7 +141,7 @@ export default function MoreScreen({ user, onSignOut }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
+  container: { flex: 1, backgroundColor: '#081A15' },
   pageTitle: { fontSize: 28, fontWeight: '700', color: '#FFFFFF', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 16 },
   userCard: {
     flexDirection: 'row',

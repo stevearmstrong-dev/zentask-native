@@ -96,8 +96,8 @@ export default function MainTabs({ user, onSignOut }: Props) {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#1C1C1E',
-          borderTopColor: 'rgba(255,255,255,0.1)',
+          backgroundColor: '#081A15',
+          borderTopColor: 'rgba(20,180,120,0.15)',
           borderTopWidth: 1,
         },
         tabBarActiveTintColor: '#14B478',
