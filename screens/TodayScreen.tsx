@@ -148,10 +148,7 @@ export default function TodayScreen({ user }: Props) {
       />
       <View style={styles.header}>
         <View style={styles.headerCopy}>
-          <View style={styles.greetingRow}>
-            <Text style={styles.greeting}>{greeting()}, {userName}</Text>
-            <Text style={styles.waveEmoji}>👋</Text>
-          </View>
+          <Text style={styles.greeting}>{greeting()}, {userName}</Text>
           <Text style={styles.date}>{formatDate()}</Text>
         </View>
         <TouchableOpacity
@@ -233,18 +230,10 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
   },
   headerCopy: { flex: 1 },
-  greetingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
   greeting: {
     fontSize: Typography.fontSize.xxxl,
     fontWeight: Typography.fontWeight.bold,
     color: Colors.text.primary
-  },
-  waveEmoji: {
-    fontSize: Typography.fontSize.xxxl,
   },
   date: {
     fontSize: Typography.fontSize.base,
