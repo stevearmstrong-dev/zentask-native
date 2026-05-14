@@ -61,7 +61,7 @@ function MoreStackNavigator({ user, onSignOut }: Props) {
         {() => <CalmPracticeScreen />}
       </MoreStack.Screen>
       <MoreStack.Screen name="Journal">
-        {() => <JournalScreen user={user} />}
+        {({ route }) => <JournalScreen user={user} openDailyNote={(route.params as any)?.openDailyNote} />}
       </MoreStack.Screen>
       <MoreStack.Screen name="WorkoutTracker">
         {() => <WorkoutTrackerScreen user={user} />}

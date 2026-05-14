@@ -18,6 +18,7 @@ import FocusMode from '../components/FocusMode';
 import AddTaskModal from '../components/AddTaskModal';
 import { toLocalDateString } from '../utils/date';
 import { Colors, Spacing, Typography, BorderRadius, Shadows, TouchTarget, getPriorityColor } from '../constants/theme';
+import { useNavigation } from '@react-navigation/native';
 
 interface Props {
   user: User | null;
@@ -47,6 +48,7 @@ interface NewTaskInput {
 
 export default function TodayScreen({ user }: Props) {
   const { tasks, loading, reload, toggleTask, editTask, addTask } = useTasks();
+  const navigation = useNavigation<any>();
   const [focusTask, setFocusTask] = useState<Task | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -152,6 +154,16 @@ export default function TodayScreen({ user }: Props) {
           <Text style={styles.date}>{formatDate()}</Text>
         </View>
         <TouchableOpacity
+          style={styles.dailyNoteButton}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            navigation.navigate('More', { screen: 'Journal', params: { openDailyNote: true } });
+          }}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="journal-outline" size={20} color="#14B478" />
+        </TouchableOpacity>
+        <TouchableOpacity
           style={styles.addButton}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -239,6 +251,16 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     color: Colors.text.tertiary,
     marginTop: 2
+  },
+  dailyNoteButton: {
+    width: TouchTarget.min,
+    height: TouchTarget.min,
+    borderRadius: TouchTarget.min / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(20,180,120,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(20,180,120,0.2)',
   },
   addButton: {
     width: TouchTarget.min,

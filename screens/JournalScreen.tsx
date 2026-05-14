@@ -59,9 +59,13 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-interface Props { user?: User | null; }
+function getTodayTitle(): string {
+  return new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+}
 
-export default function JournalScreen({ user }: Props) {
+interface Props { user?: User | null; openDailyNote?: boolean; }
+
+export default function JournalScreen({ user, openDailyNote }: Props) {
   const userEmail = user?.email || '';
   const STORAGE_KEY = useMemo(() => getKey(userEmail), [userEmail]);
 
@@ -78,6 +82,7 @@ export default function JournalScreen({ user }: Props) {
   const [editorPinned, setEditorPinned] = useState(false);
 
   const fabAnim = useRef(new Animated.Value(1)).current;
+  const dailyNoteOpened = useRef(false);
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then(raw => {
@@ -90,6 +95,24 @@ export default function JournalScreen({ user }: Props) {
     if (!loaded) return;
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(notes)).catch(console.error);
   }, [notes, loaded]);
+
+  // Auto-open today's daily note when navigated from Today screen
+  useEffect(() => {
+    if (!loaded || !openDailyNote || dailyNoteOpened.current) return;
+    dailyNoteOpened.current = true;
+    const todayTitle = getTodayTitle();
+    const existing = notes.find(n => n.title === todayTitle);
+    if (existing) {
+      openEdit(existing);
+    } else {
+      setEditingNote(null);
+      setEditorTitle(todayTitle);
+      setEditorBody('');
+      setEditorColor(NOTE_COLORS[0]);
+      setEditorPinned(false);
+      setShowEditor(true);
+    }
+  }, [loaded, openDailyNote]);
 
   const openNew = () => {
     setEditingNote(null);
