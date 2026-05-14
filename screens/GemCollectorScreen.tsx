@@ -233,7 +233,8 @@ export default function GemCollectorScreen({ user }: Props) {
 
         {/* Progress badge */}
         <View style={[s.progressCard, allCollected && s.progressCardComplete]}>
-          <Text style={[s.progressCount, allCollected && { color: '#FBBF24' }]}>
+          <View style={[s.progressBlob, allCollected && s.progressBlobComplete]} />
+          <Text style={[s.progressCount, allCollected && s.progressCountComplete]}>
             {collectedCount} / 5
           </Text>
           <Text style={s.progressLabel}>
@@ -259,14 +260,15 @@ export default function GemCollectorScreen({ user }: Props) {
             return (
               <TouchableOpacity
                 key={gem.key}
-                style={[s.gemCard, collected && { borderColor: gem.color + '66', backgroundColor: gem.color + '11' }]}
+                style={[s.gemCard, collected && s.gemCardCollected, collected && { borderColor: gem.color + '55' }]}
                 onPress={checkAllGems}
                 activeOpacity={0.8}
               >
+                <View style={[s.gemBlob, { backgroundColor: gem.color + (collected ? '30' : '18') }]} />
                 <Animated.Text style={[s.gemEmoji, !collected && s.gemLocked, { transform: [{ scale: scales[gem.key] }] }]}>
                   {gem.emoji}
                 </Animated.Text>
-                <Text style={[s.gemLabel, collected && { color: gem.color }]}>{gem.label}</Text>
+                <Text style={[s.gemLabel, collected && s.gemLabelCollected, collected && { color: gem.color }]}>{gem.label}</Text>
                 <Text style={s.gemDescription}>{gem.description}</Text>
                 {collected ? (
                   <View style={[s.collectedBadge, { backgroundColor: gem.color + '22' }]}>
@@ -297,43 +299,47 @@ export default function GemCollectorScreen({ user }: Props) {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
+  container: { flex: 1, backgroundColor: '#060A10' },
   scroll: { paddingHorizontal: 20, paddingTop: 8 },
 
-  header: { marginBottom: 20 },
-  title: { fontSize: 28, fontWeight: '700', color: '#FFFFFF' },
-  subtitle: { fontSize: 13, color: '#636366', marginTop: 4 },
+  header: { marginBottom: 24 },
+  title: { fontSize: 30, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.5 },
+  subtitle: { fontSize: 13, color: 'rgba(255,255,255,0.3)', marginTop: 4 },
 
   progressCard: {
-    backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 18,
-    padding: 18, marginBottom: 20, borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)', gap: 8, alignItems: 'center',
+    backgroundColor: '#0D1120', borderRadius: 24, padding: 22, marginBottom: 20,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', gap: 10, alignItems: 'center', overflow: 'hidden',
   },
-  progressCardComplete: { borderColor: 'rgba(251,191,36,0.4)', backgroundColor: 'rgba(251,191,36,0.06)' },
-  progressCount: { fontSize: 42, fontWeight: '900', color: '#FFFFFF' },
-  progressLabel: { fontSize: 15, color: '#636366', fontWeight: '500' },
-  progressBar: { height: 6, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden', width: '100%' },
+  progressCardComplete: { borderColor: 'rgba(251,191,36,0.4)', backgroundColor: '#150F00' },
+  progressBlob: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(139,92,246,0.12)' },
+  progressBlobComplete: { backgroundColor: 'rgba(251,191,36,0.12)' },
+  progressCount: { fontSize: 56, fontWeight: '900', color: '#FFFFFF', letterSpacing: -2 },
+  progressCountComplete: { color: '#FBBF24' },
+  progressLabel: { fontSize: 15, color: 'rgba(255,255,255,0.4)', fontWeight: '500' },
+  progressBar: { height: 6, backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 3, overflow: 'hidden', width: '100%' },
   progressFill: { height: '100%', borderRadius: 3 },
 
   gemsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 20 },
   gemCard: {
-    width: '47%',
-    backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 16,
-    padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
-    alignItems: 'center', gap: 6,
+    width: '47%', borderRadius: 20, padding: 18, borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.07)', backgroundColor: '#0D1120',
+    alignItems: 'center', gap: 6, overflow: 'hidden', minHeight: 150,
   },
-  gemEmoji: { fontSize: 40 },
-  gemLocked: { opacity: 0.35 },
-  gemLabel: { fontSize: 15, fontWeight: '700', color: '#636366' },
-  gemDescription: { fontSize: 11, color: '#48484A', textAlign: 'center' },
+  gemCardCollected: { borderWidth: 1.5 },
+  gemBlob: { position: 'absolute', top: -24, right: -24, width: 90, height: 90, borderRadius: 45 },
+  gemEmoji: { fontSize: 44, marginTop: 4 },
+  gemLocked: { opacity: 0.25 },
+  gemLabel: { fontSize: 15, fontWeight: '700', color: 'rgba(255,255,255,0.4)' },
+  gemLabelCollected: { color: '#FFFFFF' },
+  gemDescription: { fontSize: 11, color: 'rgba(255,255,255,0.25)', textAlign: 'center' },
   collectedBadge: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4, marginTop: 2 },
   collectedText: { fontSize: 12, fontWeight: '700' },
-  gemHint: { fontSize: 11, color: '#48484A', textAlign: 'center', lineHeight: 15 },
+  gemHint: { fontSize: 11, color: 'rgba(255,255,255,0.2)', textAlign: 'center', lineHeight: 15 },
 
   infoCard: {
-    backgroundColor: 'rgba(139,92,246,0.08)', borderRadius: 16,
-    padding: 16, borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)', gap: 8,
+    backgroundColor: '#0D1120', borderRadius: 20, padding: 18,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', gap: 8,
   },
-  infoTitle: { fontSize: 15, fontWeight: '700', color: '#8B5CF6' },
-  infoText: { fontSize: 13, color: '#636366', lineHeight: 19 },
+  infoTitle: { fontSize: 13, fontWeight: '700', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 0.8 },
+  infoText: { fontSize: 13, color: 'rgba(255,255,255,0.3)', lineHeight: 20 },
 });
