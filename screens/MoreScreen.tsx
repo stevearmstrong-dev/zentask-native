@@ -45,7 +45,7 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
     title: 'Finance',
     items: [
       { icon: '📅', label: 'Recurring Expenses', sublabel: 'Subscriptions & bills', screen: 'RecurringExpenses' },
-      { icon: '💳', label: 'Credit Score', sublabel: 'Monitor your score', screen: 'CreditScore' },
+      // { icon: '💳', label: 'Credit Score', sublabel: 'Monitor your score', screen: 'CreditScore' },
     ],
   },
   {

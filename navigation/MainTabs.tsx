@@ -17,7 +17,7 @@ import NoFapTrackerScreen from '../screens/NoFapTrackerScreen';
 import TimeBlocksScreen from '../screens/TimeBlocksScreen';
 import ExpenseTrackerScreen from '../screens/ExpenseTrackerScreen';
 import RecurringExpensesScreen from '../screens/RecurringExpensesScreen';
-import CreditScoreScreen from '../screens/CreditScoreScreen';
+// import CreditScoreScreen from '../screens/CreditScoreScreen';
 import GemCollectorScreen from '../screens/GemCollectorScreen';
 import PowerSwordHallScreen from '../screens/PowerSwordHallScreen';
 import DashboardScreen from '../screens/DashboardScreen';
@@ -74,9 +74,9 @@ function MoreStackNavigator({ user, onSignOut }: Props) {
       <MoreStack.Screen name="RecurringExpenses">
         {() => <RecurringExpensesScreen user={user} />}
       </MoreStack.Screen>
-      <MoreStack.Screen name="CreditScore">
+      {/* <MoreStack.Screen name="CreditScore">
         {() => <CreditScoreScreen user={user} />}
-      </MoreStack.Screen>
+      </MoreStack.Screen> */}
       <MoreStack.Screen name="GemCollector">
         {() => <GemCollectorScreen user={user} />}
       </MoreStack.Screen>
