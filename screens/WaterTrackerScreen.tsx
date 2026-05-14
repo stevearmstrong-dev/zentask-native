@@ -7,7 +7,6 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Alert,
   Animated,
   Modal,
   KeyboardAvoidingView,
@@ -412,10 +411,7 @@ export default function WaterTrackerScreen({ user }: Props) {
               <Text style={s.historyAmount}>{log.amount} ml</Text>
               <Text style={s.historyTime}>{formatTime(log.timestamp)}</Text>
               <TouchableOpacity
-                onPress={() => Alert.alert('Delete', 'Remove this entry?', [
-                  { text: 'Cancel', style: 'cancel' },
-                  { text: 'Delete', style: 'destructive', onPress: () => deleteLog(log.id) },
-                ])}
+                onPress={() => deleteLog(log.id)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 <Text style={s.historyDelete}>✕</Text>
