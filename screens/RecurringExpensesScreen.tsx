@@ -181,12 +181,6 @@ export default function RecurringExpensesScreen({ user }: Props) {
     AsyncStorage.setItem(REMINDERS_KEY, JSON.stringify(reminders)).catch(console.error);
   }, [reminders, loaded]);
 
-  const totalMonthly = useMemo(() =>
-    reminders.filter(r => typeof r.dueDay === 'number' || r.dueDay === 'last')
-      .reduce((sum, r) => sum + (r.amount ?? 0), 0),
-    [reminders]
-  );
-
   const needsAttention = useMemo(() =>
     reminders.filter(r => { const d = getDaysUntilDue(r.dueDay); return d < 0 || d === 0; }).length,
     [reminders]
@@ -246,14 +240,13 @@ export default function RecurringExpensesScreen({ user }: Props) {
           <View style={{ width: 22 }} />
         </View>
 
-        {/* Hero balance card */}
+        {/* Hero summary */}
         <View style={s.heroCard}>
-          <Text style={s.heroLabel}>Monthly commitment</Text>
           <Text style={s.heroAmount}>
-            ${totalMonthly > 0 ? totalMonthly.toFixed(2) : '—'}
+            {reminders.length} active
           </Text>
           <Text style={s.heroSub}>
-            {reminders.length} active · {needsAttention > 0 ? `${needsAttention} need attention` : 'all clear'}
+            {needsAttention > 0 ? `${needsAttention} need attention` : 'all clear'}
           </Text>
         </View>
 
