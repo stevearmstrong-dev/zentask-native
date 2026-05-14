@@ -60,7 +60,8 @@ export function useStreaks(userEmail: string): Streaks {
     let workoutStreak = 0;
     if (rawWorkout) {
       const history: { date: string }[] = JSON.parse(rawWorkout);
-      const dates = new Set(history.map(h => h.date));
+      // date is stored as full ISO string — normalize to YYYY-MM-DD
+      const dates = new Set(history.map(h => h.date.slice(0, 10)));
       const today = new Date();
       for (let i = 0; i < 365; i++) {
         const d = new Date(today);
