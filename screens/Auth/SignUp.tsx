@@ -11,9 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import * as AppleAuthentication from 'expo-apple-authentication';
 import { supabase } from '../../services/supabase';
-import { isAppleAuthCanceledError, signInWithApple } from '../../services/appleAuth';
 import GoogleLogo from '../../components/GoogleLogo';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -33,15 +31,8 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [verified, setVerified] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState('');
-  const [appleAvailable, setAppleAvailable] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Check if Apple Authentication is available
-    AppleAuthentication.isAvailableAsync().then(available => {
-      console.log('[SignUp] Apple Authentication available:', available);
-      setAppleAvailable(available);
-    });
-
     // Listen for auth state changes to reset loading and trigger success
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
@@ -86,20 +77,6 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
       setError(err.message || 'Failed to sign up. Please try again.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleAppleSignUp = async () => {
-    setError('');
-    try {
-      await signInWithApple();
-      // The onAuthStateChange listener will handle success
-    } catch (err: any) {
-      if (isAppleAuthCanceledError(err)) {
-        return;
-      }
-      console.error('Apple sign up error:', err);
-      setError(err.message || 'Failed to sign up with Apple. Please try again.');
     }
   };
 
@@ -257,22 +234,6 @@ export default function SignUp({ onSignUpSuccess, onSwitchToSignIn }: Props) {
             )}
           </TouchableOpacity>
 
-          {appleAvailable && (
-            <AppleAuthentication.AppleAuthenticationButton
-              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_UP}
-              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-              cornerRadius={14}
-              style={styles.appleButton}
-              onPress={handleAppleSignUp}
-            />
-          )}
-
-          {Platform.OS === 'ios' && appleAvailable === false && (
-            <Text style={styles.appleUnavailableText}>
-              Sign in with Apple is unavailable on this simulator or build.
-            </Text>
-          )}
-
           <View style={styles.footer}>
             <Text style={styles.footerText}>Already have an account? </Text>
             <TouchableOpacity onPress={onSwitchToSignIn} disabled={loading}>
@@ -351,17 +312,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.1)',
     gap: 12,
-  },
-  appleButton: {
-    height: 50,
-    marginBottom: 24,
-  },
-  appleUnavailableText: {
-    color: '#8E8E93',
-    fontSize: 13,
-    textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 18,
   },
   googleButtonText: {
     color: '#1F1F1F',
