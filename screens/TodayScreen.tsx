@@ -19,6 +19,7 @@ import AddTaskModal from '../components/AddTaskModal';
 import { toLocalDateString } from '../utils/date';
 import { Colors, Spacing, Typography, BorderRadius, Shadows, TouchTarget, getPriorityColor } from '../constants/theme';
 import { useNavigation } from '@react-navigation/native';
+import { useStreaks } from '../hooks/useStreaks';
 
 interface Props {
   user: User | null;
@@ -54,6 +55,7 @@ export default function TodayScreen({ user }: Props) {
 
   const userEmail = user?.email || '';
   const userName = user?.user_metadata?.name || (userEmail ? userEmail.split('@')[0] : 'Guest');
+  const streaks = useStreaks(userEmail);
 
   const todayStr = toLocalDateString();
   const todayTasks = tasks.filter(t => !t.completed && t.dueDate === todayStr);
@@ -192,6 +194,33 @@ export default function TodayScreen({ user }: Props) {
         </View>
       </View>
 
+      {/* Streak chips */}
+      {(streaks.water > 0 || streaks.workout > 0 || streaks.nofap > 0) && (
+        <View style={styles.streakRow}>
+          {streaks.water > 0 && (
+            <TouchableOpacity style={[styles.streakChip, { borderColor: 'rgba(59,130,246,0.3)', backgroundColor: 'rgba(59,130,246,0.08)' }]}
+              onPress={() => navigation.navigate('Water')} activeOpacity={0.75}>
+              <Ionicons name="water" size={13} color="#3B82F6" />
+              <Text style={[styles.streakText, { color: '#3B82F6' }]}>{streaks.water}d</Text>
+            </TouchableOpacity>
+          )}
+          {streaks.workout > 0 && (
+            <TouchableOpacity style={[styles.streakChip, { borderColor: 'rgba(245,158,11,0.3)', backgroundColor: 'rgba(245,158,11,0.08)' }]}
+              onPress={() => navigation.navigate('More', { screen: 'WorkoutTracker' })} activeOpacity={0.75}>
+              <Ionicons name="barbell" size={13} color="#F59E0B" />
+              <Text style={[styles.streakText, { color: '#F59E0B' }]}>{streaks.workout}d</Text>
+            </TouchableOpacity>
+          )}
+          {streaks.nofap > 0 && (
+            <TouchableOpacity style={[styles.streakChip, { borderColor: 'rgba(74,222,128,0.3)', backgroundColor: 'rgba(74,222,128,0.08)' }]}
+              onPress={() => navigation.navigate('More', { screen: 'NoFapTracker' })} activeOpacity={0.75}>
+              <Ionicons name="shield-checkmark" size={13} color="#4ADE80" />
+              <Text style={[styles.streakText, { color: '#4ADE80' }]}>{streaks.nofap}d</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+
       <FlatList
         data={[...overdueTasks, ...todayTasks]}
         keyExtractor={item => String(item.id)}
@@ -222,6 +251,25 @@ export default function TodayScreen({ user }: Props) {
 }
 
 const styles = StyleSheet.create({
+  streakRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: Spacing.xl,
+    paddingBottom: Spacing.md,
+  },
+  streakChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  streakText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
   container: {
     flex: 1,
     backgroundColor: Colors.background.secondary
