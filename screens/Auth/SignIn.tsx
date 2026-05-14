@@ -11,9 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import * as AppleAuthentication from 'expo-apple-authentication';
 import { supabase } from '../../services/supabase';
-import { isAppleAuthCanceledError, signInWithApple } from '../../services/appleAuth';
 import { User } from '@supabase/supabase-js';
 import GoogleLogo from '../../components/GoogleLogo';
 
@@ -32,15 +30,8 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [appleAvailable, setAppleAvailable] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Check if Apple Authentication is available
-    AppleAuthentication.isAvailableAsync().then(available => {
-      console.log('[SignIn] Apple Authentication available:', available);
-      setAppleAvailable(available);
-    });
-
     // Listen for auth state changes to reset loading and trigger success
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
@@ -80,21 +71,6 @@ export default function SignIn({ onSignInSuccess, onSwitchToSignUp, onSwitchToRe
       }
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleAppleSignIn = async () => {
-    setError('');
-    try {
-      const user = await signInWithApple();
-      if (user) onSignInSuccess(user);
-    } catch (err: any) {
-      if (isAppleAuthCanceledError(err)) {
-        // User canceled the sign-in flow
-        return;
-      }
-      console.error('Apple sign in error:', err);
-      setError(err.message || 'Failed to sign in with Apple. Please try again.');
     }
   };
 
